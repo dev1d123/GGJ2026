@@ -27,6 +27,10 @@ extends CanvasLayer
 @onready var icon_hand_l = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_L
 @onready var icon_hand_r = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_R
 
+# --- REFERENCIAS A HABILIDADES ---
+@onready var skill_q = $GameUI/SkillsPanel/SkillQ
+@onready var skill_r = $GameUI/SkillsPanel/SkillR
+
 # Textura para las vidas icono de Godot temporalmente
 var heart_texture = preload("res://icon.svg")
 
@@ -49,6 +53,13 @@ func _ready():
 	
 	actualizar_municion("FLECHAS", 30)
 	actualizar_municion("BALAS", 12)
+	
+	# Configurar rangos
+	skill_q.max_value = 100
+	skill_q.value = 100 # Q empieza lista
+	
+	skill_r.max_value = 100
+	skill_r.value = 0 # R empieza vacía
 
 func _input(event):
 	# LÓGICA DE POCIONES (1, 2, 3)
@@ -72,6 +83,11 @@ func _input(event):
 		actualizar_vida(3) 
 		actualizar_mana(20, 100)
 		actualizar_ulti(100, 100) # La ulti se carga al golpearte (ejemplo)
+	
+	# LÓGICA DE HABILIDADES
+	if event.is_action_pressed("usar_habilidad_q"):
+		print("Usando habilidad especial")
+		usar_habilidad_q()
 
 func actualizar_vida(cantidad_actual: int):
 	# 1. Borrar vidas viejas
@@ -99,14 +115,33 @@ func actualizar_stamina(val, max_val):
 	stamina_bar.max_value = max_val
 	stamina_bar.value = val
 
+# --- ACTUALIZAR HABILIDADES ---
 func actualizar_ulti(val, max_val):
-	ulti_bar.max_value = max_val
-	ulti_bar.value = val
-	
-	if val >= max_val:
-		ulti_bar.modulate = Color(1.5, 1.5, 2) # Brillar cuando está llena
-	else:
-		ulti_bar.modulate = Color(1, 1, 1)
+	# 1. Actualiza la barra de arriba
+	if ulti_bar:
+		ulti_bar.max_value = max_val
+		ulti_bar.value = val
+		# lógica de brillo
+		if val >= max_val: ulti_bar.modulate = Color(1.5, 1.5, 2)
+		else: ulti_bar.modulate = Color(1, 1, 1)
+
+	# 2. Actualiza el ROMBO de abajo (Nuevo)
+	if skill_r:
+		skill_r.max_value = max_val
+		skill_r.value = val
+		# Feedback extra: Si está llena, que el rombo de la R brille
+		if val >= max_val:
+			skill_r.modulate = Color(2, 1, 2) # Brillo intenso
+		else:
+			skill_r.modulate = Color(1, 1, 1)
+
+# Nueva función para simular uso de la Q (Cooldown visual)
+func usar_habilidad_q():
+	# Simulación visual: La vaciamos y hacemos que se llene rápido
+	var tween = create_tween()
+	skill_q.value = 0
+	# Se rellena en 2 segundos (simulando cooldown)
+	tween.tween_property(skill_q, "value", 100, 2.0)
 
 # --- FUNCIONES NUEVAS ---
 func actualizar_pocion(slot_num: int, cantidad: int):
