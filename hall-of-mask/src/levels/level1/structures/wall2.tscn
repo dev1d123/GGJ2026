@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7gi4ckv5s0hc"]
+
+[ext_resource type="PackedScene" uid="uid://bpafcv7jjak5p" path="res://src/levels/level1/structures/wall2_model.tscn" id="1_5wnda"]
+
+[node name="Wall2Model" type="StaticBody3D"]
+
+[node name="wall2" parent="." instance=ExtResource("1_5wnda")]

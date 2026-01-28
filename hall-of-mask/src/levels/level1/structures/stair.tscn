@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4pxh8n71lk51"]
+
+[ext_resource type="PackedScene" uid="uid://yc5n45meyajc" path="res://src/levels/level1/structures/stair_model.tscn" id="1_j5yo6"]
+
+[node name="Stair" type="Node3D"]
+
+[node name="stair" parent="." instance=ExtResource("1_j5yo6")]

@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgiubs8riiy1n"]
+
+[ext_resource type="PackedScene" uid="uid://nc2t61v2cugm" path="res://assets/models/enviroment/chamber.fbx" id="1_ti8b0"]
+
+[node name="chamber" instance=ExtResource("1_ti8b0")]

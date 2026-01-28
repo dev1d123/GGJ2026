@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://c8nodvhnmmxc6"]
+
+[ext_resource type="Texture2D" uid="uid://d230giai4i7w5" path="res://assets/textures/level1/Bricks_01-512x512.png" id="1_3icqu"]
+[ext_resource type="PackedScene" uid="uid://d4anbeomn46ws" path="res://assets/models/enviroment/stone_arcway.fbx" id="1_yept0"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ajkah"]
+albedo_texture = ExtResource("1_3icqu")
+uv1_scale = Vector3(14.215, 14.215, 14.215)
+
+[node name="stone_arcway" instance=ExtResource("1_yept0")]
+
+[node name="tripo_node_5a566e66" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.00025093555, -0.004386708, -0.0023837686)
+material_override = SubResource("StandardMaterial3D_ajkah")
