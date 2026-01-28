@@ -14,6 +14,14 @@ extends CanvasLayer
 @onready var slot_pocion_2 = $GameUI/ConsumablesPanel/Potions/Slot2
 @onready var slot_pocion_3 = $GameUI/ConsumablesPanel/Potions/Slot3
 
+# --- REFERENCIAS A LOS CONTADORES (LABELS) ---
+@onready var label_pocion_1 = $GameUI/ConsumablesPanel/Potions/Slot1/CountLabel
+@onready var label_pocion_2 = $GameUI/ConsumablesPanel/Potions/Slot2/CountLabel
+@onready var label_pocion_3 = $GameUI/ConsumablesPanel/Potions/Slot3/CountLabel
+# rutas iconos de flecha/bala
+@onready var label_flechas = $GameUI/ConsumablesPanel/Ammo/IconoFlecha/ArrowLabel
+@onready var label_balas = $GameUI/ConsumablesPanel/Ammo/IconoBala/BulletLabel
+
 # Referencia al Triángulo/Rombo Central dentro del Menú Radial
 # Para actualizar el icono del centro cuando se equipa algo
 @onready var icon_hand_l = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_L
@@ -33,6 +41,14 @@ func _ready():
 	actualizar_mana(50, 100) # Maná a la mitad
 	actualizar_stamina(100, 100) # Estamina llena
 	actualizar_ulti(0, 100)      # Ulti vacía
+	
+	# PRUEBA INICIAL: Poner números falsos para ver si funciona
+	actualizar_pocion(1, 5)  # Slot 1 con 5 pociones
+	actualizar_pocion(2, 2)  # Slot 2 con 2 pociones
+	actualizar_pocion(3, 0)  # Slot 3 vacío
+	
+	actualizar_municion("FLECHAS", 30)
+	actualizar_municion("BALAS", 12)
 
 func _input(event):
 	# LÓGICA DE POCIONES (1, 2, 3)
@@ -91,6 +107,35 @@ func actualizar_ulti(val, max_val):
 		ulti_bar.modulate = Color(1.5, 1.5, 2) # Brillar cuando está llena
 	else:
 		ulti_bar.modulate = Color(1, 1, 1)
+
+# --- FUNCIONES NUEVAS ---
+func actualizar_pocion(slot_num: int, cantidad: int):
+	# Busca cuál etiqueta tocar
+	var label_destino = null
+	match slot_num:
+		1: label_destino = label_pocion_1
+		2: label_destino = label_pocion_2
+		3: label_destino = label_pocion_3
+	
+	if label_destino:
+		label_destino.text = str(cantidad) # Convertir número a texto
+		
+		# Detalle Visual: Si es 0, ponerlo rojo. Si no, blanco.
+		if cantidad == 0:
+			label_destino.modulate = Color(1, 0.3, 0.3) # Rojo suave
+		else:
+			label_destino.modulate = Color.WHITE
+
+func actualizar_municion(tipo: String, cantidad: int):
+	if tipo == "FLECHAS":
+		if label_flechas:
+			label_flechas.text = str(cantidad)
+			label_flechas.modulate = Color.RED if cantidad == 0 else Color.WHITE
+			
+	elif tipo == "BALAS":
+		if label_balas:
+			label_balas.text = str(cantidad)
+			label_balas.modulate = Color.RED if cantidad == 0 else Color.WHITE
 
 
 # Esta función se activa cuando se hace click en el Menú Radial

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=10 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -12,6 +12,21 @@ size = Vector2(200, 15)
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxbmk"]
 size = Vector2(200, 15)
+
+[sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
+font_size = 20
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_wxbmk"]
+font_size = 20
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_pom5v"]
+font_size = 20
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_oqdbm")
@@ -32,7 +47,7 @@ offset_right = 148.0
 offset_bottom = 148.0
 
 [node name="MaskIcon" type="TextureRect" parent="GameUI/StatsPanel"]
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(80, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
@@ -62,6 +77,140 @@ modulate = Color(1, 0, 1, 1)
 layout_mode = 2
 value = 50.0
 texture_progress = SubResource("PlaceholderTexture2D_wxbmk")
+
+[node name="ConsumablesPanel" type="VBoxContainer" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -412.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 280.0
+grow_horizontal = 0
+
+[node name="Potions" type="HBoxContainer" parent="GameUI/ConsumablesPanel"]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="Slot1" type="TextureRect" parent="GameUI/ConsumablesPanel/Potions"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_64pwb")
+expand_mode = 1
+
+[node name="CountLabel" type="Label" parent="GameUI/ConsumablesPanel/Potions/Slot1"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "5"
+label_settings = SubResource("LabelSettings_jd13s")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Slot2" type="TextureRect" parent="GameUI/ConsumablesPanel/Potions"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_64pwb")
+expand_mode = 1
+
+[node name="CountLabel" type="Label" parent="GameUI/ConsumablesPanel/Potions/Slot2"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "5"
+label_settings = SubResource("LabelSettings_jd13s")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Slot3" type="TextureRect" parent="GameUI/ConsumablesPanel/Potions"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_64pwb")
+expand_mode = 1
+
+[node name="CountLabel" type="Label" parent="GameUI/ConsumablesPanel/Potions/Slot3"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "5"
+label_settings = SubResource("LabelSettings_jd13s")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="Ammo" type="HBoxContainer" parent="GameUI/ConsumablesPanel"]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="IconoFlecha" type="TextureRect" parent="GameUI/ConsumablesPanel/Ammo"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_64pwb")
+expand_mode = 1
+
+[node name="ArrowLabel" type="Label" parent="GameUI/ConsumablesPanel/Ammo/IconoFlecha"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "20"
+label_settings = SubResource("LabelSettings_wxbmk")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="IconoBala" type="TextureRect" parent="GameUI/ConsumablesPanel/Ammo"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_64pwb")
+expand_mode = 1
+
+[node name="BulletLabel" type="Label" parent="GameUI/ConsumablesPanel/Ammo/IconoBala"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "20"
+label_settings = SubResource("LabelSettings_pom5v")
+horizontal_alignment = 2
+vertical_alignment = 2
 
 [node name="RadialMenu" type="Control" parent="."]
 visible = false
