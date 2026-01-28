@@ -1,4 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://dygdytk7yidp7"]
+[gd_scene load_steps=16 format=3 uid="uid://dygdytk7yidp7"]
+
+[ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/levels/lobby/player.tscn" id="1_ihj6f"]
+[ext_resource type="Texture2D" uid="uid://n2tj07qienjt" path="res://assets/textures/lobbyTerrain.png" id="2_1f2id"]
+[ext_resource type="Texture2D" uid="uid://dan5opfdaco31" path="res://assets/textures/lobbyTerrain_normal.png" id="3_03odw"]
+[ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/levels/lobby/environment.tscn" id="4_1f2id"]
 
 [sub_resource type="Gradient" id="Gradient_pykon"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -40,7 +45,6 @@ _shader_parameters = {
 &"noise_texture": SubResource("NoiseTexture2D_dvjf2"),
 &"projection_threshold": 0.8
 }
-show_checkered = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1f2id"]
 transparency = 4
@@ -60,14 +64,52 @@ last_lod = 0
 last_shadow_lod = 0
 lod0_range = 128.0
 
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_bai7j"]
+name = "lobbyTerrain"
+albedo_texture = ExtResource("2_1f2id")
+normal_texture = ExtResource("3_03odw")
+uv_scale = 0.03
+
 [sub_resource type="Terrain3DAssets" id="Terrain3DAssets_bai7j"]
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_03odw")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_bai7j")])
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1f2id"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_03odw"]
+albedo_texture = ExtResource("2_1f2id")
+normal_enabled = true
+normal_scale = 5.6
+normal_texture = ExtResource("3_03odw")
+uv1_scale = Vector3(0.13, 0.13, 0.1)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.5157167
+uv1_world_triplanar = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_bai7j"]
+lightmap_size_hint = Vector2i(14, 56)
 
 [node name="Lobby" type="Node3D"]
 
+[node name="Player" parent="." instance=ExtResource("1_ihj6f")]
+
 [node name="Terrain3D" type="Terrain3D" parent="."]
+data_directory = "res://src/levels/lobby"
 material = SubResource("Terrain3DMaterial_ihj6f")
 assets = SubResource("Terrain3DAssets_bai7j")
-show_checkered = true
 top_level = true
-metadata/_edit_lock_ = true
+
+[node name="Environment" parent="." instance=ExtResource("4_1f2id")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1.94, 0, 0, 0, 6.215, 0, 0, 0, 5.13, -4.7683716e-07, 1.9418359, 3.0542793)
+
+[node name="Wall" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0, 0, 0)
+shape = SubResource("BoxShape3D_1f2id")
+debug_color = Color(0.8418882, 0.027629746, 0.91328126, 0.41960785)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+material_override = SubResource("StandardMaterial3D_03odw")
+mesh = SubResource("BoxMesh_bai7j")
+skeleton = NodePath("")
