@@ -1,8 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=7 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
 [ext_resource type="Texture2D" uid="uid://cdgedffnin6fh" path="res://icon.svg" id="2_64pwb"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_pom5v"]
+size = Vector2(200, 15)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_jd13s"]
+size = Vector2(200, 15)
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxbmk"]
+size = Vector2(200, 15)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_oqdbm")
@@ -15,42 +24,47 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="GameUI"]
+[node name="StatsPanel" type="HBoxContainer" parent="GameUI"]
 layout_mode = 1
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 148.0
+offset_bottom = 148.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameUI"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -40.0
-offset_bottom = 40.0
-grow_horizontal = 0
+[node name="MaskIcon" type="TextureRect" parent="GameUI/StatsPanel"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_64pwb")
+expand_mode = 1
 
-[node name="Control" type="Control" parent="GameUI"]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -40.0
-offset_right = 40.0
-grow_vertical = 0
+[node name="BarsContainer" type="VBoxContainer" parent="GameUI/StatsPanel"]
+layout_mode = 2
 
-[node name="Control2" type="Control" parent="GameUI"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -40.0
-grow_horizontal = 0
-grow_vertical = 0
+[node name="LifeContainer" type="HBoxContainer" parent="GameUI/StatsPanel/BarsContainer"]
+layout_mode = 2
+
+[node name="StaminaBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
+layout_mode = 2
+value = 50.0
+texture_progress = SubResource("PlaceholderTexture2D_pom5v")
+tint_progress = Color(1, 1, 0, 1)
+
+[node name="ManaBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
+modulate = Color(0, 1, 1, 1)
+layout_mode = 2
+value = 50.0
+texture_progress = SubResource("PlaceholderTexture2D_jd13s")
+
+[node name="UltiBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
+modulate = Color(1, 0, 1, 1)
+layout_mode = 2
+value = 50.0
+texture_progress = SubResource("PlaceholderTexture2D_wxbmk")
 
 [node name="RadialMenu" type="Control" parent="."]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -95,10 +109,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -86.00006
-offset_top = 7.9999847
-offset_right = -6.000061
-offset_bottom = 87.999985
+offset_left = -114.00006
+offset_top = 19.999985
+offset_right = -34.00006
+offset_bottom = 99.999985
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(40, 40)
@@ -110,10 +124,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 5.9999847
-offset_top = 8.0000305
-offset_right = 85.999985
-offset_bottom = 88.00003
+offset_left = 41.999985
+offset_top = 22.00003
+offset_right = 121.999985
+offset_bottom = 102.00003
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(40, 40)
@@ -125,10 +139,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -40.0
-offset_top = -94.0
-offset_right = 40.0
-offset_bottom = -14.0
+offset_left = -36.0
+offset_top = -120.0
+offset_right = 44.0
+offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(40, 40)
