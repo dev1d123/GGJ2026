@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=3 uid="uid://djqdqbmjeb171"]
+
+[ext_resource type="Texture2D" uid="uid://dbgmdlsp7awvt" path="res://assets/textures/lobby/lobbyTerrain2.png" id="1_ueghe"]
+[ext_resource type="Texture2D" uid="uid://bqemspf3086a1" path="res://assets/textures/lobby/lobbyTerrain2_normal.png" id="2_ve06a"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1f2id"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_03odw"]
+albedo_texture = ExtResource("1_ueghe")
+normal_enabled = true
+normal_scale = 5.6
+normal_texture = ExtResource("2_ve06a")
+uv1_scale = Vector3(0.05, 0.05, 0.05)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 1.5157167
+uv1_world_triplanar = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_bai7j"]
+lightmap_size_hint = Vector2i(14, 21)
+
+[node name="StaticBody3D" type="StaticBody3D"]
+
+[node name="Wall" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.99999994, 0, 0, 0, 1, 0, 0, 0, 0.99999994, 0, 0, 0)
+shape = SubResource("BoxShape3D_1f2id")
+debug_color = Color(0.8418882, 0.027629746, 0.91328126, 0.41960785)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_03odw")
+mesh = SubResource("BoxMesh_bai7j")
+skeleton = NodePath("")

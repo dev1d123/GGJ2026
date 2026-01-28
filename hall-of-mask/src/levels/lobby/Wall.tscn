@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://b4cbchha4kqpl"]
 
-[ext_resource type="Texture2D" uid="uid://n2tj07qienjt" path="res://assets/textures/lobbyTerrain.png" id="1_dh86c"]
-[ext_resource type="Texture2D" uid="uid://dan5opfdaco31" path="res://assets/textures/lobbyTerrain_normal.png" id="2_1y3h3"]
+[ext_resource type="Texture2D" uid="uid://n2tj07qienjt" path="res://assets/textures/lobby/lobbyTerrain.png" id="1_dh86c"]
+[ext_resource type="Texture2D" uid="uid://dan5opfdaco31" path="res://assets/textures/lobby/lobbyTerrain_normal.png" id="2_1y3h3"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_1f2id"]
 

@@ -1,0 +1,87 @@
+[gd_scene load_steps=13 format=3 uid="uid://ga0vi62i45gl"]
+
+[ext_resource type="Texture2D" uid="uid://bghu4cvmne4x7" path="res://assets/sprites/fighter.png" id="1_6g2fk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_opg0m"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(0, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p6c4w"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(400, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kpptx"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(800, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8sp2g"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(1200, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ttf87"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(1600, 0, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a3xne"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(0, 400, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5fbsg"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(400, 400, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5k7bw"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(800, 400, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_77uib"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(1200, 400, 400, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mt3xr"]
+atlas = ExtResource("1_6g2fk")
+region = Rect2(1600, 400, 400, 400)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_f3df5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_opg0m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p6c4w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kpptx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8sp2g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ttf87")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a3xne")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5fbsg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5k7bw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_77uib")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mt3xr")
+}],
+"loop": true,
+"name": &"default",
+"speed": 25.0
+}]
+
+[node name="SpriteTest" type="AnimatedSprite3D"]
+billboard = 1
+texture_filter = 0
+sprite_frames = SubResource("SpriteFrames_f3df5")
+frame_progress = 0.5654813
