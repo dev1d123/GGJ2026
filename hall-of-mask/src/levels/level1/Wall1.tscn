@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3 uid="uid://eaq2jqqf3qby"]
+
+[ext_resource type="Texture2D" uid="uid://d230giai4i7w5" path="res://assets/textures/level1/Bricks_01-512x512.png" id="1_6rw2j"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nk0sm"]
+albedo_texture = ExtResource("1_6rw2j")
+uv1_scale = Vector3(0.3, 0.3, 0.3)
+uv1_triplanar = true
+uv1_world_triplanar = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_k32se"]
+lightmap_size_hint = Vector2i(14, 21)
+material = SubResource("StandardMaterial3D_nk0sm")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ojw4k"]
+
+[node name="Wall1" type="StaticBody3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_k32se")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_ojw4k")
+debug_color = Color(0.6611355, 0.51448405, 3.85046e-07, 0.41960785)
