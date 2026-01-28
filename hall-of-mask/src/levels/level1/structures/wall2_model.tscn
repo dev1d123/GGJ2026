@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpafcv7jjak5p"]
+
+[ext_resource type="PackedScene" uid="uid://bku5yrp2jeryu" path="res://assets/models/enviroment/wall2.fbx" id="1_5wnda"]
+
+[node name="wall2" instance=ExtResource("1_5wnda")]

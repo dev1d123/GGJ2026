@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://c1r8g0lcpv2rj"]
+
+[ext_resource type="PackedScene" uid="uid://b5r5erlvq222a" path="res://src/levels/level1/structures/chamber2_model.tscn" id="1_bik0s"]
+
+[node name="Chamber2" type="StaticBody3D"]
+
+[node name="chamber2" parent="." instance=ExtResource("1_bik0s")]

@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://dpmp8voqprbdw"]
+
+[ext_resource type="PackedScene" uid="uid://c8nodvhnmmxc6" path="res://src/levels/level1/structures/Arc_stone.tscn" id="1_ritqs"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4jkjq"]
+size = Vector3(0.24, 0.915, 0.215)
+
+[node name="Arc" type="StaticBody3D"]
+
+[node name="stone_arcway" parent="." instance=ExtResource("1_ritqs")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.012542009, 0.008242339, 0.31761688)
+shape = SubResource("BoxShape3D_4jkjq")
+debug_color = Color(0, 0.6, 0.69803923, 1)
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.002603531, 0.008242339, -0.34295684)
+shape = SubResource("BoxShape3D_4jkjq")
+debug_color = Color(0, 0.6, 0.69803923, 1)

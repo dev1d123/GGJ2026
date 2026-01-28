@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqv551m5m6ag0"]
+
+[ext_resource type="PackedScene" uid="uid://dr563ta8ydbgx" path="res://src/levels/level1/structures/principal_floor_model.tscn" id="1_xa2kl"]
+
+[node name="PrincipalFloor" type="StaticBody3D"]
+
+[node name="principalFloor" parent="." instance=ExtResource("1_xa2kl")]

@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://b6o2drp31fndo"]
+
+[ext_resource type="PackedScene" uid="uid://d3n2eg0xro8kh" path="res://assets/models/enviroment/floor.fbx" id="1_bdcyy"]
+
+[node name="floor" instance=ExtResource("1_bdcyy")]
