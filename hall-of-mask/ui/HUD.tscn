@@ -1,9 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=4 format=3 uid="uid://bs0f617h5k5u4"]
 
-[ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://game/scripts/radial_menu.gd" id="1_nsbp6"]
+[ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
+[ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
 [ext_resource type="Texture2D" uid="uid://cdgedffnin6fh" path="res://icon.svg" id="2_64pwb"]
 
 [node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_oqdbm")
 
 [node name="GameUI" type="Control" parent="."]
 layout_mode = 3
@@ -76,16 +78,60 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -64.0
-offset_top = -64.0
-offset_right = 64.0
-offset_bottom = 64.0
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
-rotation = 0.7853982
 scale = Vector2(0.5, 0.5)
-pivot_offset = Vector2(64, 64)
+pivot_offset = Vector2(100, 100)
 texture = ExtResource("2_64pwb")
+
+[node name="Icon_Hand_L" type="TextureRect" parent="RadialMenu/WheelOrigin/RomboCentro"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -86.00006
+offset_top = 7.9999847
+offset_right = -6.000061
+offset_bottom = 87.999985
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(40, 40)
+
+[node name="Icon_Hand_R" type="TextureRect" parent="RadialMenu/WheelOrigin/RomboCentro"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 5.9999847
+offset_top = 8.0000305
+offset_right = 85.999985
+offset_bottom = 88.00003
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(40, 40)
+
+[node name="Icon_Mask" type="TextureRect" parent="RadialMenu/WheelOrigin/RomboCentro"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -94.0
+offset_right = 40.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(40, 40)
 
 [node name="Sector0" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -94,10 +140,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 100.0
-offset_top = -147.0
-offset_right = 228.0
-offset_bottom = -19.0
+offset_left = -66.0
+offset_top = -232.0
+offset_right = 62.0
+offset_bottom = -104.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
@@ -110,10 +156,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 101.0
-offset_top = 30.0
-offset_right = 229.0
-offset_bottom = 158.0
+offset_left = 94.0
+offset_top = -139.0
+offset_right = 222.0
+offset_bottom = -11.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
@@ -126,10 +172,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -57.0
-offset_top = 93.0
-offset_right = 71.0
-offset_bottom = 221.0
+offset_left = 95.0
+offset_top = 32.0
+offset_right = 223.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
@@ -142,10 +188,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -224.0
-offset_top = 22.0
-offset_right = -96.0
-offset_bottom = 150.0
+offset_left = -65.0
+offset_top = 110.0
+offset_right = 63.0
+offset_bottom = 238.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
@@ -158,10 +204,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -224.0
-offset_top = -146.0
-offset_right = -96.0
-offset_bottom = -18.0
+offset_left = -230.0
+offset_top = 32.0
+offset_right = -102.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
@@ -174,10 +220,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -65.0
-offset_top = -234.0
-offset_right = 63.0
-offset_bottom = -106.0
+offset_left = -228.0
+offset_top = -141.0
+offset_right = -100.0
+offset_bottom = -13.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
