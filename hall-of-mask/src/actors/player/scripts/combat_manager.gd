@@ -160,7 +160,7 @@ func procesar_input(mano: String):
 		ejecutar_ataque_seguro(w, mano)
 
 func ejecutar_ataque_seguro(w: WeaponData, mano: String):
-	# 1. Definir Rutas
+	# 1. Definir Rutas (Igual que antes)
 	var playback_path = ""
 	var blend_path = ""
 	var anim_name = w.anim_attack
@@ -168,7 +168,6 @@ func ejecutar_ataque_seguro(w: WeaponData, mano: String):
 	if w.is_two_handed:
 		playback_path = path_playback_2h
 		blend_path = path_blend_2h
-		# Bloqueamos ambas manos para armas pesadas
 		is_attacking_r = true
 		is_attacking_l = true
 	elif mano == "right":
@@ -181,56 +180,40 @@ func ejecutar_ataque_seguro(w: WeaponData, mano: String):
 		anim_name = w.anim_attack + "_L"
 		is_attacking_l = true
 	
-	# 2. CONFIGURAR HITBOX (Nuevo Paso)
+	# 2. CONFIGURAR HITBOX (CORREGIDO)
+	# --- BORRÉ TODO EL BLOQUE QUE PRENDÍA EL MONITORING AQUÍ ---
+	# Solo actualizamos el daño base, pero NO lo prendemos todavía.
+	
 	var weapon_node = null
 	if mano == "right": weapon_node = hand_r_node.get_child(0)
 	else: weapon_node = hand_l_node.get_child(0)
 	
 	if weapon_node:
-		# Buscamos el nodo Hitbox dentro del arma instanciada
 		var hitbox = weapon_node.find_child("Hitbox")
 		if hitbox:
-			# Calculamos el daño real usando tus stats
 			var base_dmg = attributes.get_stat("melee_damage")
 			hitbox.damage = base_dmg * w.damage_mult
+			# ¡OJO! NO ponemos monitoring = true aquí. Esperamos al delay.
 			
-			# Activamos el Hitbox (Monitoring ON)
-			# NOTA: Lo ideal es hacer esto vía AnimationPlayer con Call Method Track
-			# Pero para probar rápido, lo encendemos aquí y lo apagamos tras el delay
-			hitbox.monitoring = true
-			
-			# Programar apagado del hitbox (cuando termine el ataque)
-			get_tree().create_timer(0.5).timeout.connect(func(): hitbox.monitoring = false)
-			
-	# 3. ARRANCAR ANIMACIÓN PRIMERO (Para evitar el frame de T-Pose)
-	# Usamos start() para forzar el inicio inmediato.
-	# IMPORTANTE: Viajamos a Empty un microsegundo para resetear cualquier estado trabado
+	# 3. ARRANCAR ANIMACIÓN
 	anim_tree[playback_path].start("Empty") 
 	anim_tree[playback_path].start(anim_name)
 	
-	# CALCULAR VELOCIDAD DE ATAQUE
-	# Asumimos que tienes un stat "attack_speed". Si no, usa 1.0 por defecto.
+	# CALCULAR VELOCIDAD
 	var atk_speed = 1.0
 	if attributes.has_method("get_stat"):
 		atk_speed = attributes.get_stat("attack_speed")
 	
-	# Ajustamos la velocidad de la animación en el árbol (Opcional pero recomendado)
-	# anim_tree.set("parameters/TimeScale/scale", atk_speed) 
-
 	# ---------------------------------------------------------
-	# NUEVA LÓGICA DE HITBOX SINCRONIZADO
+	# ESTA ES LA ÚNICA LLAMADA QUE DEBE ACTIVAR EL DAÑO
 	# ---------------------------------------------------------
 	var delay_real = w.damage_delay / atk_speed
 	var duracion_real = w.hitbox_duration / atk_speed
 	
-	# Lanzamos una "corutina" separada para manejar el hitbox
-	# Así no bloqueamos el resto de la función (el tween de mezcla y eso)
 	gestionar_hitbox_con_delay(mano, delay_real, duracion_real, w)
-
 	# ---------------------------------------------------------
 	
-	# 4. SUBIR EL VOLUMEN (Blend 0 -> 1)
-	# Usamos 0.1 o 0.15 para esa transición suave que pediste
+	# 4. SUBIR EL VOLUMEN (Mezcla de animación)
 	var t = create_tween()
 	t.tween_property(anim_tree, blend_path, 1.0, 0.15).set_trans(Tween.TRANS_SINE)
 	
@@ -240,17 +223,15 @@ func ejecutar_ataque_seguro(w: WeaponData, mano: String):
 	if anim_player.has_animation(anim_name):
 		anim_len = anim_player.get_animation(anim_name).length
 	
-	# Esperamos la duración exacta del golpe
 	await get_tree().create_timer(anim_len).timeout
 	
-	# 6. BAJAR EL VOLUMEN (Blend 1 -> 0)
+	# 6. BAJAR EL VOLUMEN
 	var t_out = create_tween()
-	t_out.tween_property(anim_tree, blend_path, 0.0, 0.2) # Regreso suave
+	t_out.tween_property(anim_tree, blend_path, 0.0, 0.2) 
 	
-	# 7. TIEMPO DE ENFRIAMIENTO (Cooldown)
-	await t_out.finished # Esperar a que baje el brazo
+	await t_out.finished 
 	
-	# Liberar banderas para poder atacar de nuevo
+	# Liberar banderas
 	if w.is_two_handed:
 		is_attacking_r = false
 		is_attacking_l = false
