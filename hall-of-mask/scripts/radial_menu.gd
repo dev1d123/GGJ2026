@@ -1,4 +1,5 @@
 extends Control
+class_name RadialMenu
 
 # Señales para conectar con el resto del juego
 signal equip_item(hand_side, item_data) # hand_side: "LEFT", "RIGHT"
@@ -21,6 +22,7 @@ var current_sector_index = -1
 
 # Datos simulados (luego con el inventario real)
 # Estructura de cada item: { "nombre": String, "icon": Texture }
+# CAMBIO 1: El inventario ahora guardará objetos reales (ItemData)
 var inventory_data = {
 	0: [], # Máscaras (Vacio por ahora)
 	1: [], # Ligero
@@ -39,26 +41,36 @@ func _ready():
 	# (Esto asume que RadialMenu ocupa toda la pantalla con Full Rect)
 	if wheel_origin:
 		wheel_origin.position = get_viewport_rect().size / 2
+		
 	# --- GENERAR ITEMS DE PRUEBA ---
-	# Cargamos el icono de Godot
-	var icono_test = preload("res://icon.svg") 
-	
-	# Llenamos el sector 1 (Ligero) con 2 armas
-	inventory_data[1].append({ "nombre": "Daga Oxidada", "icon": icono_test, "color": Color.RED })
-	inventory_data[1].append({ "nombre": "Espada Corta", "icon": icono_test, "color": Color.GREEN })
-	
-	# Llenamos el sector 2 (Pesado) con 1 arma
-	inventory_data[2].append({ "nombre": "Martillo", "icon": icono_test, "color": Color.BLUE })
-	
-	# Llenamos el sector 3 (Arco)
-	inventory_data[3].append({ "nombre": "Arco Simple", "icon": icono_test, "color": Color.YELLOW })
-
-	# Actualizamos los iconos de la rueda al iniciar
+	# --- GENERAR DATOS DE PRUEBA (USANDO LA NUEVA CLASE) ---
+	_crear_datos_falsos_pro()
 	_actualizar_iconos_sectores()
 
-# Función para pintar los iconos (ahora acepta un índice opcional)
+func _crear_datos_falsos_pro():
+	var icono_ref = preload("res://icon.svg")
+	
+	# Creamos items "al vuelo" usando nuestra nueva clase
+	var daga = ItemData.new()
+	daga.nombre = "Daga Oxidada"
+	daga.icono = icono_ref
+	daga.color_ui = Color.RED
+	inventory_data[1].append(daga)
+	
+	var espada = ItemData.new()
+	espada.nombre = "Espada Real"
+	espada.icono = icono_ref
+	espada.color_ui = Color.GREEN
+	inventory_data[1].append(espada)
+	
+	var martillo = ItemData.new()
+	martillo.nombre = "Aplastador"
+	martillo.icono = icono_ref
+	martillo.color_ui = Color.BLUE
+	inventory_data[2].append(martillo)
+
+# CAMBIO 2: Actualizar lectura de datos en _actualizar_iconos_sectores
 func _actualizar_iconos_sectores(sector_especifico: int = -1):
-	# índice (-1 significa actualiza todos), solo procesamos ese
 	var inicio = 0
 	var fin = num_sectors
 	
@@ -72,23 +84,55 @@ func _actualizar_iconos_sectores(sector_especifico: int = -1):
 		
 		if lista_items.size() > 0:
 			var indice_actual = sector_scroll_indices[i]
-			var item = lista_items[indice_actual]
 			
-			sector_visual.texture = item["icon"]
+			# AHORA item ES UN OBJETO DE TIPO ItemData
+			var item : ItemData = lista_items[indice_actual] 
 			
-			# --- CORRECCIÓN CLAVE AQUÍ ---
-			# Solo aplicamos el color base si NO es el sector que se señala.
-			# Si es el sector activo, _actualizar_resaltado() se encargue del color/brillo.
+			# Usa .icono en lugar de ["icon"]
+			sector_visual.texture = item.icono
+			
 			if i != current_sector_index:
-				sector_visual.modulate = item.get("color", Color.WHITE) * 0.6 # Oscuro
+				# Usamos .color_ui en lugar de .get("color")
+				sector_visual.modulate = item.color_ui * 0.6 
 				sector_visual.scale = Vector2(1, 1)
 			else:
-				# Si es el activo, forzamos el refresco del resaltado inmediatamente
 				_actualizar_resaltado()
 				
 		else:
 			sector_visual.modulate = Color(0.2, 0.2, 0.2, 0.5)
+
+func _actualizar_resaltado():
+	# 1. Resetear todos a gris oscuro (inactivos)
+	for i in range(sectores_visuales.size()):
+		var s = sectores_visuales[i]
+		s.modulate = Color(0.6, 0.6, 0.6, 1)
+		s.scale = Vector2(1, 1)
+
+	# 2. Resetear el rombo
+	if rombo_centro: rombo_centro.modulate = Color(1, 1, 1)
+
+	# 3. Iluminar SOLO si el mouse está encima
+	if current_sector_index != -1 and current_sector_index < sectores_visuales.size():
+		var sector_activo = sectores_visuales[current_sector_index]
+		var lista = inventory_data[current_sector_index]
+		
+		if lista.size() > 0:
+			var indice = sector_scroll_indices[current_sector_index]
+			var item : ItemData = lista[indice]
 			
+			# AHORA SE USA LAS PROPIEDADES DE LA CLASE ItemData
+			var color_base = item.color_ui
+			
+			sector_activo.modulate = color_base * 1.5 # Brillo HDR
+			sector_activo.scale = Vector2(1.15, 1.15) # Pop!
+			sector_activo.texture = item.icono
+			
+		else:
+			# CASO B: ESTÁ VACÍO
+			sector_activo.modulate = Color(0.8, 0.8, 0.8, 0.5)
+			sector_activo.scale = Vector2(1.0, 1.0)
+
+
 func _input(event):
 	
 	# 1. LÓGICA DE ABRIR/CERRAR (Mantener TAB)
@@ -153,7 +197,7 @@ func _input(event):
 				
 				# Feedback
 				var item_nuevo = lista[sector_scroll_indices[current_sector_index]]
-				print("Scroll ARRIBA: Cambiado a ", item_nuevo["nombre"])
+				print("Scroll ARRIBA: Cambiado a ", item_nuevo.nombre)
 			
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			var lista = inventory_data[current_sector_index]
@@ -166,7 +210,7 @@ func _input(event):
 				_actualizar_iconos_sectores(current_sector_index)
 				
 				var item_nuevo = lista[sector_scroll_indices[current_sector_index]]
-				print("Scroll ABAJO: Cambiado a ", item_nuevo["nombre"])
+				print("Scroll ABAJO: Cambiado a ", item_nuevo.nombre)
 			
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			var lista = inventory_data[current_sector_index]
@@ -179,36 +223,3 @@ func _input(event):
 			if lista.size() > 0:
 				var item = lista[sector_scroll_indices[current_sector_index]]
 				emit_signal("equip_item", "RIGHT", item) # <--- SE ENVIA EL ITEM REAL
-
-# FUNCIONES VISUALES
-
-func _actualizar_resaltado():
-	# 1. Resetear todos a gris oscuro (inactivos)
-	for i in range(sectores_visuales.size()):
-		var s = sectores_visuales[i]
-		s.modulate = Color(0.6, 0.6, 0.6, 1) # Gris base
-		s.scale = Vector2(1, 1)
-
-	# 2. Resetear el rombo
-	if rombo_centro: rombo_centro.modulate = Color(1, 1, 1)
-
-	# 3. Iluminar SOLO si el mouse está encima
-	if current_sector_index != -1 and current_sector_index < sectores_visuales.size():
-		var sector_activo = sectores_visuales[current_sector_index]
-		var lista = inventory_data[current_sector_index]
-		
-		if lista.size() > 0:
-			# CASO A: TIENE ARMA -> BRILLAR Y CRECER 
-			var indice = sector_scroll_indices[current_sector_index]
-			var item = lista[indice]
-			
-			var color_base = item.get("color", Color.WHITE)
-			sector_activo.modulate = color_base * 1.5 # Brillo HDR
-			sector_activo.scale = Vector2(1.15, 1.15) # Pop!
-			sector_activo.texture = item["icon"]
-			
-		else:
-			# CASO B: ESTÁ VACÍO -> QUEDARSE PEQUEÑO Y GRIS CLARO
-			# Esto le dice al jugador: "Es un hueco válido, pero no hay nada"
-			sector_activo.modulate = Color(0.8, 0.8, 0.8, 0.5) # Un poco más claro pero fantasmal
-			sector_activo.scale = Vector2(1.0, 1.0) # NO crece (feedback táctil negativo)

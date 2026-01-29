@@ -1,201 +1,86 @@
 extends CanvasLayer
 
-# REFERENCIAS A LA UI
+# --- REFERENCIAS A LOS COMPONENTES (SUB-MANAGERS) ---
+@onready var stats_panel = $GameUI/StatsPanel
+@onready var consumables_panel = $GameUI/ConsumablesPanel
+@onready var skills_panel = $GameUI/SkillsPanel    # <--- NUEVO
+@onready var radar = $GameUI/Radar
+@onready var radial_menu = $RadialMenu
 
-# Rutas hacia nodos nuevos 
-@onready var life_container = $GameUI/StatsPanel/BarsContainer/LifeContainer
-@onready var mana_bar = $GameUI/StatsPanel/BarsContainer/ManaBar
-@onready var ulti_bar = $GameUI/StatsPanel/BarsContainer/UltiBar
-@onready var stamina_bar = $GameUI/StatsPanel/BarsContainer/StaminaBar
-
-# Conexión de los nodos visuales al HUD (no del menú radial)
-# Ajusta las rutas según el árbol de nodos real
-@onready var slot_pocion_1 = $GameUI/ConsumablesPanel/Potions/Slot1
-@onready var slot_pocion_2 = $GameUI/ConsumablesPanel/Potions/Slot2
-@onready var slot_pocion_3 = $GameUI/ConsumablesPanel/Potions/Slot3
-
-# --- REFERENCIAS A LOS CONTADORES (LABELS) ---
-@onready var label_pocion_1 = $GameUI/ConsumablesPanel/Potions/Slot1/CountLabel
-@onready var label_pocion_2 = $GameUI/ConsumablesPanel/Potions/Slot2/CountLabel
-@onready var label_pocion_3 = $GameUI/ConsumablesPanel/Potions/Slot3/CountLabel
-# rutas iconos de flecha/bala
-@onready var label_flechas = $GameUI/ConsumablesPanel/Ammo/IconoFlecha/ArrowLabel
-@onready var label_balas = $GameUI/ConsumablesPanel/Ammo/IconoBala/BulletLabel
-
-# Referencia al Triángulo/Rombo Central dentro del Menú Radial
-# Para actualizar el icono del centro cuando se equipa algo
+# Referencias directas para el centro de la rueda (Esto se queda aquí o en RadialMenu)
 @onready var icon_hand_l = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_L
 @onready var icon_hand_r = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_R
 
-# --- REFERENCIAS A HABILIDADES ---
-@onready var skill_q = $GameUI/SkillsPanel/SkillQ
-@onready var skill_r = $GameUI/SkillsPanel/SkillR
-
-# Textura para las vidas icono de Godot temporalmente
-var heart_texture = preload("res://icon.svg")
+# Variables de prueba (Temporales)
+var cant_pocion_1 = 5
+var cant_pocion_2 = 3
+var cant_pocion_3 = 1
 
 func _ready():
-	# Conectar la señal del Menú Radial
-	# Cuando el menú anuncia un equipamiento, este script reacciona
-	$RadialMenu.equip_item.connect(_on_item_equipped)
+	# Conexión menú radial
+	radial_menu.equip_item.connect(_on_item_equipped)
 	
-	# --- ESTADO INICIAL DE PRUEBA ---
-	# Esto simula que el jugador empieza con todo lleno
-	actualizar_vida(5)     # 5 Mascaritas
-	actualizar_mana(50, 100) # Maná a la mitad
-	actualizar_stamina(100, 100) # Estamina llena
-	actualizar_ulti(0, 100)      # Ulti vacía
+	# INICIALIZACIÓN (Delegamos a los componentes)
+	# Nota: skills_panel se auto-inicializa en su propio _ready
 	
-	# PRUEBA INICIAL: Poner números falsos para ver si funciona
-	actualizar_pocion(1, 5)  # Slot 1 con 5 pociones
-	actualizar_pocion(2, 2)  # Slot 2 con 2 pociones
-	actualizar_pocion(3, 0)  # Slot 3 vacío
+	stats_panel.update_health(5)
+	stats_panel.update_mana(50, 100)
+	stats_panel.update_stamina(100, 100)
+	stats_panel.update_ulti(0, 100)
 	
-	actualizar_municion("FLECHAS", 30)
-	actualizar_municion("BALAS", 12)
+	consumables_panel.update_potion_count(1, cant_pocion_1)
+	consumables_panel.update_potion_count(2, cant_pocion_2) 
+	consumables_panel.update_potion_count(3, cant_pocion_3)
 	
-	# Configurar rangos
-	skill_q.max_value = 100
-	skill_q.value = 100 # Q empieza lista
-	
-	skill_r.max_value = 100
-	skill_r.value = 0 # R empieza vacía
+	consumables_panel.update_ammo("FLECHAS", 30)
 
 func _input(event):
-	# LÓGICA DE POCIONES (1, 2, 3)
-	# Ffunciona siempre, con o sin menú abierto
+	# --- INPUTS DE PRUEBA ---
+	
+	# --- POCIÓN 1 ---
 	if event.is_action_pressed("usar_pocion_1"):
-		print("Usando Poción 1")
-		_animar_slot(slot_pocion_1)
-		
-	elif event.is_action_pressed("usar_pocion_2"):
-		print("Usando Poción 2")
-		_animar_slot(slot_pocion_2)
-		
-	elif event.is_action_pressed("usar_pocion_3"):
-		print("Usando Poción 3")
-		_animar_slot(slot_pocion_3)
-		
-	# --- SIMULACIÓN DE DAÑO (SOLO PARA TEST) ---
-	# ENTER para ver cómo bajan las barras
+		if cant_pocion_1 > 0:
+			cant_pocion_1 -= 1
+			consumables_panel.update_potion_count(1, cant_pocion_1)
+			consumables_panel.animar_slot(1)
+	
+	# --- POCIÓN 2  ---
+	if event.is_action_pressed("usar_pocion_2"):
+		if cant_pocion_2 > 0:
+			cant_pocion_2 -= 1
+			consumables_panel.update_potion_count(2, cant_pocion_2)
+			consumables_panel.animar_slot(2)
+
+	# --- POCIÓN 3  ---
+	if event.is_action_pressed("usar_pocion_3"):
+		if cant_pocion_3 > 0:
+			cant_pocion_3 -= 1
+			consumables_panel.update_potion_count(3, cant_pocion_3)
+			consumables_panel.animar_slot(3)
+
+	# 2. Usar Habilidad Q (Cooldown)
+	if event.is_action_pressed("usar_habilidad_q"): # Asegúrate de tener esta tecla en el Mapa de Entrada (o usa "ui_page_up" para test)
+		print("Test: Usando Skill Q")
+		skills_panel.start_q_cooldown(2.0) # 2 segundos de cooldown
+			
+	# 3. Simular Daño y Carga de Ulti (ENTER)
 	if event.is_action_pressed("ui_accept"): 
-		print("Test: Perdiendo vida y maná")
-		actualizar_vida(3) 
-		actualizar_mana(20, 100)
-		actualizar_ulti(100, 100) # La ulti se carga al golpearte (ejemplo)
-	
-	# LÓGICA DE HABILIDADES
-	if event.is_action_pressed("usar_habilidad_q"):
-		print("Usando habilidad especial")
-		usar_habilidad_q()
-
-func actualizar_vida(cantidad_actual: int):
-	# 1. Borrar vidas viejas
-	for child in life_container.get_children():
-		child.queue_free()
-	
-	# 2. Crear mascaritas nuevas
-	for i in range(cantidad_actual):
-		var icon = TextureRect.new()
-		icon.texture = heart_texture
-		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon.stretch_mode = TextureRect.STRETCH_SCALE
-		icon.custom_minimum_size = Vector2(24, 24) # Tamaño de cada corazoncito
+		print("Test: Daño recibido + Carga Ulti")
+		stats_panel.update_health(3)
+		stats_panel.update_mana(10, 100)
 		
-		# Truco: Pintarlas de rojo si usas el icon.svg
-		icon.modulate = Color.RED 
-		
-		life_container.add_child(icon)
+		# Actualizamos ambas barras de Ulti (la de arriba y la de abajo)
+		var carga_ulti = 100 
+		stats_panel.update_ulti(carga_ulti, 100)
+		skills_panel.update_ulti_charge(carga_ulti, 100)
 
-func actualizar_mana(val, max_val):
-	mana_bar.max_value = max_val
-	mana_bar.value = val
-
-func actualizar_stamina(val, max_val):
-	stamina_bar.max_value = max_val
-	stamina_bar.value = val
-
-# --- ACTUALIZAR HABILIDADES ---
-func actualizar_ulti(val, max_val):
-	# 1. Actualiza la barra de arriba
-	if ulti_bar:
-		ulti_bar.max_value = max_val
-		ulti_bar.value = val
-		# lógica de brillo
-		if val >= max_val: ulti_bar.modulate = Color(1.5, 1.5, 2)
-		else: ulti_bar.modulate = Color(1, 1, 1)
-
-	# 2. Actualiza el ROMBO de abajo (Nuevo)
-	if skill_r:
-		skill_r.max_value = max_val
-		skill_r.value = val
-		# Feedback extra: Si está llena, que el rombo de la R brille
-		if val >= max_val:
-			skill_r.modulate = Color(2, 1, 2) # Brillo intenso
-		else:
-			skill_r.modulate = Color(1, 1, 1)
-
-# Nueva función para simular uso de la Q (Cooldown visual)
-func usar_habilidad_q():
-	# Simulación visual: La vaciamos y hacemos que se llene rápido
-	var tween = create_tween()
-	skill_q.value = 0
-	# Se rellena en 2 segundos (simulando cooldown)
-	tween.tween_property(skill_q, "value", 100, 2.0)
-
-# --- FUNCIONES NUEVAS ---
-func actualizar_pocion(slot_num: int, cantidad: int):
-	# Busca cuál etiqueta tocar
-	var label_destino = null
-	match slot_num:
-		1: label_destino = label_pocion_1
-		2: label_destino = label_pocion_2
-		3: label_destino = label_pocion_3
-	
-	if label_destino:
-		label_destino.text = str(cantidad) # Convertir número a texto
-		
-		# Detalle Visual: Si es 0, ponerlo rojo. Si no, blanco.
-		if cantidad == 0:
-			label_destino.modulate = Color(1, 0.3, 0.3) # Rojo suave
-		else:
-			label_destino.modulate = Color.WHITE
-
-func actualizar_municion(tipo: String, cantidad: int):
-	if tipo == "FLECHAS":
-		if label_flechas:
-			label_flechas.text = str(cantidad)
-			label_flechas.modulate = Color.RED if cantidad == 0 else Color.WHITE
-			
-	elif tipo == "BALAS":
-		if label_balas:
-			label_balas.text = str(cantidad)
-			label_balas.modulate = Color.RED if cantidad == 0 else Color.WHITE
-
-
-# Esta función se activa cuando se hace click en el Menú Radial
+# --- RESPUESTA AL MENÚ RADIAL ---
 func _on_item_equipped(hand_side, item_data):
-	print("HUD: Equipando ", item_data.get("nombre", "Nada"), " en ", hand_side)
+	if item_data == null: return
 	
-	# Si el item viene vacío (null), no se hace nada o se borra
-	if item_data.is_empty(): return
+	print("HUD: Equipando ", item_data.nombre)
 	
-	var texture_to_show = item_data["icon"]
-	var color_to_show = item_data.get("color", Color.WHITE) # Recuperamos el color falso
-	
-	if hand_side == "LEFT":
-		if icon_hand_l: 
-			icon_hand_l.texture = texture_to_show
-			icon_hand_l.modulate = color_to_show # Aplicar el color falso
-			
-	elif hand_side == "RIGHT":
-		if icon_hand_r: 
-			icon_hand_r.texture = texture_to_show
-			icon_hand_r.modulate = color_to_show
-
-# Un efecto visual simple para saber que se apretó la tecla
-func _animar_slot(slot_node):
-	if slot_node:
-		var tween = create_tween()
-		tween.tween_property(slot_node, "scale", Vector2(1.2, 1.2), 0.1)
-		tween.tween_property(slot_node, "scale", Vector2(1.0, 1.0), 0.1)
+	var target_icon = icon_hand_l if hand_side == "LEFT" else icon_hand_r
+	if target_icon:
+		target_icon.texture = item_data.icono
+		target_icon.modulate = item_data.color_ui
