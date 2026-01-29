@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqnc45jj0bq6d"]
+
+[ext_resource type="PackedScene" uid="uid://bc8ajw2e8br4x" path="res://assets/models/enviroment/level2/metalStair.fbx" id="1_1c658"]
+
+[node name="metalStair" instance=ExtResource("1_1c658")]

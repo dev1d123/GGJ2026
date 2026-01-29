@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk3adcpyrs3s0"]
+
+[ext_resource type="PackedScene" uid="uid://cdgcnfb0ftub5" path="res://assets/models/enviroment/level2/rock1.fbx" id="1_mtlpt"]
+
+[node name="rock1" instance=ExtResource("1_mtlpt")]

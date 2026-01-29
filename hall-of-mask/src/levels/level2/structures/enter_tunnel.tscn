@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bttr6hyupm2vo"]
+
+[ext_resource type="PackedScene" uid="uid://ct23tc7r88tsc" path="res://src/levels/level2/structures/enter_tunnel_model.tscn" id="1_p86rq"]
+
+[node name="EnterTunnel" type="StaticBody3D"]
+
+[node name="enterTunnel" parent="." instance=ExtResource("1_p86rq")]
