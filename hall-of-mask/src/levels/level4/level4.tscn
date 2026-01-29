@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3 uid="uid://c70g6tvonr2yl"]
+[gd_scene load_steps=14 format=3 uid="uid://c70g6tvonr2yl"]
 
 [ext_resource type="Texture2D" uid="uid://c2fhhbhuwbv52" path="res://assets/textures/level4/metal.dds" id="1_14d6y"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="1_d1atx"]
 [ext_resource type="Texture2D" uid="uid://berh4w748xl8a" path="res://assets/textures/level4/metal_normal.dds" id="2_8abm2"]
 [ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/player.tscn" id="2_gvxw3"]
+[ext_resource type="PackedScene" uid="uid://ctprh1fl2dai3" path="res://src/levels/level4/structures/rock_platform.tscn" id="5_8abm2"]
 
 [sub_resource type="Gradient" id="Gradient_vdpo8"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -86,3 +87,14 @@ metadata/_edit_lock_ = true
 [node name="Environment" parent="." instance=ExtResource("1_d1atx")]
 
 [node name="Player" parent="." instance=ExtResource("2_gvxw3")]
+
+[node name="Node" type="Node" parent="."]
+
+[node name="RockPlatform" parent="Node" instance=ExtResource("5_8abm2")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 32.93901, 0, -10.950094)
+
+[node name="RockPlatform2" parent="Node" instance=ExtResource("5_8abm2")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 39.134644, 0, 1.1313972)
+
+[node name="RockPlatform3" parent="Node" instance=ExtResource("5_8abm2")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 24.058594, 0, 12.490068)
