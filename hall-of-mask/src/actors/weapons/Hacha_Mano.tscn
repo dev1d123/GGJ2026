@@ -1,8 +1,23 @@
-[gd_scene load_steps=2 format=3 uid="uid://dgttdpbcefd7n"]
+[gd_scene load_steps=4 format=3 uid="uid://dgttdpbcefd7n"]
 
 [ext_resource type="PackedScene" uid="uid://bxm4xcv37srku" path="res://assets/models/weapons/axe_1handed.gltf" id="1_20e6i"]
+[ext_resource type="Script" uid="uid://cn5kkl7yys5k1" path="res://src/actors/player/scripts/WeaponHitbox.gd" id="2_2ffgf"]
 
-[node name="Axe_1Handed_R_Container" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_kltp3"]
+size = Vector3(1.9748077, 2.1897736, 0.76483154)
+
+[node name="Hacha_Mano" type="Node3D"]
 
 [node name="axe_1handed2" parent="." instance=ExtResource("1_20e6i")]
 transform = Transform3D(-1, 4.2270233e-07, -8.7422706e-08, 4.2270233e-07, 1, 3.8631066e-07, 8.742286e-08, 3.8631066e-07, -1, 0, 0, 0)
+
+[node name="Hitbox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("2_2ffgf")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.41651154, 0.4556198, -0.005279541)
+shape = SubResource("BoxShape3D_kltp3")

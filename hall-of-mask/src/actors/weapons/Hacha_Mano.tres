@@ -8,4 +8,7 @@ script = ExtResource("1_lw7vx")
 name = "Hacha_Mano"
 weapon_scene = ExtResource("2_a5wwm")
 anim_attack = "Axe_1H_Attack"
+damage_mult = 10.0
+damage_delay = 0.5
+hitbox_duration = 0.05
 metadata/_custom_type_script = "uid://r2rvquosrqcd"

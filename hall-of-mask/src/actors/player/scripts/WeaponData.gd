@@ -15,6 +15,8 @@ enum AmmoType { NONE, ARROW, BULLET, MANA }
 @export_group("Mecánicas de Combate")
 @export var type: Type = Type.MELEE_1H
 @export var damage_mult: float = 1.0     # Se multiplica por tus base_stats
+@export var knockback_force: float = 8.0  # Fuerza de retroceso
+@export var jump_force: float = 4.0      # Fuerza del salto del retroceso
 @export var stamina_cost: float = 10.0
 @export var mana_cost: float = 0.0
 @export var cooldown: float = 0.5        # Tiempo entre ataques
@@ -28,3 +30,8 @@ enum AmmoType { NONE, ARROW, BULLET, MANA }
 @export var slow_factor: float = 1.0     # 0.5 = Enemigo 50% lento
 @export var projectile_scene: PackedScene # Para arcos/magia/balas
 @export var charge_time: float = 0.0     # Para arcos/báculos cargados
+
+
+@export_group("Combat Timing")
+@export var damage_delay: float = 0.4  # Tiempo desde el click hasta que el golpe "conecta"
+@export var hitbox_duration: float = 0.1 # Cuánto tiempo se queda activo el daño (la ventana de golpe)
