@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=3 uid="uid://dftpd1puct050"]
+
+[ext_resource type="Shader" uid="uid://c61dhm8bhbg4a" path="res://shaders/dither.gdshader" id="1_gh6uk"]
+[ext_resource type="Texture2D" uid="uid://bauogtxjmx5v7" path="res://shaders/assets/palette_eeve.png" id="2_m6oxb"]
+[ext_resource type="Texture2D" uid="uid://frosj48sdxur" path="res://shaders/assets/bayer2tile16.png" id="3_16u4g"]
+[ext_resource type="PackedScene" uid="uid://deomqtukglycp" path="res://src/levels/level2/Level2.tscn" id="4_16u4g"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ggapa"]
+shader = ExtResource("1_gh6uk")
+shader_parameter/u_dither_tex = ExtResource("3_16u4g")
+shader_parameter/u_color_tex = ExtResource("2_m6oxb")
+shader_parameter/u_bit_depth = 32
+shader_parameter/u_contrast = 1.0
+shader_parameter/u_offset = 0.0
+shader_parameter/u_dither_size = 2
+
+[node name="ShaderViewport" type="SubViewportContainer"]
+material = SubResource("ShaderMaterial_ggapa")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="."]
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="Level2" parent="SubViewport" instance=ExtResource("4_16u4g")]
