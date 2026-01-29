@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://coudb0nrj7cp2"]
+
+[ext_resource type="PackedScene" uid="uid://dyvbed2g6pbu3" path="res://assets/models/enviroment/level3/columbarium.fbx" id="1_hc7n7"]
+
+[node name="columbarium" instance=ExtResource("1_hc7n7")]

@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bps3ntbjv1kcj"]
+
+[ext_resource type="PackedScene" uid="uid://drsv4fwmlhhxx" path="res://assets/models/enviroment/level3/shrub.fbx" id="1_bb8kh"]
+
+[node name="shrub" instance=ExtResource("1_bb8kh")]

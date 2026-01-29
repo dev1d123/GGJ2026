@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://djsofn7udtjbv"]
+
+[ext_resource type="PackedScene" uid="uid://cu7m3tsmy4hem" path="res://src/levels/level3/structures/tomb1_model.tscn" id="1_0ndhp"]
+
+[node name="Tomb1" type="StaticBody3D"]
+
+[node name="tomb1" parent="." instance=ExtResource("1_0ndhp")]

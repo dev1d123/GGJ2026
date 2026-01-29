@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://df44qe07navv8"]
+
+[ext_resource type="PackedScene" uid="uid://c0so1j0xbtfvl" path="res://src/levels/level3/structures/font_model.tscn" id="1_qnu1w"]
+
+[node name="Font" type="StaticBody3D"]
+
+[node name="font" parent="." instance=ExtResource("1_qnu1w")]

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cdhiy5qrrh60j"]
+
+[ext_resource type="PackedScene" uid="uid://dl662gabb20bi" path="res://src/levels/level3/structures/shrub2_model.tscn" id="1_j15i5"]
+
+[node name="Shrub2" type="StaticBody3D"]
+
+[node name="shrub2" parent="." instance=ExtResource("1_j15i5")]
