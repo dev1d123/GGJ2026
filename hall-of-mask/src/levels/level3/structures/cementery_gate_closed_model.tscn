@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://crhsuchitmp1r"]
+
+[ext_resource type="PackedScene" uid="uid://dc43mjo634qb7" path="res://assets/models/enviroment/level3/cementeryGateClosed.fbx" id="1_as7co"]
+
+[node name="cementeryGateClosed" instance=ExtResource("1_as7co")]

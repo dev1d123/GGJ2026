@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7oacoqkqteho"]
+
+[ext_resource type="PackedScene" uid="uid://b5w17y7mwy0go" path="res://src/levels/level3/structures/metal_gate_model.tscn" id="1_0vyve"]
+
+[node name="MetalGate" type="StaticBody3D"]
+
+[node name="metalGate" parent="." instance=ExtResource("1_0vyve")]

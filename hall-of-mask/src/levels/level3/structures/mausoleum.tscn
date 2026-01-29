@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://g4uowe3svs3x"]
+
+[ext_resource type="PackedScene" uid="uid://dvb8wikxaijro" path="res://src/levels/level3/structures/mausoleum_model.tscn" id="1_ooosd"]
+
+[node name="Mausoleum" type="StaticBody3D"]
+
+[node name="mausoleum" parent="." instance=ExtResource("1_ooosd")]

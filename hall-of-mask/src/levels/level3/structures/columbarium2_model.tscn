@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://dyiltw58b8phk"]
+
+[ext_resource type="PackedScene" uid="uid://clckh6f5u08mq" path="res://assets/models/enviroment/level3/columbarion2.fbx" id="1_fb0wp"]
+
+[node name="columbarion2" instance=ExtResource("1_fb0wp")]

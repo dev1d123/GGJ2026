@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpwqidnves8mb"]
+
+[ext_resource type="PackedScene" uid="uid://c5pc1ccq2e0wj" path="res://src/levels/level3/structures/tree2_model.tscn" id="1_ltkcn"]
+
+[node name="Tree2" type="StaticBody3D"]
+
+[node name="tree2" parent="." instance=ExtResource("1_ltkcn")]
