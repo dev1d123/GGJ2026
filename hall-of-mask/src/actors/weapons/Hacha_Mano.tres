@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://daaebpm6rbbe2"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_lw7vx"]
+[ext_resource type="PackedScene" uid="uid://dgttdpbcefd7n" path="res://src/actors/weapons/Hacha_Mano.tscn" id="2_a5wwm"]
+
+[resource]
+script = ExtResource("1_lw7vx")
+name = "Hacha_Mano"
+weapon_scene = ExtResource("2_a5wwm")
+anim_attack = "Axe_1H_Attack"
+metadata/_custom_type_script = "uid://r2rvquosrqcd"
