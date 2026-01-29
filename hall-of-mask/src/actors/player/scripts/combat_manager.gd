@@ -79,9 +79,39 @@ func _input(event):
 					equipar(hacha_res, "right")
 			else:
 				print("❌ ERROR: No se encontró res://src/actors/weapons/Hacha_Mano.tres")
+				
+		# Tecla 3: EQUIPAR MARTILLO
+		elif event.keycode == KEY_3:
+			# Asegúrate de que esta ruta exista, si no, te dará error
+			var martillo_res = load("res://src/actors/weapons/Martillo_Mano.tres")
+			
+			if martillo_res:
+				if holding_tab:
+					print("🧪 TEST: Equipando Martillo en Izquierda")
+					equipar(martillo_res, "left")
+				else:
+					print("🧪 TEST: Equipando Martillo en Derecha")
+					equipar(martillo_res, "right")
+			else:
+				print("❌ ERROR: No se encontró res://src/actors/weapons/Martillo_Mano.tres")
+				
+		# Tecla 3: EQUIPAR DAGGA
+		elif event.keycode == KEY_4:
+			# Asegúrate de que esta ruta exista, si no, te dará error
+			var daga_res = load("res://src/actors/weapons/Daga_Mano.tres")
+			
+			if daga_res:
+				if holding_tab:
+					print("🧪 TEST: Equipando Daga en Izquierda")
+					equipar(daga_res, "left")
+				else:
+					print("🧪 TEST: Equipando Daga en Derecha")
+					equipar(daga_res, "right")
+			else:
+				print("❌ ERROR: No se encontró res://src/actors/weapons/Daga_Mano.tres")
 
-		# EXTRA: Tecla 3 para probar la Espada 2 Manos en la derecha
-		elif event.keycode == KEY_3 and not holding_tab:
+		# EXTRA: Tecla 4 para probar la Espada 2 Manos en la derecha
+		elif event.keycode == KEY_4 and not holding_tab:
 			var espada_res = load("res://src/actors/weapons/Espada_2H.tres")
 			if espada_res:
 				print("🧪 TEST: Equipando Espada 2H (Ocupa todo)")

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://d2vcfhren1fkf"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_2achy"]
+[ext_resource type="PackedScene" uid="uid://c2qcqy6ukbj4o" path="res://src/actors/weapons/Daga_Mano.tscn" id="2_fxpi5"]
+
+[resource]
+script = ExtResource("1_2achy")
+name = "Daga_Mano"
+weapon_scene = ExtResource("2_fxpi5")
+anim_attack = "Dagger_1H_Attack"
+damage_mult = 15.0
+knockback_force = 6.0
+jump_force = 2.0
+can_use_prone = true

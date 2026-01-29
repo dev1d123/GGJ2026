@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://ccgg23oo5qk5"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_qgbib"]
+[ext_resource type="PackedScene" uid="uid://bqeuv0bvwg3f0" path="res://src/actors/weapons/Martillo_Mano.tscn" id="2_qgb8x"]
+
+[resource]
+script = ExtResource("1_qgbib")
+name = "Martillo_Mano"
+weapon_scene = ExtResource("2_qgb8x")
+anim_attack = "Hammer_1H_Attack"
+damage_mult = 20.0
+knockback_force = 10.0
+jump_force = 6.0
+stamina_cost = 20.0
+damage_delay = 0.85
