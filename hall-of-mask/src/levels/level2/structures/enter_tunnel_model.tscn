@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://ct23tc7r88tsc"]
+
+[ext_resource type="PackedScene" uid="uid://rmak53pur3bo" path="res://assets/models/enviroment/level2/enterTunnel.fbx" id="1_oq2wd"]
+
+[node name="enterTunnel" instance=ExtResource("1_oq2wd")]

@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpvp37y8573yo"]
+
+[ext_resource type="PackedScene" uid="uid://cpycs06yuxykd" path="res://assets/models/enviroment/level2/rockCliff.fbx" id="1_egmy3"]
+
+[node name="rockCliff" instance=ExtResource("1_egmy3")]

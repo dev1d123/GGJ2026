@@ -1,9 +1,17 @@
-[gd_scene load_steps=13 format=3 uid="uid://deomqtukglycp"]
+[gd_scene load_steps=21 format=3 uid="uid://deomqtukglycp"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_cp82e"]
 [ext_resource type="Texture2D" uid="uid://l4lhdp6tiq2k" path="res://assets/textures/level2/level2Rocks_normal.dds" id="2_fyp4o"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="3_hp4bj"]
 [ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/player.tscn" id="4_8hsde"]
+[ext_resource type="PackedScene" uid="uid://bttr6hyupm2vo" path="res://src/levels/level2/structures/enter_tunnel.tscn" id="5_8hsde"]
+[ext_resource type="PackedScene" uid="uid://bt7tyncl32uya" path="res://src/levels/level2/structures/rock_platafform.tscn" id="6_qamio"]
+[ext_resource type="PackedScene" uid="uid://dv0gn4jrfypnf" path="res://src/levels/level2/structures/stair_wood.tscn" id="7_qbw0w"]
+[ext_resource type="PackedScene" uid="uid://cakbsmr8x3aj7" path="res://src/levels/level2/structures/metal_bridge.tscn" id="8_0odbh"]
+[ext_resource type="PackedScene" uid="uid://dbtcit4yiinti" path="res://src/levels/level2/structures/rock_cliff.tscn" id="9_sqpsr"]
+[ext_resource type="PackedScene" uid="uid://d1a72au1fvsx6" path="res://src/levels/level2/structures/rock_wall.tscn" id="10_sqpsr"]
+[ext_resource type="PackedScene" uid="uid://dli2g33ytcbkk" path="res://src/levels/level2/structures/rock1.tscn" id="11_5suer"]
+[ext_resource type="PackedScene" uid="uid://qa57fojc1bcm" path="res://src/levels/level2/structures/metal_stair.tscn" id="12_dpe5t"]
 
 [sub_resource type="Gradient" id="Gradient_hp4bj"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -90,3 +98,78 @@ metadata/_edit_lock_ = true
 
 [node name="Player" parent="." instance=ExtResource("4_8hsde")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -74.26095, 0, 0)
+
+[node name="EnterTunnel" parent="." instance=ExtResource("5_8hsde")]
+transform = Transform3D(24.81, 0, 0, 0, 24.81, 0, 0, 0, 24.81, -65.863434, 8.3689, -0.29740667)
+
+[node name="RockPlatafform" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, -50.28846, -9.136018, 0.8216977)
+
+[node name="StairWood" parent="." instance=ExtResource("7_qbw0w")]
+transform = Transform3D(-4.371139e-07, 0, 10, 0, 10, 0, -10, 0, -4.371139e-07, -50.047035, -11.730503, -7.735754)
+
+[node name="RockPlatafform2" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(9.864787, 0, -3.3403895, 0, 10.415, 0, 3.3403895, 0, 9.864787, -47.292984, -16.748978, -15.483337)
+
+[node name="MetalBridge" parent="." instance=ExtResource("8_0odbh")]
+transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 45.87, -33.34032, -16.066414, -15.473861)
+
+[node name="RockCliff" parent="." instance=ExtResource("9_sqpsr")]
+transform = Transform3D(-39.991226, -0.4188484, -3.4969112e-06, -0.8376968, 19.995613, 0, 3.496144e-06, 3.661689e-08, -40, -15.519602, -21.615423, -31.457216)
+
+[node name="StairWood2" parent="." instance=ExtResource("7_qbw0w")]
+transform = Transform3D(14.765, 0, 0, 0, 14.765, 0, 0, 0, 14.765, 5.767499, -21.730877, -47.851704)
+
+[node name="RockWall" parent="." instance=ExtResource("10_sqpsr")]
+transform = Transform3D(-2.4096985e-07, -5.512748, -19.225233, 20, -8.742278e-07, 0, -8.403617e-07, -19.225233, 5.512748, 20.95252, -30.31312, -43.611324)
+
+[node name="Rock1" parent="." instance=ExtResource("11_5suer")]
+transform = Transform3D(-13.360579, -6.3477383, -2.4902084, 0, 5.478027, -13.963924, 6.8187184, -12.437741, -4.8793077, 39.34883, -40.680832, -24.014122)
+
+[node name="Rock2" parent="." instance=ExtResource("11_5suer")]
+transform = Transform3D(-14.96144, -1.0005717, -0.39252245, -4.1255106e-09, 5.4780273, -13.963924, 1.0748096, -13.928031, -5.463946, 48.452976, -51.157104, -1.4714317)
+
+[node name="RockPlatafform3" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 45.655632, -54.91755, 18.287117)
+
+[node name="MetalStair" parent="." instance=ExtResource("12_dpe5t")]
+transform = Transform3D(-19.493658, 0, -6.535355, 0, 20.56, 0, 6.535355, 0, -19.493658, 35.51354, -60.108047, 22.312449)
+
+[node name="RockCliff2" parent="." instance=ExtResource("9_sqpsr")]
+transform = Transform3D(-55.04795, -1.5072976, -30.3571, 1.1278181, -19.876389, 6.006186, -37.14926, 1.6300914, 45.165638, 19.253054, -73.649765, 46.215446)
+
+[node name="MetalBridge2" parent="." instance=ExtResource("8_0odbh")]
+transform = Transform3D(-3.2087448, 0, 69.055984, -13.032162, 27.296755, -3.1852646, -27.143053, -13.105955, -6.634188, 0.55854416, -79.80258, 6.885292)
+
+[node name="MetalBridge3" parent="." instance=ExtResource("8_0odbh")]
+transform = Transform3D(-2.902209, 1.367268, 69.05614, 0, 30.248837, -3.150324, -30.1406, -0.13165289, -6.6493473, 0.55854416, -79.80258, -29.867928)
+
+[node name="RockPlatafform4" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(17.35, 0, 0, 0, 17.35, 0, 0, 0, 17.35, -4.4163475, -81.10508, -49.61053)
+
+[node name="MetalStair2" parent="." instance=ExtResource("12_dpe5t")]
+transform = Transform3D(-15.520357, 0, -13.484512, 0, 20.56, 0, 13.484512, 0, -15.520357, -15.068339, -86.717384, -42.0234)
+
+[node name="Rock3" parent="." instance=ExtResource("11_5suer")]
+transform = Transform3D(-26.53726, 9.123947, 3.5793133, -9.641322e-09, 5.4780307, -13.963924, -22.904732, -10.57094, -4.146967, -25.554298, -97.74972, -38.950714)
+
+[node name="Rock4" parent="." instance=ExtResource("11_5suer")]
+transform = Transform3D(-6.6397285, 12.521384, 4.9121213, -3.615733e-08, 5.478028, -13.963924, -13.450424, -6.1811123, -2.4248407, -42.99664, -108.22599, -17.986912)
+
+[node name="RockWall2" parent="." instance=ExtResource("10_sqpsr")]
+transform = Transform3D(1.4424918e-06, 33.000366, 94.39796, 99.997826, -0.62112814, 0.21713723, 0.6579884, 94.39592, -32.999653, -57.28384, -144.08357, 16.462856)
+
+[node name="RockWall3" parent="." instance=ExtResource("10_sqpsr")]
+transform = Transform3D(1.4424918e-06, 33.000366, 94.397964, 100, -4.371139e-06, 0, 4.126266e-06, 94.397964, -33.000366, 80.020035, -144.08357, 16.462856)
+
+[node name="MetalBridge4" parent="." instance=ExtResource("8_0odbh")]
+transform = Transform3D(-48.43745, 12.5522995, -28.619766, 12.727207, 49.96743, 1.9725733, 12.300284, -2.271851, -114.74316, 11.118119, -126.96058, 23.556078)
+
+[node name="RockPlatafform5" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 31.883133, -139.62994, -31.807848)
+
+[node name="RockPlatafform6" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 24.647194, -159.915, -37.214527)
+
+[node name="RockPlatafform7" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 36.572357, -183.52634, -26.974756)

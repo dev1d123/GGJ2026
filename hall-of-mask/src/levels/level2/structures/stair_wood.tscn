@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dv0gn4jrfypnf"]
+
+[ext_resource type="PackedScene" uid="uid://uyfc6iauke0j" path="res://src/levels/level2/structures/stair_wood_model.tscn" id="1_cugmy"]
+
+[node name="StairWood" type="StaticBody3D"]
+
+[node name="stairWood" parent="." instance=ExtResource("1_cugmy")]

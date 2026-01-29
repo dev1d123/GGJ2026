@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cakbsmr8x3aj7"]
+
+[ext_resource type="PackedScene" uid="uid://cjrwms6fij2hd" path="res://src/levels/level2/structures/metal_bridge_model.tscn" id="1_2wihv"]
+
+[node name="MetalBridge" type="StaticBody3D"]
+
+[node name="metalBridge" parent="." instance=ExtResource("1_2wihv")]
