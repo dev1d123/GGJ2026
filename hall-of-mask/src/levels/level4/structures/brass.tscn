@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk3myj0hyqwar"]
+
+[ext_resource type="PackedScene" uid="uid://ctyvbyheb4kd2" path="res://src/levels/level4/structures/brass_model.tscn" id="1_y6txr"]
+
+[node name="Brass" type="StaticBody3D"]
+
+[node name="brass" parent="." instance=ExtResource("1_y6txr")]

@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://crku5cd51cplk"]
+
+[ext_resource type="PackedScene" uid="uid://bamn7207avsr5" path="res://assets/models/enviroment/level4/staircase2.fbx" id="1_q4fug"]
+
+[node name="staircase2" instance=ExtResource("1_q4fug")]

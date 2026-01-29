@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://co67g5nj51eoa"]
+
+[ext_resource type="PackedScene" uid="uid://bi1abuc40vwoe" path="res://src/levels/level4/structures/clock_platform2_model.tscn" id="1_dhxxl"]
+
+[node name="ClockPlatform2" type="StaticBody3D"]
+
+[node name="clockPlatform2" parent="." instance=ExtResource("1_dhxxl")]
