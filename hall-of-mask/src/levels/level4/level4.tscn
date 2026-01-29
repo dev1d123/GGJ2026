@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://c70g6tvonr2yl"]
+[gd_scene load_steps=23 format=3 uid="uid://c70g6tvonr2yl"]
 
 [ext_resource type="Texture2D" uid="uid://c2fhhbhuwbv52" path="res://assets/textures/level4/metal.dds" id="1_14d6y"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="1_d1atx"]
@@ -10,6 +10,10 @@
 [ext_resource type="PackedScene" uid="uid://t2j8be6gajs6" path="res://src/levels/level4/structures/clock_lenght.tscn" id="8_ki482"]
 [ext_resource type="PackedScene" uid="uid://drq1ngheusssv" path="res://src/levels/level4/structures/clock2.tscn" id="9_esd1e"]
 [ext_resource type="PackedScene" uid="uid://dxpjx7jmj8vnm" path="res://src/levels/level4/structures/staircase2.tscn" id="10_3q3hl"]
+[ext_resource type="PackedScene" uid="uid://bk3myj0hyqwar" path="res://src/levels/level4/structures/brass.tscn" id="11_goydy"]
+[ext_resource type="PackedScene" uid="uid://cyqv5rkefn71d" path="res://src/levels/level4/structures/clock1.tscn" id="12_6kb1l"]
+[ext_resource type="PackedScene" uid="uid://bpiwrgy5p45bf" path="res://src/levels/level4/structures/clock3.tscn" id="13_7kae0"]
+[ext_resource type="PackedScene" uid="uid://dj1wipkikmjsf" path="res://src/levels/level4/structures/gothic_catedral.tscn" id="14_7kae0"]
 
 [sub_resource type="Gradient" id="Gradient_vdpo8"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -208,3 +212,69 @@ transform = Transform3D(-20.351307, 6.816187, -1.7458729, 7.712603, 18.002666, 0
 
 [node name="Staircase3" parent="." instance=ExtResource("10_3q3hl")]
 transform = Transform3D(-20.351307, 6.816187, -1.7458729, 7.712603, 18.002666, 0.5541381, 1.63427, -0.07900376, -24.35622, 196.23059, 21.435001, 6.175255)
+
+[node name="Brass" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 487.97433, 22.169628, -6.86003)
+
+[node name="Brass2" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 487.97433, 21.183208, -2.1972003)
+
+[node name="Brass3" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 490.35046, 19.737764, -5.748648)
+
+[node name="Brass4" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 487.97433, 13.664032, 3.2570047)
+
+[node name="Brass5" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 487.97433, 12.677612, 7.9198346)
+
+[node name="Brass6" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 490.35046, 11.232168, 4.3683867)
+
+[node name="Brass7" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 498.76834, 11.3900795, -6.86003)
+
+[node name="Brass8" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 498.76834, 10.40366, -2.1972003)
+
+[node name="Brass9" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 501.14447, 8.958216, -5.748648)
+
+[node name="Brass10" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 505.53384, 2.3078308, -6.86003)
+
+[node name="Brass11" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 505.53384, 1.3214111, -2.1972003)
+
+[node name="Brass12" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 507.90997, -0.124032974, -5.748648)
+
+[node name="Clock1" parent="." instance=ExtResource("12_6kb1l")]
+transform = Transform3D(-0.7017435, 0, -9.9753475, 0, 10, 0, 9.9753475, 0, -0.7017435, 335.06586, 29.273579, -6.072523)
+
+[node name="Clock14" parent="." instance=ExtResource("13_7kae0")]
+transform = Transform3D(-8.800798, 0, 4.7482576, 0, 10, 0, -4.7482576, 0, -8.800798, 314.85553, 28.792984, 24.64836)
+
+[node name="Clock15" parent="." instance=ExtResource("12_6kb1l")]
+transform = Transform3D(-9.873475, 0, -1.5857167, 0, 10, 0, 1.5857167, 0, -9.873475, 279.91275, 28.78484, -6.072523)
+
+[node name="Clock16" parent="." instance=ExtResource("13_7kae0")]
+transform = Transform3D(9.139709, 0, 4.0577974, 0, 10.000001, 0, -4.0577974, 0, 9.139709, 274.00952, 28.792984, 24.64836)
+
+[node name="ClockLenght13" parent="." instance=ExtResource("8_ki482")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 302.838, 45.12632, 79.367)
+
+[node name="ClockLenght14" parent="." instance=ExtResource("8_ki482")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 302.838, 45.12632, -55.81788)
+
+[node name="ClockLenght15" parent="." instance=ExtResource("8_ki482")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 383.92657, 45.12632, 59.422974)
+
+[node name="ClockLenght16" parent="." instance=ExtResource("8_ki482")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 383.92657, 45.12632, -58.381466)
+
+[node name="Brass13" parent="." instance=ExtResource("11_goydy")]
+transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 382.61877, 21.87588, 1.4906688)
+
+[node name="GothicCatedral" parent="." instance=ExtResource("14_7kae0")]
+transform = Transform3D(149.99998, 0, 0, 0, 147.92421, -24.868162, 0, 24.868162, 147.92421, 572.24225, 47.035, -10.499376)

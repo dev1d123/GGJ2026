@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dj1wipkikmjsf"]
+
+[ext_resource type="PackedScene" uid="uid://sdy7t6e4ujri" path="res://src/levels/level4/structures/gothic_cathedral_model.tscn" id="1_sgp2h"]
+
+[node name="GothicCatedral" type="StaticBody3D"]
+
+[node name="gothicCathedral" parent="." instance=ExtResource("1_sgp2h")]
