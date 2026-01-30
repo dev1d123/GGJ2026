@@ -8,7 +8,6 @@ class_name CombatManager
 @export var left_hand_bone: Node3D  
 
 @export_category("Control de Input")
-## Marca TRUE solo en el Player. FALSE en Enemigos.
 @export var is_player_controlled: bool = false 
 
 @export_category("Componentes Opcionales")
@@ -29,17 +28,13 @@ class_name CombatManager
 @export var slot_4: WeaponData 
 
 # --- ESTADO PÚBLICO ---
-# AHORA SON INDEPENDIENTES
 var is_attacking_r: bool = false
 var is_attacking_l: bool = false
-var is_movement_locked: bool = false # Si CUALQUIERA de las dos bloquea movimiento
+var is_movement_locked: bool = false 
 
-# --- SOLUCIÓN AL ERROR ---
-# Esta variable "falsa" devuelve true si alguna de las dos manos ataca.
-# Así tus otros scripts (Esqueleto/Player) no se rompen.
+# Getter para compatibilidad con otros scripts que buscan "is_attacking"
 var is_attacking: bool:
-	get:
-		return is_attacking_r or is_attacking_l
+	get: return is_attacking_r or is_attacking_l
 
 # Internas
 var weapon_r: WeaponData
@@ -70,64 +65,55 @@ func _ready():
 	if slot_1_left: equip_weapon(slot_1_left, "left")
 
 func _process(delta):
-	# Cooldowns independientes
 	if cd_timer_r > 0: cd_timer_r -= delta
 	if cd_timer_l > 0: cd_timer_l -= delta
 
-# --- INPUT (LÓGICA BLINDADA DE CAMBIO DE ARMA) ---
+# --- INPUT ---
 func _input(event):
 	if not is_player_controlled: return
 	if "is_dead" in owner_node and owner_node.is_dead: return
 
-	# 1. ATAQUE (Mouse)
+	# Ataque
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_RIGHT: try_attack("right")
 		elif event.button_index == MOUSE_BUTTON_LEFT: try_attack("left")
 
-	# 2. CAMBIO DE ARMA (Teclado)
+	# Cambio de Arma (Bloqueado si se está atacando con ESA mano)
 	if event is InputEventKey and event.pressed:
 		var tab = Input.is_physical_key_pressed(KEY_TAB)
-		var mano_objetivo = "left" if tab else "right"
+		var mano = "left" if tab else "right"
 		
-		# --- VERIFICACIÓN CRÍTICA: BLOQUEO DE CAMBIO ---
-		# Si esa mano está atacando, NO permitimos cambiar el arma.
-		if mano_objetivo == "right" and is_attacking_r:
-			print("🚫 Mano Derecha ocupada, no puedes cambiar.")
-			return
-		if mano_objetivo == "left" and is_attacking_l:
-			print("🚫 Mano Izquierda ocupada, no puedes cambiar.")
-			return
-		# -----------------------------------------------
-		
+		if mano == "right" and is_attacking_r: return
+		if mano == "left" and is_attacking_l: return
+
 		match event.keycode:
-			KEY_1: unequip_weapon(mano_objetivo)
-			KEY_2: if slot_2: equip_weapon(slot_2, mano_objetivo)
-			KEY_3: if slot_3: equip_weapon(slot_3, mano_objetivo)
-			KEY_4: if slot_4: equip_weapon(slot_4, mano_objetivo)
+			KEY_1: unequip_weapon(mano)
+			KEY_2: if slot_2: equip_weapon(slot_2, mano)
+			KEY_3: if slot_3: equip_weapon(slot_3, mano)
+			KEY_4: if slot_4: equip_weapon(slot_4, mano)
 
 # --- SISTEMA DE EQUIPAMIENTO ---
 func equip_weapon(data: WeaponData, mano: String):
 	if not right_hand_bone or not left_hand_bone: return
 
-	# Si es 2 manos, ocupa ambos espacios
 	if data.is_two_handed:
-		# Verificamos que AMBAS manos estén libres de ataque
-		if is_attacking_r or is_attacking_l: return 
-		
+		if is_attacking_r or is_attacking_l: return
 		_crear_tween(BLEND_2H, 1.0); _crear_tween(BLEND_R, 0.0); _crear_tween(BLEND_L, 0.0)
 		_limpiar_manos()
 		weapon_r = data
-		weapon_l = null # La izquierda queda técnicamente vacía o ocupada por la 2H
+		weapon_l = null
 		_instanciar_visual(data, right_hand_bone)
 	else:
 		_crear_tween(BLEND_2H, 0.0)
 		if mano == "right":
+			if is_attacking_r: return
 			weapon_r = data
 			_crear_tween(BLEND_R, 0.0)
 			_limpiar_nodo(right_hand_bone)
 			_instanciar_visual(data, right_hand_bone)
 			_viajar_animacion(PLAYBACK_R, data.anim_idle)
 		else:
+			if is_attacking_l: return
 			weapon_l = data
 			_crear_tween(BLEND_L, 0.0)
 			_limpiar_nodo(left_hand_bone)
@@ -138,41 +124,37 @@ func unequip_weapon(mano: String):
 	if mano == "left": weapon_l = null; _limpiar_nodo(left_hand_bone); _crear_tween(BLEND_L, 0.0)
 	else: weapon_r = null; _limpiar_nodo(right_hand_bone); _crear_tween(BLEND_R, 0.0)
 
-# --- SISTEMA DE ATAQUE INDEPENDIENTE ---
+# --- LÓGICA DE ATAQUE ---
 func try_attack(mano: String):
 	var w = weapon_r if mano == "right" else weapon_l
 	if not w: return
 	
-	# 1. CHECK DE ESTADO INDEPENDIENTE
-	# Si es 2 manos, revisamos si CUALQUIERA está ocupada
+	# 1. Chequeo de estado independiente
 	if w.is_two_handed:
 		if is_attacking_r or is_attacking_l: return
 	else:
-		# Si es 1 mano, solo revisamos ESA mano
 		if mano == "right" and is_attacking_r: return
 		if mano == "left" and is_attacking_l: return
 	
-	# 2. CHECK COOLDOWN
+	# 2. Cooldown
 	if mano == "right" and cd_timer_r > 0: return
 	if mano == "left" and cd_timer_l > 0: return
 	
-	# 3. CONSUMO
+	# 3. Stamina
 	if stamina_component and stamina_component.has_method("try_consume"):
 		if not stamina_component.try_consume(w.stamina_cost): return 
 
 	_ejecutar_secuencia_ataque(w, mano)
 
 func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
-	# BLOQUEO DE ESTADO
+	# Bloquear estado
 	if w.is_two_handed:
-		is_attacking_r = true
-		is_attacking_l = true
+		is_attacking_r = true; is_attacking_l = true
 	elif mano == "right":
 		is_attacking_r = true
 	else:
 		is_attacking_l = true
 	
-	# BLOQUEO DE MOVIMIENTO (Si cualquiera de las armas lo pide, paramos)
 	if w.stop_movement: is_movement_locked = true
 	
 	var playback = ""
@@ -187,53 +169,66 @@ func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
 	else:
 		playback = PLAYBACK_L; blend_path = BLEND_L; hand_node = left_hand_bone; anim_name += "_L" 
 	
-	# --- FASE 1: INICIO SUAVE ---
+	# --- FASE 1: SUAVIZADO (XFADE) ---
+	# Subimos el blend suavemente. Esto evita el golpe visual brusco.
 	_crear_tween(blend_path, 1.0, w.blend_time)
-	if animation_tree:
-		animation_tree[playback].travel(anim_name) # Travel es más suave
 	
+	if animation_tree:
+		# .start() fuerza el reinicio desde el frame 0. 
+		# Como ya estamos haciendo un Xfade con el blend_amount, se verá suave.
+		animation_tree[playback].start(anim_name)
+	
+	# Esperamos que se mezcle un poco antes de calcular lógica
 	await get_tree().create_timer(w.blend_time).timeout
 	
 	# --- FASE 2: WINDUP ---
 	await get_tree().create_timer(w.windup_time).timeout
 	
-	# --- FASE 3: HITBOX ON ---
+	# --- FASE 3: HITBOX ACTIVADA (CORRECCIÓN DE DAÑO) ---
 	var hitbox = _buscar_hitbox(hand_node)
 	if hitbox:
 		hitbox.collision_mask = attack_layer_mask
-		var total_damage = w.damage * damage_multiplier
-		if attribute_manager and attribute_manager.has_method("get_stat"):
-			total_damage = attribute_manager.get_stat("melee_damage") * (w.damage / 10.0) 
 		
-		hitbox.activate(total_damage, w.knockback_force, w.jump_force, owner_node)
+		# --- FÓRMULA DE DAÑO CORREGIDA ---
+		var final_damage = w.damage
+		
+		# Si tenemos stats, las SUMAMOS (o multiplicamos, según tu preferencia)
+		# Aquí las sumo para que sea más fácil de entender: 10 arma + 5 fuerza = 15 total
+		if attribute_manager and attribute_manager.has_method("get_stat"):
+			final_damage += attribute_manager.get_stat("melee_damage")
+		
+		# Aplicamos el multiplicador global (Críticos, buffos, etc)
+		final_damage *= damage_multiplier
+		
+		hitbox.activate(final_damage, w.knockback_force, w.jump_force, owner_node)
 	
-	# --- FASE 4: ACTIVE TIME ---
+	# --- FASE 4: DURACIÓN DE GOLPE ---
 	await get_tree().create_timer(w.active_time).timeout
 	if hitbox: hitbox.deactivate()
 	
-	# --- FASE 5: COMPLETAR ANIMACIÓN (Tiempo restante manual) ---
+	# --- FASE 5: COMPLETAR ANIMACIÓN ---
 	var tiempo_usado = w.blend_time + w.windup_time + w.active_time
 	var tiempo_restante = w.total_animation_time - tiempo_usado
 	
 	if tiempo_restante > 0:
 		await get_tree().create_timer(tiempo_restante).timeout
 	
-	# --- FASE 6: FINALIZAR (LIBERAR LA MANO CORRECTA) ---
+	# --- FASE 6: FINALIZAR ---
+	# Liberamos la mano correcta
 	if w.is_two_handed:
-		is_attacking_r = false
-		is_attacking_l = false
+		is_attacking_r = false; is_attacking_l = false
 	elif mano == "right":
 		is_attacking_r = false
 	else:
 		is_attacking_l = false
 	
-	# Solo liberamos movimiento si no hay OTRA mano atacando que requiera bloqueo
+	# Liberamos movimiento solo si ambas manos están libres
 	if not is_attacking_r and not is_attacking_l:
 		is_movement_locked = false
 	
+	# Bajamos la mezcla suavemente para volver a Idle/Walk
 	_crear_tween(blend_path, 0.0, 0.2)
 	
-	# COOLDOWN INDEPENDIENTE
 	if mano == "right": cd_timer_r = w.cooldown
 	else: cd_timer_l = w.cooldown
 

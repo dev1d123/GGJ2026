@@ -7,6 +7,7 @@
 script = ExtResource("1_2achy")
 weapon_scene = ExtResource("2_fxpi5")
 anim_attack = "Dagger_1H_Attack"
+blend_time = 0.0
 windup_time = 0.43
 total_animation_time = 0.7
 damage = 8.0
