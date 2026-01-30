@@ -1,5 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://dwk18we86selq"]
+[gd_scene load_steps=9 format=3 uid="uid://dwk18we86selq"]
 
+[ext_resource type="Script" uid="uid://b3pg4ip2ans7k" path="res://src/GUI/menu.gd" id="1_alggg"]
 [ext_resource type="Texture2D" uid="uid://kril6038yrw4" path="res://assets/imagesGUI/background.png" id="1_ptg3k"]
 [ext_resource type="Texture2D" uid="uid://b4xh40wghtr0n" path="res://assets/imagesGUI/logo.png" id="2_n8v1d"]
 [ext_resource type="Texture2D" uid="uid://bofgiwo7vwnqn" path="res://assets/imagesGUI/butonNormal.png" id="3_ppsmk"]
@@ -17,6 +18,7 @@ shadow_color = Color(0, 0, 0, 1)
 [node name="Menu" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+script = ExtResource("1_alggg")
 
 [node name="Background" type="Sprite2D" parent="."]
 position = Vector2(577, 357)
