@@ -519,9 +519,25 @@ func _unhandled_input(event):
 
 # --- FUNCIONES PUENTE PARA HUD ---
 
-func equipar_desde_ui(weapon_data, hand_side):
+func equipar_desde_ui(item_data, hand_side):
+	# 1. ¿ES UNA MÁSCARA? 🎭 -> Al MaskManager
+	if item_data is MaskData:
+		var mask_mgr = get_node_or_null("MaskManager")
+		# Búsqueda de respaldo por si está en el padre (seguridad)
+		if not mask_mgr and get_parent().has_node("MaskManager"): 
+			mask_mgr = get_parent().get_node("MaskManager")
+		
+		if mask_mgr:
+			mask_mgr.equip_mask(item_data)
+			print("Player: Máscara enviada al MaskManager correctamente.")
+		else:
+			print("Player ERROR: No encuentro el nodo MaskManager")
+		return # ¡IMPORTANTE! Terminamos aquí. No sigas bajando.
+
+	# 2. ¿ES UN ARMA? ⚔️ -> Al CombatManager
+	# (Si llegamos aquí, sabemos que NO es una máscara)
 	if combat_manager:
-		combat_manager.equip_weapon(weapon_data, hand_side.to_lower())
+		combat_manager.equip_weapon(item_data, hand_side.to_lower())
 
 func desequipar_desde_ui(hand_side):
 	if combat_manager:
