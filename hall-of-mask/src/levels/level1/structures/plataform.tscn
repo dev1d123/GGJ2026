@@ -1,7 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://d0fwa3p6ei70k"]
+[gd_scene load_steps=3 format=3 uid="uid://d0fwa3p6ei70k"]
 
 [ext_resource type="PackedScene" uid="uid://bb4pfyorb1m7f" path="res://src/levels/level1/structures/plataform_model.tscn" id="1_a8u5p"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_a8u5p"]
 
 [node name="Plataform" type="StaticBody3D"]
 
 [node name="plataform" parent="." instance=ExtResource("1_a8u5p")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.525, 0, 0, 0, 0.5, 0, 0, 0)
+shape = SubResource("CylinderShape3D_a8u5p")

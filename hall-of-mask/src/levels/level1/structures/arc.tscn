@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dpmp8voqprbdw"]
 
-[ext_resource type="PackedScene" uid="uid://c8nodvhnmmxc6" path="res://src/levels/level1/structures/Arc_stone.tscn" id="1_ritqs"]
+[ext_resource type="PackedScene" uid="uid://c8nodvhnmmxc6" path="res://src/levels/level1/structures/arc_model.tscn" id="1_ritqs"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4jkjq"]
 size = Vector3(0.24, 0.915, 0.215)
@@ -16,5 +16,10 @@ debug_color = Color(0, 0.6, 0.69803923, 1)
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.002603531, 0.008242339, -0.34295684)
+shape = SubResource("BoxShape3D_4jkjq")
+debug_color = Color(0, 0.6, 0.69803923, 1)
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(-0.08068606, 4.8353104e-09, 1.6396365, 0.99671453, -0.0041452236, 0.13272525, 0.00706275, 0.5849853, 0.0009404816, 0.012542009, 0.3398223, -0.035711765)
 shape = SubResource("BoxShape3D_4jkjq")
 debug_color = Color(0, 0.6, 0.69803923, 1)

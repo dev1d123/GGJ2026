@@ -1,7 +1,29 @@
-[gd_scene load_steps=2 format=3 uid="uid://hm1e2u4cvc0p"]
+[gd_scene load_steps=3 format=3 uid="uid://hm1e2u4cvc0p"]
 
 [ext_resource type="PackedScene" uid="uid://cgiubs8riiy1n" path="res://src/levels/level1/structures/chamber_model.tscn" id="1_iropa"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iropa"]
 
 [node name="Chamber" type="StaticBody3D"]
 
 [node name="chamber" parent="." instance=ExtResource("1_iropa")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, -0.4608932, 0)
+shape = SubResource("BoxShape3D_iropa")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.00069814484, 0.24475625, 0.04459041, 0.01563935, -0.010925991, 0.9988827, 0.9998774, -1.5095498e-11, -0.01565492, -0.4095276, -0.0054378957, 0)
+shape = SubResource("BoxShape3D_iropa")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.4199173, -0.0028193402, -0.016167333, 0.006568451, -0.010925868, 0.9988827, -0.0051305704, -0.24474004, -0.044406623, -0.15495276, -0.0054378957, -0.4365445)
+shape = SubResource("BoxShape3D_iropa")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.20495963, -0.0028193402, -0.016167333, 0.0032060295, -0.010925868, 0.9988827, -0.002504207, -0.24474004, -0.044406623, 0.3842765, -0.0054378957, -0.4365445)
+shape = SubResource("BoxShape3D_iropa")
+
+[node name="CollisionShape3D5" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.5648887, -0.0028193402, -0.00776032, 0.008836131, -0.010925868, 0.4794637, -0.006901839, -0.24474004, -0.021315178, 0.19049263, 0.23050188, -0.4365445)
+shape = SubResource("BoxShape3D_iropa")

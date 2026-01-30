@@ -1,7 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://c7gi4ckv5s0hc"]
+[gd_scene load_steps=3 format=3 uid="uid://c7gi4ckv5s0hc"]
 
 [ext_resource type="PackedScene" uid="uid://bpafcv7jjak5p" path="res://src/levels/level1/structures/wall2_model.tscn" id="1_5wnda"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5wnda"]
 
 [node name="Wall2Model" type="StaticBody3D"]
 
 [node name="wall2" parent="." instance=ExtResource("1_5wnda")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.01083008, -0.9934806, 0, 0.09438066, 0.11400084, 0, 0.000549078, -0.06550601)
+shape = SubResource("BoxShape3D_5wnda")
