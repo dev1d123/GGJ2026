@@ -1,87 +1,102 @@
 extends CharacterBody3D
 
 # ------------------------------------------------------------------------------
-# 1. REFERENCIAS Y CONFIGURACIÓN
+# 1. CONFIGURACIÓN Y REFERENCIAS
 # ------------------------------------------------------------------------------
-@export_group("Referencias")
-@export var skeleton_mesh: Node3D 
-@export var hand_attachment: Node3D 
-@export var weapon_data: WeaponData 
+@export_group("Configuración de IA")
+@export var weapon_data: WeaponData # ¡ASIGNA ESTO EN EL INSPECTOR DEL ESQUELETO!
+@export var skeleton_mesh: Node3D
 
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var eyes: RayCast3D = $VisionManager/Eyes
-@onready var health_component = $HealthComponent
 
-# Animación (Ajustado a tu estructura)
-@onready var anim_tree = $Skeleton_Minion/AnimationTree 
-@onready var sm_base = anim_tree["parameters/StateMachine/playback"]
-@onready var sm_combat = anim_tree["parameters/Combat_2H/playback"]
+# --- SISTEMAS MODULARES ---
+@onready var combat_manager: CombatManager = $CombatManager
+@onready var health_component: HealthComponent = $HealthComponent
+@onready var anim_tree: AnimationTree = $Skeleton_Minion/AnimationTree
 
-# Rutas de Parámetros
-const P_BLEND_2H = "parameters/Mezcla_2H/blend_amount"
+# Rutas de Animación
 const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 
-# Variables de Juego
+# ------------------------------------------------------------------------------
+# 2. VARIABLES (TU LÓGICA ORIGINAL)
+# ------------------------------------------------------------------------------
 var speed = 2.5
 var gravity = 9.8
 var attack_range = 1.8 
 var vision_range = 15.0
 
-# Variables Internas
 enum State { PATROL, CHASE, ATTACK }
 var current_state = State.PATROL
 var player_ref: Node3D = null
-var current_weapon_hitbox: Area3D = null 
-var is_attacking = false
 var patrol_timer = 0.0
-var debug_timer = 0.0 
-
-# Efectos
-var unique_materials: Array[StandardMaterial3D] = []
-var flash_tween: Tween
 var _last_vision_blocker = ""
 
-@export var skeleteon_damage = 1
+# Físicas y Efectos
+var knockback_velocity: Vector3 = Vector3.ZERO
+var unique_materials: Array[StandardMaterial3D] = []
+var flash_tween: Tween
 
 # ------------------------------------------------------------------------------
-# 2. INICIALIZACIÓN
+# 3. CICLO DE VIDA
 # ------------------------------------------------------------------------------
 func _ready():
-	print("\n💀 --- INICIANDO ESQUELETO ---")
+	print("\n💀 --- INICIANDO IA ESQUELETO ---")
 	
 	if anim_tree:
 		anim_tree.active = true
-		# Igual que en tu combat_manager: Todo a 0 al inicio
-		anim_tree.set("parameters/Mezcla_R/blend_amount", 0.0)
-		anim_tree.set("parameters/Mezcla_L/blend_amount", 0.0)
-		anim_tree.set(P_BLEND_2H, 0.0) 
-		sm_base.travel("Standing")
-		print("✅ Animaciones configuradas (Mezclas en 0).")
+		
+	# 1. EQUIPAR ARMA (CRÍTICO: Cada esqueleto lo hace por su cuenta)
+	if combat_manager and weapon_data:
+		combat_manager.equip_weapon(weapon_data, "right")
+	else:
+		print("⚠️ ALERTA: Esqueleto sin WeaponData o CombatManager asignado.")
 	
-	_equipar_arma()
-	_setup_unique_materials()
-	
-	if health_component: 
+	# 2. CONECTAR SALUD
+	if health_component:
 		health_component.on_death.connect(_morir)
+		health_component.on_damage_received.connect(_on_damage_visual)
 	
-	eyes.add_exception(self)
+	# 3. VISUALES Y VISIÓN
+	_setup_unique_materials()
+	if eyes: eyes.add_exception(self)
 	
 	call_deferred("_buscar_punto_patrulla")
 
-# ------------------------------------------------------------------------------
-# 3. FÍSICA Y LÓGICA PRINCIPAL
-# ------------------------------------------------------------------------------
 func _physics_process(delta):
-	# Debug cada 1 segundo
-	debug_timer += delta
-	if debug_timer > 1.0:
-		# _imprimir_estado_debug() # Descomenta si quieres ver velocidad
-		debug_timer = 0.0
-
-	# Gravedad
+	# 1. Gravedad
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
+	# 2. Empuje (Knockback)
+	if knockback_velocity.length() > 0.5:
+		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * delta)
+		velocity.x = knockback_velocity.x
+		velocity.z = knockback_velocity.z
+		move_and_slide()
+		return 
+
+	# 3. Si está atacando (Controlado por CombatManager)
+	if combat_manager.is_attacking:
+		
+		# Solo paramos al esqueleto si el arma actual tiene 'stop_movement = true'
+		if combat_manager.is_movement_locked:
+			velocity.x = move_toward(velocity.x, 0, 20.0 * delta)
+			velocity.z = move_toward(velocity.z, 0, 20.0 * delta)
+		else:
+			# Si el arma permite moverse, el esqueleto avanza lento hacia el jugador
+			# (Opcional: puedes dejarlo en 0 si prefieres que siempre pare)
+			velocity.x = move_toward(velocity.x, 0, 1.0) 
+			velocity.z = move_toward(velocity.z, 0, 1.0)
+		
+		# Siempre girar hacia el jugador al atacar
+		if player_ref:
+			_rotar_hacia(player_ref.global_position, delta * 5.0)
+		
+		move_and_slide()
+		return
+
+	# 4. Máquina de Estados (TU LÓGICA INTACTA)
 	match current_state:
 		State.PATROL:
 			_procesar_patrulla(delta)
@@ -89,21 +104,12 @@ func _physics_process(delta):
 		
 		State.CHASE:
 			_procesar_persecucion(delta)
-		
-		State.ATTACK:
-			# ESTILO MINECRAFT: Girar hacia el jugador MIENTRAS ataca
-			if player_ref:
-				_rotar_hacia(player_ref.global_position, delta * 10.0)
-			
-			# Frenar casi en seco
-			velocity.x = move_toward(velocity.x, 0, 1.0)
-			velocity.z = move_toward(velocity.z, 0, 1.0)
-
+	
 	move_and_slide()
 	_animar_movimiento(delta)
 
 # ------------------------------------------------------------------------------
-# 4. SISTEMA DE MOVIMIENTO (UNIVERSAL)
+# 4. LÓGICA DE IA (TU CÓDIGO ORIGINAL)
 # ------------------------------------------------------------------------------
 func _mover_hacia_destino(delta, velocidad_base):
 	if nav_agent.is_navigation_finished():
@@ -129,9 +135,14 @@ func _rotar_hacia(target, speed_rot):
 		var new_transform = global_transform.looking_at(target_flat, Vector3.UP)
 		global_transform.basis = global_transform.basis.slerp(new_transform.basis, speed_rot)
 
-# ------------------------------------------------------------------------------
-# 5. ESTADOS IA
-# ------------------------------------------------------------------------------
+func _animar_movimiento(delta):
+	if not anim_tree: return
+	var vel_real = Vector2(velocity.x, velocity.z).length()
+	var target = Vector2(0, 1) if vel_real > 0.1 else Vector2(0, 0)
+	var actual = anim_tree.get(P_MOVIMIENTO)
+	if actual == null: actual = Vector2.ZERO
+	anim_tree.set(P_MOVIMIENTO, actual.lerp(target, delta * 8.0))
+
 func _procesar_patrulla(delta):
 	var llego = _mover_hacia_destino(delta, speed * 0.5)
 	if llego:
@@ -153,72 +164,14 @@ func _procesar_persecucion(delta):
 	
 	var dist = global_position.distance_to(player_ref.global_position)
 	
+	# AQUÍ ES DONDE USAMOS EL NUEVO SISTEMA
 	if dist <= attack_range:
-		_iniciar_ataque()
+		combat_manager.try_attack("right") # Atacamos con la derecha
 	elif dist > vision_range * 1.5:
 		current_state = State.PATROL
 		_buscar_punto_patrulla()
 
-# ------------------------------------------------------------------------------
-# 6. COMBATE (LÓGICA DEL PLAYER COPIADA)
-# ------------------------------------------------------------------------------
-func _iniciar_ataque():
-	if is_attacking: return 
-	is_attacking = true
-	current_state = State.ATTACK
-	
-	print("⚔️ INICIANDO ATAQUE (Lógica Player)")
-	
-	# 1. FORZAR REINICIO DE LA ANIMACIÓN
-	# Esto es vital para evitar el T-Pose. Si la máquina estaba en "End" o "Idle",
-	# start() la fuerza a reproducir desde el frame 0.
-	# Asegúrate que weapon_data.anim_attack sea EXACTAMENTE el nombre del nodo en el Tree (ej: "Axe_Attack")
-	sm_combat.start("Empty") # Reset por seguridad
-	sm_combat.start(weapon_data.anim_attack)
-	
-	# 2. SUBIR LA MEZCLA (TWEEN)
-	# Subimos el peso de la animación de brazos a 1.0 suavemente
-	var t = create_tween()
-	t.tween_property(anim_tree, P_BLEND_2H, 1.0, 0.15).set_trans(Tween.TRANS_SINE)
-	
-	# 3. ESPERAR EL GOLPE (DELAY)
-	# Si tu animación pega en el segundo 0.3, esperamos 0.3
-	await get_tree().create_timer(weapon_data.damage_delay).timeout
-	
-	# 4. ACTIVAR HITBOX (ESTILO MINECRAFT)
-	if is_instance_valid(current_weapon_hitbox):
-		# Actualizamos stats
-		current_weapon_hitbox.damage = skeleteon_damage * weapon_data.damage_mult
-		current_weapon_hitbox.knockback_force = weapon_data.knockback_force
-		
-		# Llamada directa: "Si hay alguien ahí, golpéalo YA"
-		if current_weapon_hitbox.has_method("attack_simple"):
-			current_weapon_hitbox.attack_simple()
-			print("🔥 Hitbox activado (attack_simple)")
-		else:
-			print("⚠️ ERROR: El hitbox no tiene script WeaponHitbox")
-	
-	# 5. ESPERAR FIN DE ANIMACIÓN
-	# Calculamos cuanto falta para terminar (Duracion total - lo que ya esperamos)
-	# Ajusta 0.8 a la duración real de tu animación.
-	var tiempo_restante = 0.8 - weapon_data.damage_delay
-	if tiempo_restante > 0:
-		await get_tree().create_timer(tiempo_restante).timeout
-	
-	# 6. BAJAR LA MEZCLA (Volver a caminar normal)
-	var t2 = create_tween()
-	t2.tween_property(anim_tree, P_BLEND_2H, 0.0, 0.2)
-	
-	await t2.finished
-	
-	is_attacking = false
-	current_state = State.CHASE
-
-# ------------------------------------------------------------------------------
-# 7. UTILIDADES
-# ------------------------------------------------------------------------------
 func _buscar_jugador():
-	# Resiliencia: Si no lo encontramos al inicio, lo buscamos ahora
 	if not player_ref:
 		player_ref = get_tree().get_first_node_in_group("Player")
 		if not player_ref: return
@@ -232,47 +185,26 @@ func _buscar_jugador():
 	if eyes.is_colliding():
 		var col = eyes.get_collider()
 		if col and (col == player_ref or col.is_in_group("Player")):
-			print("👁️ ¡TE VEO!")
+			# print("👁️ ¡TE VEO!")
 			current_state = State.CHASE
 			_last_vision_blocker = "" 
-		else:
-			if col and col.name != _last_vision_blocker:
-				_last_vision_blocker = col.name
-				# print("❌ Bloqueado por: ", col.name)
 
-func _imprimir_estado_debug():
-	var estado_str = State.keys()[current_state]
-	print("📊 Estado: %s" % estado_str)
+# ------------------------------------------------------------------------------
+# 5. RESPUESTA A EVENTOS (DAÑO Y MUERTE)
+# ------------------------------------------------------------------------------
+func apply_knockback(dir: Vector3, knock: float, jump: float):
+	knockback_velocity = dir * knock
+	if is_on_floor(): velocity.y += jump
 
-func _animar_movimiento(delta):
-	if not anim_tree: return
-	var vel_real = Vector2(velocity.x, velocity.z).length()
-	var target = Vector2(0, 1) if vel_real > 0.1 else Vector2(0, 0)
-	var actual = anim_tree.get(P_MOVIMIENTO)
-	if actual == null: actual = Vector2.ZERO
-	anim_tree.set(P_MOVIMIENTO, actual.lerp(target, delta * 8.0))
+func _on_damage_visual(amount, current):
+	flash_red()
 
-func _equipar_arma():
-	if not weapon_data or not hand_attachment: return
-	
-	var w = weapon_data.weapon_scene.instantiate()
-	hand_attachment.add_child(w)
-	
-	var hb = w.find_child("Hitbox")
-	if hb:
-		current_weapon_hitbox = hb
-		
-		# CONFIGURACIÓN CRÍTICA DEL HITBOX
-		hb.collision_mask = 2 # Capa del Player
-		hb.set_collision_mask_value(3, false) # No golpear enemigos
-		hb.monitoring = false # Apagado por defecto
-		
-		eyes.add_exception(hb)
-		if w is CollisionObject3D: eyes.add_exception(w)
-		print("✅ Arma equipada.")
-	else:
-		print("⚠️ Arma sin Hitbox.")
+func _morir():
+	print("💀 Esqueleto destruido.")
+	# Puedes instanciar partículas de huesos aquí
+	queue_free()
 
+# --- EFECTOS VISUALES ---
 func _setup_unique_materials():
 	if not skeleton_mesh: return
 	unique_materials.clear()
@@ -284,11 +216,6 @@ func _setup_unique_materials():
 				child.set_surface_override_material(0, unique)
 				unique_materials.append(unique)
 
-func apply_knockback(dir: Vector3, knock: float, jump: float):
-	velocity += dir * knock
-	if is_on_floor(): velocity.y += jump
-	flash_red()
-
 func flash_red():
 	if unique_materials.is_empty(): return
 	if flash_tween: flash_tween.kill()
@@ -296,6 +223,3 @@ func flash_red():
 	flash_tween = create_tween()
 	flash_tween.set_parallel(true)
 	for mat in unique_materials: flash_tween.tween_property(mat, "albedo_color", Color.WHITE, 0.2)
-
-func _morir():
-	queue_free()

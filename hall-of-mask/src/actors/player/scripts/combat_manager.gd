@@ -1,267 +1,224 @@
 extends Node3D
+class_name CombatManager
 
-# --- REFERENCIAS (Ajusta las rutas si es necesario) ---
-@onready var player = $".." # El CharacterBody3D
-@onready var anim_tree = $"../AnimationTree"
-@onready var skeleton = $"../Ranger/Rig_Medium/Skeleton3D"
-@onready var hand_r_node = $"../Ranger/Rig_Medium/Skeleton3D/Right Hand"
-@onready var hand_l_node = $"../Ranger/Rig_Medium/Skeleton3D/Left Hand/Marker3D"
+# --- DEPENDENCIAS ---
+@export_category("Referencias Obligatorias")
+@export var animation_tree: AnimationTree
+@export var right_hand_bone: Node3D 
+@export var left_hand_bone: Node3D  
 
-# Tus Componentes
-@onready var attributes = $"../AttributeManager"
-@onready var stamina = $"../StaminaComponent"
-@onready var mana = $"../ManaComponent"
+@export_category("Control de Input")
+## Marca TRUE solo en el Player. FALSE en Enemigos.
+@export var is_player_controlled: bool = false 
 
-# Variables de Estado
+@export_category("Componentes Opcionales")
+@export var stamina_component: Node 
+@export var attribute_manager: Node 
+
+# --- CONFIGURACIÓN ---
+@export_category("Reglas de Combate")
+@export_flags_3d_physics var attack_layer_mask: int = 0 
+@export var damage_multiplier: float = 1.0 
+
+# --- INVENTARIO ---
+@export_category("Inventario Inicial")
+@export var slot_1_left: WeaponData
+@export var slot_1_right: WeaponData
+@export var slot_2: WeaponData 
+@export var slot_3: WeaponData 
+@export var slot_4: WeaponData 
+
+# --- ESTADO PÚBLICO ---
+# AHORA SON INDEPENDIENTES
+var is_attacking_r: bool = false
+var is_attacking_l: bool = false
+var is_movement_locked: bool = false # Si CUALQUIERA de las dos bloquea movimiento
+
+# --- SOLUCIÓN AL ERROR ---
+# Esta variable "falsa" devuelve true si alguna de las dos manos ataca.
+# Así tus otros scripts (Esqueleto/Player) no se rompen.
+var is_attacking: bool:
+	get:
+		return is_attacking_r or is_attacking_l
+
+# Internas
 var weapon_r: WeaponData
 var weapon_l: WeaponData
-var is_attacking_r = false
-var is_attacking_l = false
-var cooldown_time: float = 0.2 # Tiempo extra tras terminar el ataque
+var cd_timer_r: float = 0.0
+var cd_timer_l: float = 0.0
+var owner_node: Node = null 
 
-# Rutas del AnimationTree
-var path_blend_r = "parameters/Mezcla_R/blend_amount"
-var path_blend_l = "parameters/Mezcla_L/blend_amount"
-var path_blend_2h = "parameters/Mezcla_2H/blend_amount"
-var path_playback_r = "parameters/Combat_R/playback"
-var path_playback_l = "parameters/Combat_L/playback"
-var path_playback_2h = "parameters/Combat_2H/playback"
+const BLEND_R = "parameters/Mezcla_R/blend_amount"
+const BLEND_L = "parameters/Mezcla_L/blend_amount"
+const BLEND_2H = "parameters/Mezcla_2H/blend_amount"
+const PLAYBACK_R = "parameters/Combat_R/playback"
+const PLAYBACK_L = "parameters/Combat_L/playback"
+const PLAYBACK_2H = "parameters/Combat_2H/playback"
 
 func _ready():
-	# Al inicio, reseteamos las mezclas a 0 (brazos libres al caminar)
-	anim_tree.set(path_blend_r, 0.0)
-	anim_tree.set(path_blend_l, 0.0)
-	anim_tree.set(path_blend_2h, 0.0)
+	owner_node = get_parent()
+	
+	if not animation_tree and owner_node.has_node("AnimationTree"):
+		animation_tree = owner_node.get_node("AnimationTree")
 
-# --- ZONA DE PRUEBAS (BORRAR LUEGO) ---
+	if animation_tree:
+		animation_tree.set(BLEND_R, 0.0)
+		animation_tree.set(BLEND_L, 0.0)
+		animation_tree.set(BLEND_2H, 0.0)
+	
+	if slot_1_right: equip_weapon(slot_1_right, "right")
+	if slot_1_left: equip_weapon(slot_1_left, "left")
+
+func _process(delta):
+	# Cooldowns independientes
+	if cd_timer_r > 0: cd_timer_r -= delta
+	if cd_timer_l > 0: cd_timer_l -= delta
+
+# --- INPUT (LÓGICA BLINDADA DE CAMBIO DE ARMA) ---
 func _input(event):
-	# 1. ATAQUES CON MOUSE
+	if not is_player_controlled: return
+	if "is_dead" in owner_node and owner_node.is_dead: return
+
+	# 1. ATAQUE (Mouse)
 	if event is InputEventMouseButton and event.pressed:
-		# Click Derecho -> Atacar con Mano Derecha (Tu pedido)
-		if event.button_index == MOUSE_BUTTON_RIGHT:
-			if weapon_r: # Solo ataca si hay arma
-				procesar_input("right")
-			else:
-				print("⚠️ Mano Derecha vacía")
+		if event.button_index == MOUSE_BUTTON_RIGHT: try_attack("right")
+		elif event.button_index == MOUSE_BUTTON_LEFT: try_attack("left")
 
-		# Click Izquierdo -> Atacar con Mano Izquierda
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if weapon_l: # Solo ataca si hay arma
-				procesar_input("left")
-			else:
-				print("⚠️ Mano Izquierda vacía")
-
-	# 2. SELECTOR DE ARMAS (TECLADO)
+	# 2. CAMBIO DE ARMA (Teclado)
 	if event is InputEventKey and event.pressed:
-		# Detectar si TAB está presionado
-		var holding_tab = Input.is_physical_key_pressed(KEY_TAB)
+		var tab = Input.is_physical_key_pressed(KEY_TAB)
+		var mano_objetivo = "left" if tab else "right"
+		
+		# --- VERIFICACIÓN CRÍTICA: BLOQUEO DE CAMBIO ---
+		# Si esa mano está atacando, NO permitimos cambiar el arma.
+		if mano_objetivo == "right" and is_attacking_r:
+			print("🚫 Mano Derecha ocupada, no puedes cambiar.")
+			return
+		if mano_objetivo == "left" and is_attacking_l:
+			print("🚫 Mano Izquierda ocupada, no puedes cambiar.")
+			return
+		# -----------------------------------------------
+		
+		match event.keycode:
+			KEY_1: unequip_weapon(mano_objetivo)
+			KEY_2: if slot_2: equip_weapon(slot_2, mano_objetivo)
+			KEY_3: if slot_3: equip_weapon(slot_3, mano_objetivo)
+			KEY_4: if slot_4: equip_weapon(slot_4, mano_objetivo)
 
-		# Tecla 1: DESEQUIPAR (Nada)
-		if event.keycode == KEY_1:
-			if holding_tab:
-				print("🧪 TEST: Desequipando Izquierda")
-				desequipar("left")
-			else:
-				print("🧪 TEST: Desequipando Derecha")
-				desequipar("right")
+# --- SISTEMA DE EQUIPAMIENTO ---
+func equip_weapon(data: WeaponData, mano: String):
+	if not right_hand_bone or not left_hand_bone: return
 
-		# Tecla 2: EQUIPAR HACHA
-		elif event.keycode == KEY_2:
-			# Asegúrate de que esta ruta exista, si no, te dará error
-			var hacha_res = load("res://src/actors/weapons/Hacha_Mano.tres")
-			
-			if hacha_res:
-				if holding_tab:
-					print("🧪 TEST: Equipando Hacha en Izquierda")
-					equipar(hacha_res, "left")
-				else:
-					print("🧪 TEST: Equipando Hacha en Derecha")
-					equipar(hacha_res, "right")
-			else:
-				print("❌ ERROR: No se encontró res://src/actors/weapons/Hacha_Mano.tres")
-				
-		# Tecla 3: EQUIPAR MARTILLO
-		elif event.keycode == KEY_3:
-			# Asegúrate de que esta ruta exista, si no, te dará error
-			var martillo_res = load("res://src/actors/weapons/Martillo_Mano.tres")
-			
-			if martillo_res:
-				if holding_tab:
-					print("🧪 TEST: Equipando Martillo en Izquierda")
-					equipar(martillo_res, "left")
-				else:
-					print("🧪 TEST: Equipando Martillo en Derecha")
-					equipar(martillo_res, "right")
-			else:
-				print("❌ ERROR: No se encontró res://src/actors/weapons/Martillo_Mano.tres")
-				
-		# Tecla 3: EQUIPAR DAGGA
-		elif event.keycode == KEY_4:
-			# Asegúrate de que esta ruta exista, si no, te dará error
-			var daga_res = load("res://src/actors/weapons/Daga_Mano.tres")
-			
-			if daga_res:
-				if holding_tab:
-					print("🧪 TEST: Equipando Daga en Izquierda")
-					equipar(daga_res, "left")
-				else:
-					print("🧪 TEST: Equipando Daga en Derecha")
-					equipar(daga_res, "right")
-			else:
-				print("❌ ERROR: No se encontró res://src/actors/weapons/Daga_Mano.tres")
-
-		# EXTRA: Tecla 4 para probar la Espada 2 Manos en la derecha
-		elif event.keycode == KEY_4 and not holding_tab:
-			var espada_res = load("res://src/actors/weapons/Espada_2H.tres")
-			if espada_res:
-				print("🧪 TEST: Equipando Espada 2H (Ocupa todo)")
-				equipar(espada_res, "right")
-# ----------------------------------------
-
-func equipar(data: WeaponData, mano: String):
-	# 1. LOGICA 2 MANOS
+	# Si es 2 manos, ocupa ambos espacios
 	if data.is_two_handed:
-		# Para 2 manos SÍ queremos override (1.0) porque cambia la postura entera
-		crear_tween_mezcla(path_blend_2h, 1.0)
-		crear_tween_mezcla(path_blend_r, 0.0)
-		crear_tween_mezcla(path_blend_l, 0.0)
+		# Verificamos que AMBAS manos estén libres de ataque
+		if is_attacking_r or is_attacking_l: return 
+		
+		_crear_tween(BLEND_2H, 1.0); _crear_tween(BLEND_R, 0.0); _crear_tween(BLEND_L, 0.0)
+		_limpiar_manos()
+		weapon_r = data
+		weapon_l = null # La izquierda queda técnicamente vacía o ocupada por la 2H
+		_instanciar_visual(data, right_hand_bone)
 	else:
-		# Para 1 mano queremos que siga caminando normal (0.0)
-		# Solo activaremos el blend al atacar
-		crear_tween_mezcla(path_blend_2h, 0.0)
-		
-		# ¡ESTO ES LO QUE CAUSABA EL T-POSE!
-		# Antes decía 1.0, cámbialo a 0.0
-		if mano == "right": 
-			weapon_r = data
-			crear_tween_mezcla(path_blend_r, 0.0) 
-		else: 
-			weapon_l = data
-			crear_tween_mezcla(path_blend_l, 0.0)
-
-	# 2. VISUALES (Mesh)
-	if mano == "right": limpiar_nodo(hand_r_node)
-	else: limpiar_nodo(hand_l_node)
-
-	# Instanciamos la escena del arma (.tscn)
-	if data.weapon_scene:
-		var nueva_arma = data.weapon_scene.instantiate()
-		
-		# IMPORTANTE: Desactivar colisiones físicas si tu arma tiene StaticBody 
-		# (para que no choque con el jugador al moverse)
-		# Pero dejamos el Area3D (Hitbox) activo.
-		
+		_crear_tween(BLEND_2H, 0.0)
 		if mano == "right":
 			weapon_r = data
-			hand_r_node.add_child(nueva_arma)
-			anim_tree[path_playback_r].travel(data.anim_idle)
+			_crear_tween(BLEND_R, 0.0)
+			_limpiar_nodo(right_hand_bone)
+			_instanciar_visual(data, right_hand_bone)
+			_viajar_animacion(PLAYBACK_R, data.anim_idle)
 		else:
 			weapon_l = data
-			hand_l_node.add_child(nueva_arma)
-			# Nota: Si usaste el script de espejo, recuerda usar anim_idle + "_L" si aplica
-			anim_tree[path_playback_l].travel(data.anim_idle)
+			_crear_tween(BLEND_L, 0.0)
+			_limpiar_nodo(left_hand_bone)
+			_instanciar_visual(data, left_hand_bone)
+			_viajar_animacion(PLAYBACK_L, data.anim_idle)
 
-func desequipar(mano: String):
-	if mano == "left":
-		weapon_l = null
-		limpiar_nodo(hand_l_node)
-		crear_tween_mezcla(path_blend_l, 0.0) # Bajamos el brazo
-	else:
-		weapon_r = null
-		limpiar_nodo(hand_r_node)
-		crear_tween_mezcla(path_blend_r, 0.0)
+func unequip_weapon(mano: String):
+	if mano == "left": weapon_l = null; _limpiar_nodo(left_hand_bone); _crear_tween(BLEND_L, 0.0)
+	else: weapon_r = null; _limpiar_nodo(right_hand_bone); _crear_tween(BLEND_R, 0.0)
 
-func procesar_input(mano: String):
+# --- SISTEMA DE ATAQUE INDEPENDIENTE ---
+func try_attack(mano: String):
 	var w = weapon_r if mano == "right" else weapon_l
 	if not w: return
 	
-	# 1. BLOQUEO DE SPAM (Si ya está atacando, ignoramos el click)
-	if mano == "right" and is_attacking_r: return
-	if mano == "left" and is_attacking_l: return
+	# 1. CHECK DE ESTADO INDEPENDIENTE
+	# Si es 2 manos, revisamos si CUALQUIERA está ocupada
+	if w.is_two_handed:
+		if is_attacking_r or is_attacking_l: return
+	else:
+		# Si es 1 mano, solo revisamos ESA mano
+		if mano == "right" and is_attacking_r: return
+		if mano == "left" and is_attacking_l: return
+	
+	# 2. CHECK COOLDOWN
+	if mano == "right" and cd_timer_r > 0: return
+	if mano == "left" and cd_timer_l > 0: return
+	
+	# 3. CONSUMO
+	if stamina_component and stamina_component.has_method("try_consume"):
+		if not stamina_component.try_consume(w.stamina_cost): return 
 
-	# 2. Restricción de Postura
-	if player.current_state == 3 and not w.can_use_prone:
-		print("¡No puedes usar esto reptando!")
-		return
+	_ejecutar_secuencia_ataque(w, mano)
 
-	# 3. Consumo y Ejecución
-	var costo = w.stamina_cost # (Logica de mana/stamina igual)
-	if stamina.try_consume(costo):
-		ejecutar_ataque_seguro(w, mano)
-
-func ejecutar_ataque_seguro(w: WeaponData, mano: String):
-	# 1. Definir Rutas (Igual que antes)
-	var playback_path = ""
+func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
+	# BLOQUEO DE ESTADO
+	if w.is_two_handed:
+		is_attacking_r = true
+		is_attacking_l = true
+	elif mano == "right":
+		is_attacking_r = true
+	else:
+		is_attacking_l = true
+	
+	# BLOQUEO DE MOVIMIENTO (Si cualquiera de las armas lo pide, paramos)
+	if w.stop_movement: is_movement_locked = true
+	
+	var playback = ""
 	var blend_path = ""
 	var anim_name = w.anim_attack
+	var hand_node = null
 	
 	if w.is_two_handed:
-		playback_path = path_playback_2h
-		blend_path = path_blend_2h
-		is_attacking_r = true
-		is_attacking_l = true
+		playback = PLAYBACK_2H; blend_path = BLEND_2H; hand_node = right_hand_bone
 	elif mano == "right":
-		playback_path = path_playback_r
-		blend_path = path_blend_r
-		is_attacking_r = true
+		playback = PLAYBACK_R; blend_path = BLEND_R; hand_node = right_hand_bone
 	else:
-		playback_path = path_playback_l
-		blend_path = path_blend_l
-		anim_name = w.anim_attack + "_L"
-		is_attacking_l = true
+		playback = PLAYBACK_L; blend_path = BLEND_L; hand_node = left_hand_bone; anim_name += "_L" 
 	
-	# 2. CONFIGURAR HITBOX (CORREGIDO)
-	# --- BORRÉ TODO EL BLOQUE QUE PRENDÍA EL MONITORING AQUÍ ---
-	# Solo actualizamos el daño base, pero NO lo prendemos todavía.
+	# --- FASE 1: INICIO SUAVE ---
+	_crear_tween(blend_path, 1.0, w.blend_time)
+	if animation_tree:
+		animation_tree[playback].travel(anim_name) # Travel es más suave
 	
-	var weapon_node = null
-	if mano == "right": weapon_node = hand_r_node.get_child(0)
-	else: weapon_node = hand_l_node.get_child(0)
+	await get_tree().create_timer(w.blend_time).timeout
 	
-	if weapon_node:
-		var hitbox = weapon_node.find_child("Hitbox")
-		if hitbox:
-			var base_dmg = attributes.get_stat("melee_damage")
-			hitbox.damage = base_dmg * w.damage_mult
-			# ¡OJO! NO ponemos monitoring = true aquí. Esperamos al delay.
-			
-	# 3. ARRANCAR ANIMACIÓN
-	anim_tree[playback_path].start("Empty") 
-	anim_tree[playback_path].start(anim_name)
+	# --- FASE 2: WINDUP ---
+	await get_tree().create_timer(w.windup_time).timeout
 	
-	# CALCULAR VELOCIDAD
-	var atk_speed = 1.0
-	if attributes.has_method("get_stat"):
-		atk_speed = attributes.get_stat("attack_speed")
+	# --- FASE 3: HITBOX ON ---
+	var hitbox = _buscar_hitbox(hand_node)
+	if hitbox:
+		hitbox.collision_mask = attack_layer_mask
+		var total_damage = w.damage * damage_multiplier
+		if attribute_manager and attribute_manager.has_method("get_stat"):
+			total_damage = attribute_manager.get_stat("melee_damage") * (w.damage / 10.0) 
+		
+		hitbox.activate(total_damage, w.knockback_force, w.jump_force, owner_node)
 	
-	# ---------------------------------------------------------
-	# ESTA ES LA ÚNICA LLAMADA QUE DEBE ACTIVAR EL DAÑO
-	# ---------------------------------------------------------
-	var delay_real = w.damage_delay / atk_speed
-	var duracion_real = w.hitbox_duration / atk_speed
+	# --- FASE 4: ACTIVE TIME ---
+	await get_tree().create_timer(w.active_time).timeout
+	if hitbox: hitbox.deactivate()
 	
-	gestionar_hitbox_con_delay(mano, delay_real, duracion_real, w)
-	# ---------------------------------------------------------
+	# --- FASE 5: COMPLETAR ANIMACIÓN (Tiempo restante manual) ---
+	var tiempo_usado = w.blend_time + w.windup_time + w.active_time
+	var tiempo_restante = w.total_animation_time - tiempo_usado
 	
-	# 4. SUBIR EL VOLUMEN (Mezcla de animación)
-	var t = create_tween()
-	t.tween_property(anim_tree, blend_path, 1.0, 0.15).set_trans(Tween.TRANS_SINE)
+	if tiempo_restante > 0:
+		await get_tree().create_timer(tiempo_restante).timeout
 	
-	# 5. ESPERAR QUE TERMINE LA ANIMACIÓN
-	var anim_len = 0.5
-	var anim_player = player.get_node("AnimationPlayer")
-	if anim_player.has_animation(anim_name):
-		anim_len = anim_player.get_animation(anim_name).length
-	
-	await get_tree().create_timer(anim_len).timeout
-	
-	# 6. BAJAR EL VOLUMEN
-	var t_out = create_tween()
-	t_out.tween_property(anim_tree, blend_path, 0.0, 0.2) 
-	
-	await t_out.finished 
-	
-	# Liberar banderas
+	# --- FASE 6: FINALIZAR (LIBERAR LA MANO CORRECTA) ---
 	if w.is_two_handed:
 		is_attacking_r = false
 		is_attacking_l = false
@@ -269,37 +226,39 @@ func ejecutar_ataque_seguro(w: WeaponData, mano: String):
 		is_attacking_r = false
 	else:
 		is_attacking_l = false
+	
+	# Solo liberamos movimiento si no hay OTRA mano atacando que requiera bloqueo
+	if not is_attacking_r and not is_attacking_l:
+		is_movement_locked = false
+	
+	_crear_tween(blend_path, 0.0, 0.2)
+	
+	# COOLDOWN INDEPENDIENTE
+	if mano == "right": cd_timer_r = w.cooldown
+	else: cd_timer_l = w.cooldown
 
 # --- UTILIDADES ---
-func crear_tween_mezcla(path, valor_final):
-	var t = create_tween()
-	t.tween_property(anim_tree, path, valor_final, 0.2)
+func _crear_tween(path, val, tiempo = 0.2):
+	if animation_tree:
+		var t = create_tween()
+		t.tween_property(animation_tree, path, val, tiempo)
 
-func limpiar_nodo(nodo):
-	for c in nodo.get_children():
-		c.queue_free()
-		
-func gestionar_hitbox_con_delay(mano: String, delay: float, duracion: float, w: WeaponData):
-	# 1. Esperar el "Windup" (El tiempo que tarda en levantar el arma antes de pegar)
-	await get_tree().create_timer(delay).timeout
-	
-	# --- VERIFICACIONES DE SEGURIDAD ---
-	var weapon_node = hand_r_node.get_child(0) if mano == "right" else hand_l_node.get_child(0)
-	if not weapon_node: return
-	
-	# Si nos cancelaron el ataque en medio del delay, no hacemos daño
-	if mano == "right" and not is_attacking_r: return
-	if mano == "left" and not is_attacking_l: return
-	
-	# 2. BUSCAR EL HITBOX Y ACTIVARLO
-	var hitbox = weapon_node.find_child("Hitbox")
-	if hitbox and hitbox.has_method("attack_simple"):
-		# Actualizamos stats antes de pegar
-		hitbox.damage = attributes.get_stat("melee_damage") * w.damage_mult
-		hitbox.knockback_force = w.knockback_force # Asumiendo que agregaste esto al WeaponData
-		
-		# ¡AQUÍ ESTÁ LA MAGIA!
-		# Le decimos al hitbox: "Haz tu trabajo". Él se prenderá, chequeará colisiones y se apagará solo.
-		hitbox.attack_simple() 
-	else:
-		print("⚠️ Error: No encontré nodo Hitbox o no tiene el script WeaponHitbox")
+func _limpiar_manos():
+	_limpiar_nodo(right_hand_bone); _limpiar_nodo(left_hand_bone)
+
+func _limpiar_nodo(node):
+	if node: for c in node.get_children(): c.queue_free()
+
+func _instanciar_visual(data, parent):
+	if data.weapon_scene and parent:
+		var scn = data.weapon_scene.instantiate()
+		parent.add_child(scn)
+
+func _buscar_hitbox(parent):
+	if parent and parent.get_child_count() > 0:
+		var weapon = parent.get_child(0)
+		return weapon.find_child("Hitbox")
+	return null
+
+func _viajar_animacion(path, anim_name):
+	if animation_tree: animation_tree[path].travel(anim_name)

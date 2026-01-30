@@ -1,45 +1,53 @@
 extends Area3D
 class_name WeaponHitbox
 
-var damage: float = 10.0 
-var knockback_force: float = 8.0
-var jump_force: float = 4.0
-var hit_objects = [] 
+var damage: float = 0.0
+var knockback: float = 0.0
+var jump: float = 0.0
+var attacker_node: Node = null # REFERENCIA AL DUEÑO DEL ARMA
+var hit_history: Array[Node] = [] 
 
 func _ready():
-	monitoring = false 
+	monitoring = false
 	monitorable = false
 	area_entered.connect(_on_area_entered)
 
-# --- ESTA ES LA MAGIA SIMPLE ---
-func attack_simple():
-	# 1. Configuración rápida
-	hit_objects.clear()
-	monitoring = true 
+# Ahora recibimos "attacker" para saber a quién NO golpear
+func activate(dmg: float, kb: float, jmp: float, attacker: Node):
+	hit_history.clear()
+	damage = dmg
+	knockback = kb
+	jump = jmp
+	attacker_node = attacker # Guardamos quién está atacando
+	monitoring = true
 	
-	# 2. Revisión instantánea (para que no falle el primer frame)
+	# Revisión instantánea
 	for area in get_overlapping_areas():
 		_on_area_entered(area)
-	
-	# 3. EL TEMPORIZADOR (La vieja confiable)
-	# Esperamos 0.1 segundos (o lo que dure tu golpe fuerte) y apagamos.
-	# No dependemos de la animación.
-	await get_tree().create_timer(0.2).timeout 
-	
+
+func deactivate():
 	monitoring = false
+	attacker_node = null
 
 func _on_area_entered(area):
-	if not monitoring: return # Doble seguridad
+	if not monitoring: return
+	if area in hit_history: return
 	
-	if area in hit_objects: return 
+	# --- FIX SUICIDIO ---
+	# Si el área golpeada pertenece al mismo nodo que ataca, IGNORAR.
+	# Esto evita que el esqueleto se pegue a su propia Hurtbox.
+	if attacker_node and area.owner == attacker_node: 
+		return 
 
 	if area.has_method("hit"):
-		hit_objects.append(area) 
+		hit_history.append(area)
 		
-		# Calculamos dirección
-		var dir = (area.global_position - global_position).normalized()
-		dir.y = 0 
+		# Dirección del empuje: Desde el atacante hacia la víctima
+		var origin = global_position
+		if attacker_node: origin = attacker_node.global_position
 		
-		# Golpeamos
-		area.hit(damage, dir.normalized(), knockback_force, jump_force)
-		print("🩸 PUM! Golpe conectado")
+		var dir = (area.global_position - origin).normalized()
+		dir.y = 0.2 
+		
+		area.hit(damage, dir, knockback, jump)
+		print("🩸 Golpe conectado a: ", area.owner.name)
