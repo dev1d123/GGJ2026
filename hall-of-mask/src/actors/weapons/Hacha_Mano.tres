@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://daaebpm6rbbe2"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_lw7vx"]
+[ext_resource type="PackedScene" uid="uid://dgttdpbcefd7n" path="res://src/actors/weapons/Hacha_Mano.tscn" id="2_a5wwm"]
+
+[resource]
+script = ExtResource("1_lw7vx")
+weapon_scene = ExtResource("2_a5wwm")
+anim_attack = "Axe_1H_Attack"
+blend_time = 0.0
+windup_time = 0.6
+active_time = 0.15
+total_animation_time = 1.067
+cooldown = 0.25
+knockback_force = 3.0
+jump_force = 2.0
+stamina_cost = 10.0
+metadata/_custom_type_script = "uid://r2rvquosrqcd"
