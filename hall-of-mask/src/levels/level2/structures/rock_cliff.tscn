@@ -1,7 +1,27 @@
-[gd_scene load_steps=2 format=3 uid="uid://dbtcit4yiinti"]
+[gd_scene load_steps=3 format=3 uid="uid://dbtcit4yiinti"]
 
 [ext_resource type="PackedScene" uid="uid://bpvp37y8573yo" path="res://src/levels/level2/structures/rock_cliff_model.tscn" id="1_y6ixj"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_y6ixj"]
+height = 0.6376953
+radius = 0.30615234
 
 [node name="RockCliff" type="StaticBody3D"]
 
 [node name="rockCliff" parent="." instance=ExtResource("1_y6ixj")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1605551, -0.024902344, -0.12237583)
+shape = SubResource("CylinderShape3D_y6ixj")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15821645, -0.024902344, 0.20021397)
+shape = SubResource("CylinderShape3D_y6ixj")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13121286, -0.024902344, 0.24961543)
+shape = SubResource("CylinderShape3D_y6ixj")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13878104, -0.024902344, 0.07971342)
+shape = SubResource("CylinderShape3D_y6ixj")

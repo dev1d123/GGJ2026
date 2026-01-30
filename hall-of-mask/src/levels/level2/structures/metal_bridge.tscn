@@ -1,7 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://cakbsmr8x3aj7"]
+[gd_scene load_steps=4 format=3 uid="uid://cakbsmr8x3aj7"]
 
 [ext_resource type="PackedScene" uid="uid://cjrwms6fij2hd" path="res://src/levels/level2/structures/metal_bridge_model.tscn" id="1_2wihv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2wihv"]
+size = Vector3(1.0283203, 0.6088867, 0.10789871)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_20qgy"]
+size = Vector3(1, 0.109191895, 0.010009766)
 
 [node name="MetalBridge" type="StaticBody3D"]
 
 [node name="metalBridge" parent="." instance=ExtResource("1_2wihv")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.14726889, 0, 0, 0, 1, -0.014160156, -0.028799409, 0.00040245056)
+shape = SubResource("BoxShape3D_2wihv")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.99978435, 0, 0.020767923, 0, 1, 0, -0.020767923, 0, 0.99978435, -0.000448721, 0.035125732, -0.06285156)
+shape = SubResource("BoxShape3D_20qgy")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.9999992, 0, -0.0012042783, 0, 1, 0, 0.0012042783, 0, 0.9999992, -0.000448721, 0.05245921, 0.05488643)
+shape = SubResource("BoxShape3D_20qgy")
