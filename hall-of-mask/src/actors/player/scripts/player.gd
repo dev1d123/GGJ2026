@@ -12,6 +12,9 @@ extends CharacterBody3D
 @onready var stamina: Node = $StaminaComponent
 @onready var health_component: HealthComponent = $HealthComponent 
 @onready var combat_manager: CombatManager = $CombatManager 
+@onready var distortion: ColorRect = $ColorRect
+@onready var distortion_mat: ShaderMaterial = distortion.material
+var transitioning := false
 
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
@@ -74,6 +77,31 @@ const PATH_DODGE    = "parameters/StateMachine/Dodge/blend_position"
 var smooth_blend: Vector2 = Vector2.ZERO
 var blend_speed: float = 10.0
 
+func start_distortion_transition(duration: float = 1.0) -> void:
+	if transitioning:
+		return
+
+	transitioning = true
+
+	set_physics_process(false)
+	set_process(false)
+
+	distortion.visible = true
+	distortion_mat.set_shader_parameter("strength", 0.0)
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+
+	tween.tween_property(
+		distortion_mat,
+		"shader_parameter/strength",
+		1.0,
+		duration
+	)
+
+
+
 # ------------------------------------------------------------------------------
 # 2. CICLO DE VIDA E INPUTS
 # ------------------------------------------------------------------------------
@@ -111,18 +139,21 @@ func _input(event: InputEvent) -> void:
 				combat_manager.try_attack("right")
 			elif event.button_index == MOUSE_BUTTON_LEFT:
 				combat_manager.try_attack("left")
+	
+	
+	#COMENTADO PRUEBA DE ARMAS EN BOTONES EN PLAYER
+	
+	#if event is InputEventKey and event.pressed:
+	#	var tab = Input.is_physical_key_pressed(KEY_TAB)
+	#	var mano = "left" if tab else "right"
+	#	if mano == "right" and combat_manager.is_attacking_r: return
+	#	if mano == "left" and combat_manager.is_attacking_l: return
 
-	if event is InputEventKey and event.pressed:
-		var tab = Input.is_physical_key_pressed(KEY_TAB)
-		var mano = "left" if tab else "right"
-		if mano == "right" and combat_manager.is_attacking_r: return
-		if mano == "left" and combat_manager.is_attacking_l: return
-
-		match event.keycode:
-			KEY_1: combat_manager.unequip_weapon(mano)
-			KEY_2: if combat_manager.slot_2: combat_manager.equip_weapon(combat_manager.slot_2, mano)
-			KEY_3: if combat_manager.slot_3: combat_manager.equip_weapon(combat_manager.slot_3, mano)
-			KEY_4: if combat_manager.slot_4: combat_manager.equip_weapon(combat_manager.slot_4, mano)
+	#	match event.keycode:
+	#		KEY_1: combat_manager.unequip_weapon(mano)
+	#		KEY_2: if combat_manager.slot_2: combat_manager.equip_weapon(combat_manager.slot_2, mano)
+	#		KEY_3: if combat_manager.slot_3: combat_manager.equip_weapon(combat_manager.slot_3, mano)
+	#		KEY_4: if combat_manager.slot_4: combat_manager.equip_weapon(combat_manager.slot_4, mano)
 
 # ------------------------------------------------------------------------------
 # 3. FÍSICAS
@@ -416,3 +447,95 @@ func morir():
 	await get_tree().create_timer(4.0).timeout
 	death_cam.queue_free()
 	get_tree().reload_current_scene()
+
+# ==============================================================================
+# SECCIÓN UI INYECTADA (NO MODIFICAR LÓGICA CORE)
+# ==============================================================================
+
+# --- SEÑALES PARA HUD ---
+signal vida_cambiada(nueva_vida)
+signal mana_cambiado(nuevo_mana, max_mana)
+signal stamina_cambiada(nueva_stamina, max_stamina)
+signal pociones_cambiadas(slot_index, cantidad)
+signal ulti_cambiada(nueva_carga, max_carga)
+signal mascara_cambiada(mask_data) # Nueva para el icono grande
+
+# --- VARIABLES UI ---
+var pociones_ui = [3, 1, 0] # Inventario interno de pociones
+
+# --- INICIALIZACIÓN DE CONEXIONES UI ---
+func _ready_ui_connections():
+	# 1. VIDA
+	if health_component:
+		health_component.on_damage_received.connect(func(_amt, curr): emit_signal("vida_cambiada", curr))
+		# Emitir estado inicial
+		emit_signal("vida_cambiada", health_component.current_health)
+
+	# 2. STAMINA
+	if stamina:
+		stamina.on_value_changed.connect(func(curr, max_val): emit_signal("stamina_cambiada", curr, max_val))
+		# Emitir estado inicial (Asumiendo que stamina tiene current_value accesible)
+		if "current_value" in stamina:
+			emit_signal("stamina_cambiada", stamina.current_value, stamina.max_value)
+
+	# 3. MANA (Si existe, si no, ignora)
+	var mana_comp = get_node_or_null("ManaComponent")
+	if mana_comp:
+		mana_comp.on_value_changed.connect(func(curr, max_val): emit_signal("mana_cambiado", curr, max_val))
+		emit_signal("mana_cambiado", mana_comp.current_value, mana_comp.max_value)
+
+	# 4. MÁSCARAS Y ULTI (¡Conectado al MaskManager real!)
+	var mask_mgr = get_node_or_null("MaskManager") # O busca en el padre si está fuera
+	if not mask_mgr and get_parent().has_node("MaskManager"): mask_mgr = get_parent().get_node("MaskManager")
+	
+	if mask_mgr:
+		# Conectar cambio de máscara
+		mask_mgr.on_mask_changed.connect(func(mask): emit_signal("mascara_cambiada", mask))
+		# Conectar carga de ulti
+		mask_mgr.on_ult_charge_changed.connect(func(val): emit_signal("ulti_cambiada", val, 100.0))
+		
+		# Estado inicial
+		emit_signal("mascara_cambiada", mask_mgr.current_mask)
+		emit_signal("ulti_cambiada", mask_mgr.current_ult_charge, 100.0)
+
+	# 5. POCIONES
+	emit_signal("pociones_cambiadas", 1, pociones_ui[0])
+	emit_signal("pociones_cambiadas", 2, pociones_ui[1])
+	emit_signal("pociones_cambiadas", 3, pociones_ui[2])
+
+# --- SOBREESCRIBIR _READY (TRUCO) ---
+# Como no podemos borrar su _ready, llamamos a nuestra init al final de su _ready original.
+# Búscalo en su código y agrega: _ready_ui_connections() al final.
+# SI NO QUIERES TOCAR SU _READY: Usa un call_deferred en _enter_tree o _ready
+func _enter_tree():
+	call_deferred("_ready_ui_connections")
+
+# --- INPUTS DE UI (ADICIONALES) ---
+func _unhandled_input(event):
+	# Usamos _unhandled_input para que no pelee con su _input
+	if event.is_action_pressed("usar_pocion_1"): usar_pocion(0)
+	elif event.is_action_pressed("usar_pocion_2"): usar_pocion(1)
+	elif event.is_action_pressed("usar_pocion_3"): usar_pocion(2)
+
+# --- FUNCIONES PUENTE PARA HUD ---
+
+func equipar_desde_ui(weapon_data, hand_side):
+	if combat_manager:
+		combat_manager.equip_weapon(weapon_data, hand_side.to_lower())
+
+func desequipar_desde_ui(hand_side):
+	if combat_manager:
+		combat_manager.unequip_weapon(hand_side.to_lower())
+
+func usar_pocion(index):
+	if index >= 0 and index < pociones_ui.size() and pociones_ui[index] > 0:
+		pociones_ui[index] -= 1
+		
+		# Efecto (Vida)
+		if index == 0 and health_component:
+			health_component.current_health += 20
+			if health_component.current_health > health_component.max_health:
+				health_component.current_health = health_component.max_health
+			emit_signal("vida_cambiada", health_component.current_health)
+			
+		emit_signal("pociones_cambiadas", index + 1, pociones_ui[index])
