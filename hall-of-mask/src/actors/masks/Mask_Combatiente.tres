@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="MaskData" load_steps=2 format=3 uid="uid://bidblay1hqrnw"]
+[gd_resource type="Resource" script_class="MaskData" load_steps=3 format=3 uid="uid://bidblay1hqrnw"]
 
 [ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_ktn8c"]
+[ext_resource type="Texture2D" uid="uid://cadydt58x26be" path="res://src/actors/masks/WhatsApp_Image_2026-01-30_at_11.46.29_AM__1_-removebg-preview-convertido-a-128x128.jpeg" id="1_lur1r"]
 
 [resource]
 script = ExtResource("1_ktn8c")
+icon = ExtResource("1_lur1r")
 screen_tint = Color(1, 0, 0, 0.101960786)
 speed_mult = 1.2
 jump_mult = 1.2

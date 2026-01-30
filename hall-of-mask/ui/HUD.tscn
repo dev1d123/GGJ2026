@@ -435,6 +435,7 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("16_l08fo")
+expand_mode = 1
 
 [node name="Sector1" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1

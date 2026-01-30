@@ -37,16 +37,25 @@ func _ready():
 		print("HUD: ❌ ¡NO encuentro al Player! Asegúrate que el nodo se llame 'Player'")
 
 func _on_mask_changed(mask_data):
-	# Si mask_data es null (se quitó la máscara), ponemos icono gris
+	# PROTECCIÓN: Si olvidamos poner el nodo en la escena
+	if not mask_icon_grande: return 
+
+	# CASO A: Se quitó la máscara (mask_data es null)
 	if mask_data == null:
-		# Poner icono por defecto/vacío
 		mask_icon_grande.modulate = Color(0.3, 0.3, 0.3, 0.5) 
+		
+		# AVISAR A LOS ICONOS PEQUEÑOS (Vuelta a la normalidad)
+		stats_panel.update_life_icons_texture(null) 
 		return
 
-	# Si hay máscara, buscamos su icono
+	# CASO B: Hay máscara nueva
 	if "icon" in mask_data and mask_data.icon:
+		# 1. Actualizar el Grande
 		mask_icon_grande.texture = mask_data.icon
 		mask_icon_grande.modulate = Color(1, 1, 1, 1)
+		
+		# 2. Actualizar los Pequeños (¡NUEVO!) 🆕
+		stats_panel.update_life_icons_texture(mask_data.icon)
 
 func _input(event):
 	# --- YA NO MANEJAMOS POCIONES AQUÍ ---
@@ -90,6 +99,20 @@ func _on_player_ulti_cambiada(nueva_carga, max_carga):
 func _on_item_equipped(hand_side, item_data):
 	if item_data == null: return
 	
+	# ENVIAR ORDEN AL PLAYER PRIMERO (Para que la lógica funcione siempre)
+	var player = get_tree().root.find_child("Player", true, false)
+	if player and player.has_method("equipar_desde_ui"):
+		player.equipar_desde_ui(item_data, hand_side)
+
+	# --- FILTRO DE SEGURIDAD ---
+	# Si es una MÁSCARA, no hacemos nada con los iconos de las MANOS y terminamos aquí.
+	if item_data is MaskData:
+		return 
+	
+	# ===============================================
+	# DE AQUÍ PARA ABAJO ES SOLO PARA ARMAS (WeaponData)
+	# ===============================================
+	
 	var target_icon = null
 	var other_icon = null
 	
@@ -104,8 +127,10 @@ func _on_item_equipped(hand_side, item_data):
 		target_icon.texture = item_data.icon
 		target_icon.modulate = Color(1, 1, 1)
 		
+		# AHORA ES SEGURO PREGUNTAR: Como ya filtramos las máscaras arriba,
+		# sabemos que 'item_data' es un WeaponData y tiene 'is_two_handed'.
 		if item_data.is_two_handed:
-			print("HUD: Arma 2 manos. Bloqueando la otra.")
+			# print("HUD: Arma 2 manos. Bloqueando la otra.")
 			other_icon.texture = null
 			other_icon.modulate = Color(0.5, 0.5, 0.5, 0.5)
 		else:
@@ -113,8 +138,3 @@ func _on_item_equipped(hand_side, item_data):
 			if other_icon.modulate.a < 0.9: 
 				other_icon.texture = null 
 				other_icon.modulate = Color(1, 1, 1, 1)
-
-	# ENVIAR ORDEN AL PLAYER
-	var player = get_tree().root.find_child("Player", true, false)
-	if player and player.has_method("equipar_desde_ui"):
-		player.equipar_desde_ui(item_data, hand_side)
