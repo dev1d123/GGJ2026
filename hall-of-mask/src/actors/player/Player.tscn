@@ -1,4 +1,4 @@
-[gd_scene load_steps=244 format=3 uid="uid://oprw0dsewh7i"]
+[gd_scene load_steps=245 format=3 uid="uid://oprw0dsewh7i"]
 
 [ext_resource type="PackedScene" uid="uid://c7qnseftm8dje" path="res://assets/models/characters/Ranger.glb" id="1_7u6rr"]
 [ext_resource type="Script" uid="uid://dr7maxxlou66f" path="res://src/actors/player/scripts/player.gd" id="1_fpfku"]
@@ -154,6 +154,7 @@
 [ext_resource type="Resource" uid="uid://bidblay1hqrnw" path="res://src/actors/masks/Mask_Combatiente.tres" id="150_6cogj"]
 [ext_resource type="Script" uid="uid://6qh57tw338s" path="res://src/actors/player/scripts/MaskManager.gd" id="151_j1o44"]
 [ext_resource type="Script" uid="uid://bretkgkm6hjso" path="res://src/actors/player/scripts/HUDManager.gd" id="153_pohdh"]
+[ext_resource type="PackedScene" uid="uid://bs0f617h5k5u4" path="res://ui/HUD.tscn" id="154_cupkb"]
 [ext_resource type="Shader" uid="uid://dt5mlkqpfmgvj" path="res://src/actors/player/fighterShader.gdshader" id="155_cupkb"]
 [ext_resource type="Shader" uid="uid://iwgg8w3ulv7r" path="res://src/actors/player/shooterShader.gdshader" id="156_2ph0s"]
 [ext_resource type="Shader" uid="uid://dnqpeecxf3byp" path="res://src/actors/player/undeadShader.gdshader" id="157_x7dbd"]
@@ -1102,7 +1103,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00017166138, 0.9409027, 0.
 shape = SubResource("BoxShape3D_hf755")
 
 [node name="Hurtbox" type="Area3D" parent="." node_paths=PackedStringArray("health_component")]
-transform = Transform3D(-0.9989288, 0.0031051857, -0.04616786, 0.002573814, 0.99992985, 0.011564549, 0.046200532, 0.011433335, -0.9988667, -0.0018162137, -0.009453297, -0.0075550172)
+transform = Transform3D(-0.99868417, 0.0210428, -0.046765495, 0.02076405, 0.9997637, 0.00643849, 0.046889927, 0.005458976, -0.9988851, -0.012268801, -0.0151029825, -0.0045099426)
 collision_layer = 2
 collision_mask = 2
 script = ExtResource("2_hpkk0")
@@ -1117,40 +1118,40 @@ debug_color = Color(0.8980392, 0.15686275, 0.3019608, 0.85490197)
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="Ranger/Rig_Medium" index="0"]
-bones/1/position = Vector3(3.28744e-20, 0.38170075, 7.837868e-27)
-bones/1/rotation = Quaternion(0.002311013, 0.023061363, 3.9335166e-05, 0.9997314)
+bones/1/position = Vector3(3.1657947e-20, 0.3759567, 7.547843e-27)
+bones/1/rotation = Quaternion(0.0034535849, 0.023061272, 8.678936e-05, 0.99972814)
 bones/1/scale = Vector3(0.99999994, 1, 0.99999994)
-bones/2/position = Vector3(0.17094508, 0.11358723, -0.001154385)
-bones/2/rotation = Quaternion(0.9654964, 0.022901922, 0.043329317, 0.2557631)
+bones/2/position = Vector3(0.17094508, 0.113106064, -0.009083938)
+bones/2/rotation = Quaternion(0.99048096, 0.037768338, 0.031414807, -0.12858504)
 bones/2/scale = Vector3(0.99999994, 0.99999976, 1.000001)
-bones/3/rotation = Quaternion(0.6255127, 5.4806463e-08, -4.3119059e-07, 0.780214)
+bones/3/rotation = Quaternion(0.18127346, 6.546196e-08, -1.2525204e-07, 0.9834328)
 bones/3/scale = Vector3(1.0000002, 1.0000002, 1.0000001)
-bones/4/rotation = Quaternion(-0.5241565, -0.06106514, 0.023433177, 0.8491065)
+bones/4/rotation = Quaternion(-0.52907217, -0.060491156, 0.025253057, 0.8460412)
 bones/4/scale = Vector3(1.0000002, 1.0000007, 0.99999905)
-bones/5/rotation = Quaternion(-5.065881e-07, 0.92003936, -0.39182594, 1.8437603e-07)
+bones/5/rotation = Quaternion(-5.2638836e-07, 0.91331095, -0.4072631, 1.8790857e-07)
 bones/5/scale = Vector3(1.0000001, 0.9999971, 1.0000032)
-bones/6/position = Vector3(-0.17094508, 0.104633115, 0.0011538056)
-bones/6/rotation = Quaternion(0.99892694, -0.01611389, 0.016827408, 0.04002888)
+bones/6/position = Vector3(-0.17094508, 0.113698296, 0.009080377)
+bones/6/rotation = Quaternion(0.9755896, -0.019138008, 0.013615326, 0.21834229)
 bones/6/scale = Vector3(0.99999994, 0.99999976, 1.000001)
-bones/7/rotation = Quaternion(0.3484237, -6.26569e-08, 2.4137543e-07, 0.9373373)
+bones/7/rotation = Quaternion(0.41416445, -6.114671e-08, 2.8767718e-07, 0.9102021)
 bones/7/scale = Vector3(0.99999994, 1.0000001, 1)
-bones/8/rotation = Quaternion(-0.64165807, 0.061574437, 0.0023682276, 0.76451164)
+bones/8/rotation = Quaternion(-0.6283527, 0.06166538, -0.0007227504, 0.77548033)
 bones/8/scale = Vector3(0.9999999, 1.0000007, 0.999999)
-bones/9/rotation = Quaternion(-4.771143e-05, 0.92003924, -0.39182636, 1.0902072e-05)
+bones/9/rotation = Quaternion(-4.7717866e-05, 0.9201646, -0.39153188, 1.0885385e-05)
 bones/9/scale = Vector3(1.0000001, 0.9999973, 1.000003)
 bones/10/rotation = Quaternion(0, 0, 0, 1)
-bones/11/rotation = Quaternion(0.0104961675, 1.0488469e-05, 0.0045533027, 0.9999346)
-bones/12/rotation = Quaternion(-0.00040648034, -0.008521575, -0.00010517399, 0.99996364)
-bones/18/position = Vector3(0.21194911, 0.13407104, -0.00014875324)
-bones/18/rotation = Quaternion(-0.54168487, -0.29064324, -0.62016827, 0.487335)
+bones/11/rotation = Quaternion(0.00035996776, -4.7223207e-06, -0.009486201, 0.999955)
+bones/12/rotation = Quaternion(-0.0041042613, -0.008520234, -0.00022500518, 0.9999553)
+bones/18/position = Vector3(0.21195455, 0.13407376, -0.00015022344)
+bones/18/rotation = Quaternion(-0.5298142, -0.31659183, -0.64131206, 0.45583493)
 bones/18/scale = Vector3(0.99999934, 0.9999993, 0.99999976)
-bones/19/rotation = Quaternion(1.7498225e-08, -6.393534e-08, -0.27416703, 0.9616822)
+bones/19/rotation = Quaternion(8.564579e-09, -6.6656405e-08, -0.21611178, 0.97636867)
 bones/20/rotation = Quaternion(4.1587493e-09, -2.2264026e-09, 0.0266581, 0.99964464)
 bones/20/scale = Vector3(1, 0.99999994, 0.99999994)
-bones/21/rotation = Quaternion(-0.12302216, -0.16794686, 0.07216813, 0.9754237)
+bones/21/rotation = Quaternion(-0.13686252, -0.17467108, 0.051041204, 0.97373176)
 bones/21/scale = Vector3(0.99999994, 1, 1)
 bones/22/position = Vector3(5.1388044e-10, 0.09612508, -0.05750009)
-bones/22/rotation = Quaternion(0.022523783, -0.019304557, -0.7048692, 0.70871687)
+bones/22/rotation = Quaternion(0.022833822, -0.018991305, -0.70384145, 0.70973605)
 
 [node name="Ranger_Body" parent="Ranger/Rig_Medium/Skeleton3D" index="2"]
 cast_shadow = 3
@@ -1162,12 +1163,12 @@ cast_shadow = 3
 cast_shadow = 3
 
 [node name="Right Hand" type="BoneAttachment3D" parent="Ranger/Rig_Medium/Skeleton3D" index="8"]
-transform = Transform3D(-0.9988616, 0.04633966, -0.011230809, -0.011679753, -0.0094276685, 0.9998869, 0.04622848, 0.9988806, 0.009958123, -0.8841476, 1.0149462, 0.038187966)
+transform = Transform3D(-0.9989028, 0.046764735, -0.0020582706, -0.0017928614, 0.0057179164, 0.9999816, 0.04677557, 0.9988891, -0.005627859, -0.89021564, 1.0178761, 0.04015604)
 bone_name = "handslot.r"
 bone_idx = 17
 
 [node name="Left Hand" type="BoneAttachment3D" parent="Ranger/Rig_Medium/Skeleton3D" index="9"]
-transform = Transform3D(-0.753939, -0.0020540096, 0.65694016, 0.6496275, 0.14649005, 0.74600506, -0.09776737, 0.98920953, -0.10911028, 0.74465275, 0.74656063, 0.052011345)
+transform = Transform3D(-0.72876334, 0.004002113, 0.6847527, 0.67358446, 0.1841502, 0.7158014, -0.123232454, 0.9828896, -0.13689783, 0.7372611, 0.72828317, 0.07443634)
 bone_name = "handslot.l"
 bone_idx = 22
 
@@ -1175,7 +1176,7 @@ bone_idx = 22
 transform = Transform3D(-1, -9.51694e-07, 8.742217e-08, -9.5169383e-07, 1, 1.2468981e-06, -8.742333e-08, 1.2468979e-06, -1, 0, 0, 0)
 
 [node name="Camera" type="BoneAttachment3D" parent="Ranger/Rig_Medium/Skeleton3D" index="10"]
-transform = Transform3D(0.9995096, -0.01105186, 0.02930026, 0.011314411, 0.9998972, -0.008810145, -0.029199881, 0.009137337, 0.9995318, -0.0041779764, 1.2174041, -0.000723355)
+transform = Transform3D(0.9995564, -0.0019229949, 0.029719835, 0.0015104103, 0.9999023, 0.013898773, -0.029743655, -0.013847716, 0.99946165, -0.008446917, 1.2116208, -0.0022335104)
 bone_name = "head"
 bone_idx = 12
 
@@ -1184,7 +1185,7 @@ transform = Transform3D(-1, -3.209157e-05, -1.1175871e-07, -3.2091513e-05, 0.999
 remote_path = NodePath("../../../../../HeadMount")
 
 [node name="Hurtbox" type="BoneAttachment3D" parent="Ranger/Rig_Medium/Skeleton3D" index="11"]
-transform = Transform3D(0.99892884, -0.0031051848, 0.046167772, 0.0025738142, 0.99992985, 0.01156455, -0.046200443, -0.011433335, 0.99886674, 5.364258e-06, 0.5736762, 0.0008874349)
+transform = Transform3D(0.9986842, -0.0210428, 0.046765406, 0.020764051, 0.9997637, 0.0064384905, -0.046889838, -0.005458978, 0.99888515, -2.7340989e-06, 0.5679296, 0.001326429)
 bone_name = "spine"
 bone_idx = 10
 
@@ -1214,7 +1215,7 @@ parameters/Mezcla_R/blend_amount = 1.0
 parameters/Mezcla_2H/blend_amount = 0.490628005328911
 
 [node name="HeadMount" type="Node3D" parent="."]
-transform = Transform3D(0.9995092, 0.011073071, 0.029304555, -0.011346499, 0.9998934, 0.009180859, -0.029199788, -0.009508856, 0.99952835, 0.0041779764, 1.2174041, 0.00072335463)
+transform = Transform3D(0.99955636, 0.0019440543, 0.029720746, -0.0015424972, 0.99990726, -0.013528055, -0.0297443, 0.013476204, 0.9994667, 0.008446917, 1.2116208, 0.0022335097)
 
 [node name="Camera3D" type="Camera3D" parent="HeadMount"]
 transform = Transform3D(1.0000004, 0, 1.748457e-07, 0, 1, 0, -1.7484564e-07, 0, 1, 1.7450352e-08, 0.14335537, -0.1996088)
@@ -1270,7 +1271,10 @@ stamina_component = NodePath("../StaminaComponent")
 screen_overlay = NodePath("../HUD/MaskOverlay")
 current_mask = ExtResource("150_6cogj")
 
+[node name="HUD2" parent="." instance=ExtResource("154_cupkb")]
+
 [node name="HUD" type="CanvasLayer" parent="."]
+visible = false
 script = ExtResource("153_pohdh")
 
 [node name="MaskOverlay" type="ColorRect" parent="HUD"]

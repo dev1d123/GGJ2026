@@ -102,16 +102,16 @@ func _input(event):
 				else:
 					mask_manager.equip_mask(mask_slot_1)
 		
-		var tab = Input.is_physical_key_pressed(KEY_TAB)
-		var mano = "left" if tab else "right"
-		if mano == "right" and is_attacking_r: return
-		if mano == "left" and is_attacking_l: return
+		#var tab = Input.is_physical_key_pressed(KEY_TAB)
+		#var mano = "left" if tab else "right"
+		#if mano == "right" and is_attacking_r: return
+		#if mano == "left" and is_attacking_l: return
 
-		match event.keycode:
-			KEY_1: unequip_weapon(mano)
-			KEY_2: if slot_2: equip_weapon(slot_2, mano)
-			KEY_3: if slot_3: equip_weapon(slot_3, mano)
-			KEY_4: if slot_4: equip_weapon(slot_4, mano)
+		#match event.keycode:
+		#	KEY_1: unequip_weapon(mano)
+		#	KEY_2: if slot_2: equip_weapon(slot_2, mano)
+		#	KEY_3: if slot_3: equip_weapon(slot_3, mano)
+		#	KEY_4: if slot_4: equip_weapon(slot_4, mano)
 
 func equip_weapon(data: WeaponData, mano: String):
 	if not right_hand_bone or not left_hand_bone: return
