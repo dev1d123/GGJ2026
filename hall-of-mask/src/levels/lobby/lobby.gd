@@ -27,4 +27,18 @@ func _on_area_body_entered(body: Node3D, area: Area3D) -> void:
 	if body != player:
 		return
 
+	# transición visual del player
+	player.start_distortion_transition(1.0)
+
+	# fade out de audio
+	var audio_tween := create_tween()
+	audio_tween.tween_property(
+		audio,
+		"volume_db",
+		-80.0, # silencio real
+		1.0
+	)
+
+	await get_tree().create_timer(1.0).timeout
+
 	get_tree().change_scene_to_file(level_areas[area])

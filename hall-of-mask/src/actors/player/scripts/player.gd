@@ -12,6 +12,9 @@ extends CharacterBody3D
 @onready var stamina: Node = $StaminaComponent
 @onready var health_component: HealthComponent = $HealthComponent 
 @onready var combat_manager: CombatManager = $CombatManager 
+@onready var distortion: ColorRect = $ColorRect
+@onready var distortion_mat: ShaderMaterial = distortion.material
+var transitioning := false
 
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
@@ -73,6 +76,31 @@ const PATH_CRAWLING = "parameters/StateMachine/Crawling/blend_position"
 const PATH_DODGE    = "parameters/StateMachine/Dodge/blend_position"
 var smooth_blend: Vector2 = Vector2.ZERO
 var blend_speed: float = 10.0
+
+func start_distortion_transition(duration: float = 1.0) -> void:
+	if transitioning:
+		return
+
+	transitioning = true
+
+	set_physics_process(false)
+	set_process(false)
+
+	distortion.visible = true
+	distortion_mat.set_shader_parameter("strength", 0.0)
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+
+	tween.tween_property(
+		distortion_mat,
+		"shader_parameter/strength",
+		1.0,
+		duration
+	)
+
+
 
 # ------------------------------------------------------------------------------
 # 2. CICLO DE VIDA E INPUTS
