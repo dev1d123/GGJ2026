@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dwk18we86selq"]
+[gd_scene load_steps=10 format=3 uid="uid://dwk18we86selq"]
 
 [ext_resource type="Script" uid="uid://b3pg4ip2ans7k" path="res://src/GUI/menu.gd" id="1_alggg"]
 [ext_resource type="Texture2D" uid="uid://kril6038yrw4" path="res://assets/imagesGUI/background.png" id="1_ptg3k"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://bumfyytgarcwd" path="res://assets/imagesGUI/buttonClicked.png" id="4_kpcnc"]
 [ext_resource type="Texture2D" uid="uid://bb1x181wlsn87" path="res://assets/imagesGUI/buttonHover.png" id="5_alggg"]
 [ext_resource type="FontFile" uid="uid://3qoskpc6gny4" path="res://assets/imagesGUI/font.TTF" id="6_kpcnc"]
+[ext_resource type="AudioStream" uid="uid://l8m2dfhclyxv" path="res://assets/sounds/Intro.wav" id="8_o3d0h"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_alggg"]
 font = ExtResource("6_kpcnc")
@@ -21,29 +22,29 @@ anchors_preset = 0
 script = ExtResource("1_alggg")
 
 [node name="Background" type="Sprite2D" parent="."]
-position = Vector2(577, 357)
-scale = Vector2(1.2119141, 1.1253603)
+position = Vector2(954.99994, 580)
+scale = Vector2(1.9584961, 1.9257927)
 texture = ExtResource("1_ptg3k")
 
 [node name="Logo" type="Sprite2D" parent="."]
-position = Vector2(600, 126)
-scale = Vector2(1.497, 1.712)
+position = Vector2(954.0001, 252)
+scale = Vector2(2.36, 3.0546873)
 texture = ExtResource("2_n8v1d")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 0
-offset_left = 394.0
-offset_top = 243.0
-offset_right = 787.0
-offset_bottom = 617.0
+offset_left = 753.25
+offset_top = 450.568
+offset_right = 1146.25
+offset_bottom = 824.568
 color = Color(0.012617188, 0.012617188, 0.012617188, 0.7882353)
 
 [node name="startButton" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 461.0
-offset_top = 319.0
-offset_right = 710.0
-offset_bottom = 390.0
+offset_left = 820.25
+offset_top = 526.568
+offset_right = 1069.25
+offset_bottom = 597.568
 texture_normal = ExtResource("3_ppsmk")
 texture_pressed = ExtResource("4_kpcnc")
 texture_hover = ExtResource("5_alggg")
@@ -62,10 +63,10 @@ autowrap_mode = 2
 
 [node name="exitButton" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 467.0
-offset_top = 470.0
-offset_right = 716.0
-offset_bottom = 541.0
+offset_left = 826.25
+offset_top = 677.568
+offset_right = 1075.25
+offset_bottom = 748.568
 texture_normal = ExtResource("3_ppsmk")
 texture_pressed = ExtResource("4_kpcnc")
 texture_hover = ExtResource("5_alggg")
@@ -81,3 +82,7 @@ label_settings = SubResource("LabelSettings_alggg")
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_o3d0h")
+autoplay = true
