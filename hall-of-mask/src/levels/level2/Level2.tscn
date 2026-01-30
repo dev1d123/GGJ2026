@@ -1,6 +1,7 @@
-[gd_scene load_steps=22 format=3 uid="uid://deomqtukglycp"]
+[gd_scene load_steps=24 format=3 uid="uid://deomqtukglycp"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_cp82e"]
+[ext_resource type="Script" uid="uid://gwxmmwihf4uo" path="res://src/levels/level2/level_2.gd" id="1_dqyqn"]
 [ext_resource type="Texture2D" uid="uid://l4lhdp6tiq2k" path="res://assets/textures/level2/level2Rocks_normal.dds" id="2_fyp4o"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="3_hp4bj"]
 [ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/player.tscn" id="4_8hsde"]
@@ -13,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://dli2g33ytcbkk" path="res://src/levels/level2/structures/rock1.tscn" id="11_5suer"]
 [ext_resource type="PackedScene" uid="uid://qa57fojc1bcm" path="res://src/levels/level2/structures/metal_stair.tscn" id="12_dpe5t"]
 [ext_resource type="PackedScene" uid="uid://bk3adcpyrs3s0" path="res://src/levels/level2/structures/rock1_model.tscn" id="13_0wu3u"]
+[ext_resource type="AudioStream" uid="uid://bcqevbi6q4kk" path="res://assets/sounds/JazzyFall.wav" id="15_43bsa"]
 
 [sub_resource type="Gradient" id="Gradient_hp4bj"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -87,6 +89,7 @@ mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_0odbh")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_sqpsr")])
 
 [node name="Level2" type="Node3D"]
+script = ExtResource("1_dqyqn")
 
 [node name="Terrain3D" type="Terrain3D" parent="."]
 data_directory = "res://src/levels/level2"
@@ -195,3 +198,6 @@ transform = Transform3D(18.03445, 0, 8.680945, 0, 20.015, 0, -8.680945, 0, 18.03
 
 [node name="RockPlatafform8" parent="." instance=ExtResource("6_qamio")]
 transform = Transform3D(0.8522562, 9.963616, 0, -9.963616, 0.8522562, 0, 0, 0, 10, -77.96411, 2.8558989, 0.26533353)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("15_43bsa")
