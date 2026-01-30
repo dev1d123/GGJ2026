@@ -4,7 +4,6 @@
 [ext_resource type="Script" uid="uid://dvwq56eark3gj" path="res://src/levels/level4/level_4.gd" id="1_crcck"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="1_d1atx"]
 [ext_resource type="Texture2D" uid="uid://berh4w748xl8a" path="res://assets/textures/level4/metal_normal.dds" id="2_8abm2"]
-[ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/player.tscn" id="2_gvxw3"]
 [ext_resource type="PackedScene" uid="uid://ctprh1fl2dai3" path="res://src/levels/level4/structures/rock_platform.tscn" id="5_8abm2"]
 [ext_resource type="PackedScene" uid="uid://b4r55u6a18ak5" path="res://src/levels/level4/structures/clock_platform.tscn" id="6_fti30"]
 [ext_resource type="PackedScene" uid="uid://co67g5nj51eoa" path="res://src/levels/level4/structures/clock_platform2.tscn" id="7_s1js1"]
@@ -16,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://bpiwrgy5p45bf" path="res://src/levels/level4/structures/clock3.tscn" id="13_7kae0"]
 [ext_resource type="PackedScene" uid="uid://dj1wipkikmjsf" path="res://src/levels/level4/structures/gothic_catedral.tscn" id="14_7kae0"]
 [ext_resource type="AudioStream" uid="uid://dijyqot1bwrw7" path="res://assets/sounds/TimeStop.wav" id="15_71euu"]
+[ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="16_crcck"]
 
 [sub_resource type="Gradient" id="Gradient_vdpo8"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -97,8 +97,6 @@ top_level = true
 metadata/_edit_lock_ = true
 
 [node name="Environment" parent="." instance=ExtResource("1_d1atx")]
-
-[node name="Player" parent="." instance=ExtResource("2_gvxw3")]
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("15_71euu")
@@ -286,3 +284,7 @@ transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 
 
 [node name="GothicCatedral" parent="Elements" instance=ExtResource("14_7kae0")]
 transform = Transform3D(-149.53285, 0.01156113, 11.828885, 0, 149.99991, -0.14660455, -11.828894, -0.146148, -149.53278, 572.24225, 72.38368, -10.499376)
+
+[node name="Player" parent="." instance=ExtResource("16_crcck")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7723417, 3.1063814, 0)
+collision_mask = 133

@@ -4,8 +4,8 @@
 [ext_resource type="Script" uid="uid://ol4wcmbkt4d4" path="res://src/levels/level3/level_3.gd" id="1_710q4"]
 [ext_resource type="PackedScene" uid="uid://su4fiu50o7a" path="res://src/levels/level3/structures/cementery_gate_closed.tscn" id="1_sui43"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="1_x8wxk"]
-[ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/player.tscn" id="2_dmtvy"]
 [ext_resource type="Texture2D" uid="uid://l4lhdp6tiq2k" path="res://assets/textures/level2/level2Rocks_normal.dds" id="2_ofe6v"]
+[ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="2_xw760"]
 [ext_resource type="PackedScene" uid="uid://b5w17y7mwy0go" path="res://src/levels/level3/structures/metal_gate_model.tscn" id="5_7t7ym"]
 [ext_resource type="PackedScene" uid="uid://bvfb3pihedyr1" path="res://src/levels/level3/structures/gatepost.tscn" id="6_lobg7"]
 [ext_resource type="PackedScene" uid="uid://c04lncpgntc08" path="res://src/levels/level3/structures/wall1.tscn" id="7_lobg7"]
@@ -98,6 +98,10 @@ texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_
 [node name="Level3" type="Node3D"]
 script = ExtResource("1_710q4")
 
+[node name="Player" parent="." instance=ExtResource("2_xw760")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7723417, 3.1063814, 0)
+collision_mask = 133
+
 [node name="Terrain3D" type="Terrain3D" parent="."]
 data_directory = "res://src/levels/level3"
 material = SubResource("Terrain3DMaterial_dmtvy")
@@ -106,8 +110,6 @@ top_level = true
 metadata/_edit_lock_ = true
 
 [node name="Environment" parent="." instance=ExtResource("1_x8wxk")]
-
-[node name="Player" parent="." instance=ExtResource("2_dmtvy")]
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("23_xw760")

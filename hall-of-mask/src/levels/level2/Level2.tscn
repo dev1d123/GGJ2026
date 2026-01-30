@@ -4,7 +4,6 @@
 [ext_resource type="Script" uid="uid://gwxmmwihf4uo" path="res://src/levels/level2/level_2.gd" id="1_dqyqn"]
 [ext_resource type="Texture2D" uid="uid://l4lhdp6tiq2k" path="res://assets/textures/level2/level2Rocks_normal.dds" id="2_fyp4o"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="3_hp4bj"]
-[ext_resource type="PackedScene" uid="uid://buok6e4cecci5" path="res://src/player.tscn" id="4_8hsde"]
 [ext_resource type="PackedScene" uid="uid://bttr6hyupm2vo" path="res://src/levels/level2/structures/enter_tunnel.tscn" id="5_8hsde"]
 [ext_resource type="PackedScene" uid="uid://bt7tyncl32uya" path="res://src/levels/level2/structures/rock_platafform.tscn" id="6_qamio"]
 [ext_resource type="PackedScene" uid="uid://dv0gn4jrfypnf" path="res://src/levels/level2/structures/stair_wood.tscn" id="7_qbw0w"]
@@ -15,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://qa57fojc1bcm" path="res://src/levels/level2/structures/metal_stair.tscn" id="12_dpe5t"]
 [ext_resource type="PackedScene" uid="uid://bk3adcpyrs3s0" path="res://src/levels/level2/structures/rock1_model.tscn" id="13_0wu3u"]
 [ext_resource type="AudioStream" uid="uid://bcqevbi6q4kk" path="res://assets/sounds/JazzyFall.wav" id="15_43bsa"]
+[ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="15_a1g1w"]
 
 [sub_resource type="Gradient" id="Gradient_hp4bj"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -99,9 +99,6 @@ top_level = true
 metadata/_edit_lock_ = true
 
 [node name="Environment" parent="." instance=ExtResource("3_hp4bj")]
-
-[node name="Player" parent="." instance=ExtResource("4_8hsde")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -74.26095, 0, 0)
 
 [node name="EnterTunnel" parent="." instance=ExtResource("5_8hsde")]
 transform = Transform3D(24.81, 0, 0, 0, 24.81, 0, 0, 0, 24.81, -65.863434, 8.3689, -0.29740667)
@@ -201,3 +198,7 @@ transform = Transform3D(0.8522562, 9.963616, 0, -9.963616, 0.8522562, 0, 0, 0, 1
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("15_43bsa")
+
+[node name="Player" parent="." instance=ExtResource("15_a1g1w")]
+transform = Transform3D(0.045014262, 0, -0.99898636, 0, 1, 0, 0.99898636, 0, 0.045014262, -63.196857, 3.1063814, 0)
+collision_mask = 133
