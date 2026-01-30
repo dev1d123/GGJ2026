@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=13 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -6,16 +6,8 @@
 [ext_resource type="Script" uid="uid://bu8rp0160gddv" path="res://scripts/components/stats_panel.gd" id="2_pom5v"]
 [ext_resource type="Script" uid="uid://ckh233cdm87p" path="res://scripts/radar.gd" id="3_wxbmk"]
 [ext_resource type="Script" uid="uid://db1ighsdalgaj" path="res://scripts/components/consumables_panel.gd" id="4_pfnlp"]
+[ext_resource type="Texture2D" uid="uid://en7jipuv4je1" path="res://UI_assets/77564.jpg" id="4_tvtyy"]
 [ext_resource type="Script" uid="uid://bgphac7drlugh" path="res://scripts/components/skills_panel.gd" id="5_3q2by"]
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_pom5v"]
-size = Vector2(200, 15)
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_jd13s"]
-size = Vector2(200, 15)
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_wxbmk"]
-size = Vector2(200, 15)
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -71,22 +63,28 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="StaminaBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
+custom_minimum_size = Vector2(200, 15)
 layout_mode = 2
 value = 50.0
-texture_progress = SubResource("PlaceholderTexture2D_pom5v")
+nine_patch_stretch = true
+texture_progress = ExtResource("4_tvtyy")
 tint_progress = Color(1, 1, 0, 1)
 
 [node name="ManaBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
 modulate = Color(0, 1, 1, 1)
+custom_minimum_size = Vector2(200, 15)
 layout_mode = 2
 value = 50.0
-texture_progress = SubResource("PlaceholderTexture2D_jd13s")
+nine_patch_stretch = true
+texture_progress = ExtResource("4_tvtyy")
 
 [node name="UltiBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
-modulate = Color(1, 0, 1, 1)
+modulate = Color(0.33003333, 0, 0.99382055, 1)
+custom_minimum_size = Vector2(200, 15)
 layout_mode = 2
 value = 50.0
-texture_progress = SubResource("PlaceholderTexture2D_wxbmk")
+nine_patch_stretch = true
+texture_progress = ExtResource("4_tvtyy")
 
 [node name="ConsumablesPanel" type="VBoxContainer" parent="GameUI"]
 layout_mode = 1
@@ -239,6 +237,7 @@ grow_vertical = 0
 script = ExtResource("5_3q2by")
 
 [node name="SkillQ" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
+visible = false
 layout_mode = 0
 offset_left = 132.0
 offset_right = 260.0
@@ -330,6 +329,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="RadialMenu" type="Control" parent="."]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

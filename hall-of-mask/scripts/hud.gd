@@ -1,86 +1,106 @@
 extends CanvasLayer
 
-# --- REFERENCIAS A LOS COMPONENTES (SUB-MANAGERS) ---
+# --- REFERENCIAS A LOS COMPONENTES ---
 @onready var stats_panel = $GameUI/StatsPanel
 @onready var consumables_panel = $GameUI/ConsumablesPanel
-@onready var skills_panel = $GameUI/SkillsPanel    # <--- NUEVO
+@onready var skills_panel = $GameUI/SkillsPanel
 @onready var radar = $GameUI/Radar
 @onready var radial_menu = $RadialMenu
 
-# Referencias directas para el centro de la rueda (Esto se queda aquí o en RadialMenu)
+# Referencias iconos mano
 @onready var icon_hand_l = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_L
 @onready var icon_hand_r = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_R
 
-# Variables de prueba (Temporales)
-var cant_pocion_1 = 5
-var cant_pocion_2 = 3
-var cant_pocion_3 = 1
-
 func _ready():
-	# Conexión menú radial
+	# 1. Conexión Menú Radial
 	radial_menu.equip_item.connect(_on_item_equipped)
 	
-	# INICIALIZACIÓN (Delegamos a los componentes)
-	# Nota: skills_panel se auto-inicializa en su propio _ready
+	# 2. BUSCAR AL JUGADOR Y CONECTARSE (EL CABLEADO REAL)
+	var player = get_tree().root.find_child("Player", true, false)
 	
-	stats_panel.update_health(5)
-	stats_panel.update_mana(50, 100)
-	stats_panel.update_stamina(100, 100)
-	stats_panel.update_ulti(0, 100)
-	
-	consumables_panel.update_potion_count(1, cant_pocion_1)
-	consumables_panel.update_potion_count(2, cant_pocion_2) 
-	consumables_panel.update_potion_count(3, cant_pocion_3)
-	
-	consumables_panel.update_ammo("FLECHAS", 30)
+	if player:
+		print("HUD: ✅ Player encontrado. Conectando señales...")
+		
+		# Conectamos los gritos del Player a las funciones de actualización del HUD
+		player.vida_cambiada.connect(_on_player_vida_cambiada)
+		player.mana_cambiado.connect(_on_player_mana_cambiado)
+		player.stamina_cambiada.connect(_on_player_stamina_cambiada)
+		player.pociones_cambiadas.connect(_on_player_pociones_cambiadas)
+		
+		# CONEXIÓN ULTI (NUEVO)
+		player.ulti_cambiada.connect(_on_player_ulti_cambiada)
+		# Si el player tiene el método para forzar actualización inicial, úsalo
+		# si no, esperamos a que el player emita sus señales al inicio
+	else:
+		print("HUD: ❌ ¡NO encuentro al Player! Asegúrate que el nodo se llame 'Player'")
 
 func _input(event):
-	# --- INPUTS DE PRUEBA ---
+	# --- YA NO MANEJAMOS POCIONES AQUÍ ---
+	# El Player.gd se encarga de detectar la tecla 1, 2, 3.
+	# El HUD solo reacciona cuando el Player emite la señal.
 	
-	# --- POCIÓN 1 ---
-	if event.is_action_pressed("usar_pocion_1"):
-		if cant_pocion_1 > 0:
-			cant_pocion_1 -= 1
-			consumables_panel.update_potion_count(1, cant_pocion_1)
-			consumables_panel.animar_slot(1)
+	# Solo dejamos inputs EXCLUSIVOS de UI (como debug o menús)
 	
-	# --- POCIÓN 2  ---
-	if event.is_action_pressed("usar_pocion_2"):
-		if cant_pocion_2 > 0:
-			cant_pocion_2 -= 1
-			consumables_panel.update_potion_count(2, cant_pocion_2)
-			consumables_panel.animar_slot(2)
+	# 2. Usar Habilidad Q (Visualización)
+	# Si la lógica está en el player, esto también debería moverse, 
+	# pero por ahora lo dejamos visual.
+	if event.is_action_pressed("usar_habilidad_q"): 
+		skills_panel.start_q_cooldown(2.0)
 
-	# --- POCIÓN 3  ---
-	if event.is_action_pressed("usar_pocion_3"):
-		if cant_pocion_3 > 0:
-			cant_pocion_3 -= 1
-			consumables_panel.update_potion_count(3, cant_pocion_3)
-			consumables_panel.animar_slot(3)
+# --- RECEPCIÓN DE SEÑALES DEL PLAYER (CALLBACKS) 📡 ---
 
-	# 2. Usar Habilidad Q (Cooldown)
-	if event.is_action_pressed("usar_habilidad_q"): # Asegúrate de tener esta tecla en el Mapa de Entrada (o usa "ui_page_up" para test)
-		print("Test: Usando Skill Q")
-		skills_panel.start_q_cooldown(2.0) # 2 segundos de cooldown
-			
-	# 3. Simular Daño y Carga de Ulti (ENTER)
-	if event.is_action_pressed("ui_accept"): 
-		print("Test: Daño recibido + Carga Ulti")
-		stats_panel.update_health(3)
-		stats_panel.update_mana(10, 100)
-		
-		# Actualizamos ambas barras de Ulti (la de arriba y la de abajo)
-		var carga_ulti = 100 
-		stats_panel.update_ulti(carga_ulti, 100)
-		skills_panel.update_ulti_charge(carga_ulti, 100)
+func _on_player_vida_cambiada(nueva_vida):
+	# Convertimos a int por si acaso viene como float
+	stats_panel.update_health(int(nueva_vida))
 
-# --- RESPUESTA AL MENÚ RADIAL ---
+func _on_player_mana_cambiado(nuevo_mana, max_mana):
+	stats_panel.update_mana(nuevo_mana, max_mana)
+
+func _on_player_stamina_cambiada(nueva_stamina, max_stamina):
+	stats_panel.update_stamina(nueva_stamina, max_stamina)
+
+func _on_player_pociones_cambiadas(slot_index, cantidad):
+	# El Player manda slot 1, 2, 3. El panel lo entiende perfecto.
+	consumables_panel.update_potion_count(slot_index, cantidad)
+	consumables_panel.animar_slot(slot_index)
+
+# --- NUEVA FUNCIÓN DE ULTI ---
+func _on_player_ulti_cambiada(nueva_carga, max_carga):
+	# 1. Actualizar la barra grande de arriba
+	stats_panel.update_ulti(nueva_carga, max_carga)
+	# 2. Actualizar el icono pequeño de abajo (R)
+	skills_panel.update_ulti_charge(nueva_carga, max_carga)
+
+# --- LÓGICA DE EQUIPAMIENTO (Radial Menu) ---
+
 func _on_item_equipped(hand_side, item_data):
 	if item_data == null: return
 	
-	print("HUD: Equipando ", item_data.nombre)
+	var target_icon = null
+	var other_icon = null
 	
-	var target_icon = icon_hand_l if hand_side == "LEFT" else icon_hand_r
+	if hand_side == "LEFT":
+		target_icon = icon_hand_l
+		other_icon = icon_hand_r
+	elif hand_side == "RIGHT":
+		target_icon = icon_hand_r
+		other_icon = icon_hand_l
+	
 	if target_icon:
-		target_icon.texture = item_data.icono
-		target_icon.modulate = item_data.color_ui
+		target_icon.texture = item_data.icon
+		target_icon.modulate = Color(1, 1, 1)
+		
+		if item_data.is_two_handed:
+			print("HUD: Arma 2 manos. Bloqueando la otra.")
+			other_icon.texture = null
+			other_icon.modulate = Color(0.5, 0.5, 0.5, 0.5)
+		else:
+			# Limpiar fantasma si estaba bloqueada
+			if other_icon.modulate.a < 0.9: 
+				other_icon.texture = null 
+				other_icon.modulate = Color(1, 1, 1, 1)
+
+	# ENVIAR ORDEN AL PLAYER
+	var player = get_tree().root.find_child("Player", true, false)
+	if player and player.has_method("equipar_desde_ui"):
+		player.equipar_desde_ui(item_data, hand_side)

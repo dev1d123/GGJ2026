@@ -11,7 +11,9 @@ func _ready():
 	
 	skill_r_bar.max_value = 100
 	skill_r_bar.value = 0 # R empieza vacía
-
+	
+	# La ocultamos visualmente, pero la lógica sigue ahí por si acaso.
+	skill_q_bar.visible = false
 # --- HABILIDAD Q (Cooldown) ---
 
 func start_q_cooldown(tiempo_segundos: float = 2.0):

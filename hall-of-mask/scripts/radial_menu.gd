@@ -44,30 +44,46 @@ func _ready():
 		
 	# --- GENERAR ITEMS DE PRUEBA ---
 	# --- GENERAR DATOS DE PRUEBA (USANDO LA NUEVA CLASE) ---
-	_crear_datos_falsos_pro()
+	_cargar_armas_desde_carpeta()
 	_actualizar_iconos_sectores()
 
-func _crear_datos_falsos_pro():
-	var icono_ref = preload("res://icon.svg")
+func _cargar_armas_desde_carpeta():
+	var ruta_carpeta = "res://src/actors/weapons/" # <--- AJUSTA ESTA RUTA A LA SUYA
+	var dir = DirAccess.open(ruta_carpeta)
 	
-	# Creamos items "al vuelo" usando nuestra nueva clase
-	var daga = ItemData.new()
-	daga.nombre = "Daga Oxidada"
-	daga.icono = icono_ref
-	daga.color_ui = Color.RED
-	inventory_data[1].append(daga)
+	if dir:
+		dir.list_dir_begin()
+		var file_name = dir.get_next()
+		
+		while file_name != "":
+			# Buscamos solo archivos .tres (Resources) y evitamos archivos temporales (.remap)
+			if file_name.ends_with(".tres") or (file_name.ends_with(".tres.remap")):
+				# Limpieza de nombre para Godot exportado
+				var nombre_real = file_name.replace(".remap", "")
+				
+				# Cargar el recurso
+				var recurso = load(ruta_carpeta + nombre_real)
+				
+				# Verificar que sea un WeaponData válido
+				if recurso is WeaponData:
+					print("🎒 RadialMenu: Arma encontrada -> ", recurso.name)
+					_distribuir_arma_en_inventario(recurso)
+					
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	else:
+		print("❌ ERROR: No se encontró la carpeta de armas en: ", ruta_carpeta)
+
+func _distribuir_arma_en_inventario(arma: WeaponData):
+	# Lógica simple para ordenar por ahora:
+	# Sector 1: Ligeras (Dagas, Espadas)
+	# Sector 2: Pesadas (2 Manos, Martillos)
+	# Puedes mejorar esto si WeaponData tuviera una variable "tipo" o "categoria"
 	
-	var espada = ItemData.new()
-	espada.nombre = "Espada Real"
-	espada.icono = icono_ref
-	espada.color_ui = Color.GREEN
-	inventory_data[1].append(espada)
-	
-	var martillo = ItemData.new()
-	martillo.nombre = "Aplastador"
-	martillo.icono = icono_ref
-	martillo.color_ui = Color.BLUE
-	inventory_data[2].append(martillo)
+	if arma.is_two_handed:
+		inventory_data[2].append(arma) # Sector 2 = Pesadas
+	else:
+		inventory_data[1].append(arma) # Sector 1 = Una mano
 
 # CAMBIO 2: Actualizar lectura de datos en _actualizar_iconos_sectores
 func _actualizar_iconos_sectores(sector_especifico: int = -1):
@@ -85,15 +101,15 @@ func _actualizar_iconos_sectores(sector_especifico: int = -1):
 		if lista_items.size() > 0:
 			var indice_actual = sector_scroll_indices[i]
 			
-			# AHORA item ES UN OBJETO DE TIPO ItemData
-			var item : ItemData = lista_items[indice_actual] 
+			# AHORA item ES UN OBJETO DE TIPO WeaponData
+			var item : WeaponData = lista_items[indice_actual] 
 			
-			# Usa .icono en lugar de ["icon"]
-			sector_visual.texture = item.icono
+			# Usa .icon
+			sector_visual.texture = item.icon
 			
 			if i != current_sector_index:
-				# Usamos .color_ui en lugar de .get("color")
-				sector_visual.modulate = item.color_ui * 0.6 
+				# Usamos .Color.WHITE en lugar de .get("color")
+				sector_visual.modulate = Color.WHITE * 0.6 
 				sector_visual.scale = Vector2(1, 1)
 			else:
 				_actualizar_resaltado()
@@ -118,14 +134,14 @@ func _actualizar_resaltado():
 		
 		if lista.size() > 0:
 			var indice = sector_scroll_indices[current_sector_index]
-			var item : ItemData = lista[indice]
+			var item : WeaponData = lista[indice]
 			
-			# AHORA SE USA LAS PROPIEDADES DE LA CLASE ItemData
-			var color_base = item.color_ui
+			# AHORA SE USA LAS PROPIEDADES DE LA CLASE WeaponData
+			var color_base = Color.WHITE
 			
 			sector_activo.modulate = color_base * 1.5 # Brillo HDR
 			sector_activo.scale = Vector2(1.15, 1.15) # Pop!
-			sector_activo.texture = item.icono
+			sector_activo.texture = item.icon
 			
 		else:
 			# CASO B: ESTÁ VACÍO
@@ -136,20 +152,26 @@ func _actualizar_resaltado():
 func _input(event):
 	
 	# 1. LÓGICA DE ABRIR/CERRAR (Mantener TAB)
-	
 	if event.is_action_pressed("abrir_menu_radial"):
 		visible = true
-		wheel_origin.position = get_viewport_rect().size / 2 # Recentrar por si acaso
-		_actualizar_resaltado() # Limpiar visuales al abrir
+		wheel_origin.position = get_viewport_rect().size / 2
+		_actualizar_resaltado()
+		
+		# --- PAUSAR EL JUEGO ---
+		get_tree().paused = true # Congela al Player y enemigos
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE # Soltar el mouse
 		
 	elif event.is_action_released("abrir_menu_radial"):
 		visible = false
 		current_sector_index = -1 
-		return # Sale para no procesar clics mientras se cierra
+		
+		# --- REANUDAR EL JUEGO ---
+		get_tree().paused = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED # Capturar mouse de nuevo
+		
+		return 
 
-	# Si el menú no está visible no se procesa nada más
 	if not visible: return
-
 	
 	# 2. CÁLCULO MATEMÁTICO DEL SECTOR
 
@@ -197,7 +219,7 @@ func _input(event):
 				
 				# Feedback
 				var item_nuevo = lista[sector_scroll_indices[current_sector_index]]
-				print("Scroll ARRIBA: Cambiado a ", item_nuevo.nombre)
+				print("Scroll ARRIBA: Cambiado a ", item_nuevo.name)
 			
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			var lista = inventory_data[current_sector_index]
@@ -210,7 +232,7 @@ func _input(event):
 				_actualizar_iconos_sectores(current_sector_index)
 				
 				var item_nuevo = lista[sector_scroll_indices[current_sector_index]]
-				print("Scroll ABAJO: Cambiado a ", item_nuevo.nombre)
+				print("Scroll ABAJO: Cambiado a ", item_nuevo.name)
 			
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			var lista = inventory_data[current_sector_index]
