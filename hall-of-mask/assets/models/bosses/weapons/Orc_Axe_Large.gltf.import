@@ -3,12 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b1nljwfohotcf"
-valid=false
+uid="uid://csuy3vqg8yp7c"
+path="res://.godot/imported/Orc_Axe_Large.gltf-245de212a11379e6c00cd2a6a5c1a53c.scn"
 
 [deps]
 
 source_file="res://assets/models/bosses/weapons/Orc_Axe_Large.gltf"
+dest_files=["res://.godot/imported/Orc_Axe_Large.gltf-245de212a11379e6c00cd2a6a5c1a53c.scn"]
 
 [params]
 

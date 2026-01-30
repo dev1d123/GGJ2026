@@ -3,12 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c7piatapxewi6"
-valid=false
+uid="uid://ly7gs08yrtab"
+path="res://.godot/imported/Orc_Banner.gltf-9dab4f15e584f530e0d028fbc604e5ac.scn"
 
 [deps]
 
 source_file="res://assets/models/bosses/weapons/Orc_Banner.gltf"
+dest_files=["res://.godot/imported/Orc_Banner.gltf-9dab4f15e584f530e0d028fbc604e5ac.scn"]
 
 [params]
 

@@ -299,3 +299,27 @@ func _buscar_hitbox(parent):
 
 func _viajar_animacion(path, anim_name):
 	if animation_tree: animation_tree[path].travel(anim_name)
+
+# Función para que los Jefes activen el hitbox manualmente con tiempos personalizados
+func manual_hitbox_activation(damage_mult_override: float, duration: float, knockback_force: float, hand_node: Node3D):
+	var hitbox = _buscar_hitbox(hand_node)
+	if hitbox:
+		hitbox.collision_mask = attack_layer_mask
+		
+		# Calculamos daño base
+		var base_dmg = 10.0
+		if weapon_r: base_dmg = weapon_r.damage # Usamos el daño del arma equipada
+		
+		# Sumamos atributos
+		if attribute_manager and attribute_manager.has_method("get_stat"):
+			base_dmg += attribute_manager.get_stat("melee_damage")
+		
+		# Aplicamos multiplicadores
+		var final_damage = base_dmg * damage_multiplier * damage_mult_override
+		
+		# Activar
+		hitbox.activate(final_damage, knockback_force, 5.0, owner_node)
+		
+		# Esperar y desactivar
+		await get_tree().create_timer(duration).timeout
+		if hitbox: hitbox.deactivate()

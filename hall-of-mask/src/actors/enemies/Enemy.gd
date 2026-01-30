@@ -12,7 +12,7 @@ class_name Enemy
 # --- SISTEMAS MODULARES ---
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var health_component: HealthComponent = $HealthComponent
-@onready var anim_tree: AnimationTree = $AnimationTree
+@export var anim_tree: AnimationTree
 # AGREGAMOS REFERENCIA AL MASK MANAGER (Si no la tenías)
 @onready var mask_manager: MaskManager = $MaskManager
 
@@ -117,6 +117,9 @@ func _ready():
 	if health_component:
 		health_component.on_death.connect(_morir)
 		health_component.on_damage_received.connect(_on_damage_visual)
+	
+	if mask_manager:
+		mask_manager.on_ultimate_state.connect(_on_ultimate_visuals)
 	
 	_setup_unique_materials()
 	if eyes: eyes.add_exception(self)
@@ -448,3 +451,25 @@ func _activar_aura_mascara():
 		mat.next_pass = aura_mat
 	
 	print(name, ": ✨ Aura externa activada color ", color_aura)
+	
+func _on_ultimate_visuals(is_active: bool):
+	if unique_materials.is_empty(): return
+	
+	print(name, ": 🔥 CAMBIO VISUAL ULTI -> ", is_active)
+	
+	var target_energy = 2.0 # Energía normal
+	var target_grow = 0.03  # Grosor normal
+	
+	if is_active:
+		target_energy = 8.0 # ¡MUCHO MÁS BRILLO!
+		target_grow = 0.08  # Aura más gruesa (Super Saiyan)
+	
+	# Aplicamos los cambios al material "Next Pass" (el aura)
+	for mat in unique_materials:
+		if mat.next_pass:
+			var aura = mat.next_pass
+			# Usamos un tween para que la transición sea épica
+			var t = create_tween()
+			t.set_parallel(true)
+			t.tween_property(aura, "emission_energy", target_energy, 0.5)
+			t.tween_property(aura, "grow_amount", target_grow, 0.5)
