@@ -1,0 +1,81 @@
+[gd_scene load_steps=8 format=3 uid="uid://dwk18we86selq"]
+
+[ext_resource type="Texture2D" uid="uid://kril6038yrw4" path="res://assets/imagesGUI/background.png" id="1_ptg3k"]
+[ext_resource type="Texture2D" uid="uid://b4xh40wghtr0n" path="res://assets/imagesGUI/logo.png" id="2_n8v1d"]
+[ext_resource type="Texture2D" uid="uid://bofgiwo7vwnqn" path="res://assets/imagesGUI/butonNormal.png" id="3_ppsmk"]
+[ext_resource type="Texture2D" uid="uid://bumfyytgarcwd" path="res://assets/imagesGUI/buttonClicked.png" id="4_kpcnc"]
+[ext_resource type="Texture2D" uid="uid://bb1x181wlsn87" path="res://assets/imagesGUI/buttonHover.png" id="5_alggg"]
+[ext_resource type="FontFile" uid="uid://3qoskpc6gny4" path="res://assets/imagesGUI/font.TTF" id="6_kpcnc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_alggg"]
+font = ExtResource("6_kpcnc")
+font_size = 32
+outline_size = 3
+shadow_size = 31
+shadow_color = Color(0, 0, 0, 1)
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="Background" type="Sprite2D" parent="."]
+position = Vector2(577, 357)
+scale = Vector2(1.2119141, 1.1253603)
+texture = ExtResource("1_ptg3k")
+
+[node name="Logo" type="Sprite2D" parent="."]
+position = Vector2(600, 126)
+scale = Vector2(1.497, 1.712)
+texture = ExtResource("2_n8v1d")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 394.0
+offset_top = 243.0
+offset_right = 787.0
+offset_bottom = 617.0
+color = Color(0.012617188, 0.012617188, 0.012617188, 0.7882353)
+
+[node name="startButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 461.0
+offset_top = 319.0
+offset_right = 710.0
+offset_bottom = 390.0
+texture_normal = ExtResource("3_ppsmk")
+texture_pressed = ExtResource("4_kpcnc")
+texture_hover = ExtResource("5_alggg")
+
+[node name="Label" type="Label" parent="startButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 6.0
+offset_right = 230.0
+offset_bottom = 64.0
+text = "START!"
+label_settings = SubResource("LabelSettings_alggg")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="exitButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 467.0
+offset_top = 470.0
+offset_right = 716.0
+offset_bottom = 541.0
+texture_normal = ExtResource("3_ppsmk")
+texture_pressed = ExtResource("4_kpcnc")
+texture_hover = ExtResource("5_alggg")
+
+[node name="Label" type="Label" parent="exitButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 6.0
+offset_right = 230.0
+offset_bottom = 64.0
+text = "EXIT"
+label_settings = SubResource("LabelSettings_alggg")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
