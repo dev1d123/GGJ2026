@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqiusix20y17r"
-path="res://.godot/imported/pocion-de-amor.png-962d0f0b343b4b8d40d5dcd80597b136.ctex"
+uid="uid://cwcv5hx8rqrvd"
+path="res://.godot/imported/images.png-0cdf54818092340409d44c3a83b7f38e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://UI_assets/pocion-de-amor.png"
-dest_files=["res://.godot/imported/pocion-de-amor.png-962d0f0b343b4b8d40d5dcd80597b136.ctex"]
+source_file="res://UI_assets/images.png"
+dest_files=["res://.godot/imported/images.png-0cdf54818092340409d44c3a83b7f38e.ctex"]
 
 [params]
 

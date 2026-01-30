@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqiusix20y17r"
-path="res://.godot/imported/pocion-de-amor.png-962d0f0b343b4b8d40d5dcd80597b136.ctex"
+uid="uid://dd1jja0vqag3s"
+path="res://.godot/imported/flecha-de-tiro-con-arco.png-16f19953072a4849d627536339a590b7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://UI_assets/pocion-de-amor.png"
-dest_files=["res://.godot/imported/pocion-de-amor.png-962d0f0b343b4b8d40d5dcd80597b136.ctex"]
+source_file="res://UI_assets/flecha-de-tiro-con-arco.png"
+dest_files=["res://.godot/imported/flecha-de-tiro-con-arco.png-16f19953072a4849d627536339a590b7.ctex"]
 
 [params]
 

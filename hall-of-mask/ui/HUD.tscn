@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=21 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -8,6 +8,14 @@
 [ext_resource type="Script" uid="uid://db1ighsdalgaj" path="res://scripts/components/consumables_panel.gd" id="4_pfnlp"]
 [ext_resource type="Texture2D" uid="uid://en7jipuv4je1" path="res://UI_assets/77564.jpg" id="4_tvtyy"]
 [ext_resource type="Script" uid="uid://bgphac7drlugh" path="res://scripts/components/skills_panel.gd" id="5_3q2by"]
+[ext_resource type="Texture2D" uid="uid://dqiusix20y17r" path="res://UI_assets/pocion-de-amor.png" id="6_mpo0d"]
+[ext_resource type="Texture2D" uid="uid://dgdw6shbfwilf" path="res://UI_assets/pocion-de-escudo.png" id="7_tlkqj"]
+[ext_resource type="Texture2D" uid="uid://dlpyvw0me7n5l" path="res://UI_assets/pocion-magica.png" id="8_urddi"]
+[ext_resource type="Texture2D" uid="uid://dd1jja0vqag3s" path="res://UI_assets/flecha-de-tiro-con-arco.png" id="9_ioimr"]
+[ext_resource type="Texture2D" uid="uid://vkskqkh626jb" path="res://UI_assets/bala.png" id="10_cjw2x"]
+[ext_resource type="Texture2D" uid="uid://c5tn7i2xyseeh" path="res://UI_assets/star-trek.png" id="12_5d7l6"]
+[ext_resource type="Texture2D" uid="uid://biqjafxg8ahv0" path="res://UI_assets/diamante.png" id="15_wxjpw"]
+[ext_resource type="Texture2D" uid="uid://cwcv5hx8rqrvd" path="res://UI_assets/images.png" id="16_l08fo"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -106,7 +114,7 @@ size_flags_horizontal = 8
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("2_64pwb")
+texture = ExtResource("6_mpo0d")
 expand_mode = 1
 
 [node name="CountLabel" type="Label" parent="GameUI/ConsumablesPanel/Potions/Slot1"]
@@ -129,7 +137,7 @@ vertical_alignment = 2
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("2_64pwb")
+texture = ExtResource("7_tlkqj")
 expand_mode = 1
 
 [node name="CountLabel" type="Label" parent="GameUI/ConsumablesPanel/Potions/Slot2"]
@@ -152,7 +160,7 @@ vertical_alignment = 2
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("2_64pwb")
+texture = ExtResource("8_urddi")
 expand_mode = 1
 
 [node name="CountLabel" type="Label" parent="GameUI/ConsumablesPanel/Potions/Slot3"]
@@ -179,7 +187,7 @@ size_flags_horizontal = 8
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("2_64pwb")
+texture = ExtResource("9_ioimr")
 expand_mode = 1
 
 [node name="ArrowLabel" type="Label" parent="GameUI/ConsumablesPanel/Ammo/IconoFlecha"]
@@ -202,7 +210,7 @@ vertical_alignment = 2
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("2_64pwb")
+texture = ExtResource("10_cjw2x")
 expand_mode = 1
 
 [node name="BulletLabel" type="Label" parent="GameUI/ConsumablesPanel/Ammo/IconoBala"]
@@ -272,8 +280,8 @@ offset_right = 260.0
 offset_bottom = 260.0
 size_flags_horizontal = 8
 fill_mode = 3
-texture_under = ExtResource("2_64pwb")
-texture_progress = ExtResource("2_64pwb")
+texture_under = ExtResource("12_5d7l6")
+texture_progress = ExtResource("12_5d7l6")
 tint_progress = Color(1, 0, 1, 1)
 
 [node name="Label" type="Label" parent="GameUI/SkillsPanel/SkillR"]
@@ -365,7 +373,7 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.5, 0.5)
 pivot_offset = Vector2(100, 100)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("15_wxjpw")
 
 [node name="Icon_Hand_L" type="TextureRect" parent="RadialMenu/WheelOrigin/RomboCentro"]
 layout_mode = 1
@@ -426,7 +434,7 @@ offset_bottom = -104.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("16_l08fo")
 
 [node name="Sector1" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -442,7 +450,7 @@ offset_bottom = -11.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("16_l08fo")
 
 [node name="Sector2" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -458,7 +466,7 @@ offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("16_l08fo")
 
 [node name="Sector3" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -474,7 +482,7 @@ offset_bottom = 238.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("16_l08fo")
 
 [node name="Sector4" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -490,7 +498,7 @@ offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("16_l08fo")
 
 [node name="Sector5" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -506,4 +514,4 @@ offset_bottom = -13.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
-texture = ExtResource("2_64pwb")
+texture = ExtResource("16_l08fo")
