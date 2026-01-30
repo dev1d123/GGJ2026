@@ -1,6 +1,8 @@
 extends CharacterBody3D
 
-# --- REFERENCIAS ---
+# ------------------------------------------------------------------------------
+# 1. CONFIGURACIÓN Y REFERENCIAS
+# ------------------------------------------------------------------------------
 @onready var head_mount: Node3D = $HeadMount
 @onready var camera: Camera3D = $HeadMount/Camera3D
 @onready var anim_tree: AnimationTree = $AnimationTree
@@ -9,40 +11,71 @@ extends CharacterBody3D
 @onready var attributes: Node = $AttributeManager 
 @onready var stamina: Node = $StaminaComponent
 @onready var health_component: HealthComponent = $HealthComponent 
-@onready var combat_manager: CombatManager = $CombatManager # Referencia al Manager
+@onready var combat_manager: CombatManager = $CombatManager 
 
-# --- VARIABLES ---
+# --- CONFIGURACIÓN FÍSICA ---
+@export_category("Movimiento Base")
+@export var speed_walk: float = 5.0
+@export var jump_force: float = 9.0 
+@export var gravity_multiplier: float = 2.0 
+
+@export_category("Evasión (Dodge & Dive)")
+@export var dodge_power: float = 15.0 
+@export var dodge_cost: float = 15.0
+
+# --- FUSIÓN DE MECÁNICAS ---
+## Penalizador base: El Dive tendrá como MÁXIMO este % de fuerza del Dodge.
+## (0.8 = El dive llega al 80% de lejos que un dodge normal).
+@export var dive_sprint_damp: float = 0.8
+
+# --- CONFIGURACIÓN DE MOMENTO (NUEVO) ---
+# Tiempo necesario corriendo para alcanzar el 100% de impulso
+const MAX_MOMENTUM_TIME: float = 0.9 
+# Impulso mínimo al empezar a correr (0.1 = 10%)
+const MIN_MOMENTUM_MULT: float = 0.1 
+
+# --- MULTIPLICADORES DE MÁSCARA ---
+var mask_speed_mult: float = 1.0
+var mask_jump_mult: float = 1.0
+var mask_defense_mult: float = 1.0:
+	set(value):
+		mask_defense_mult = value
+		if health_component: health_component.defense_multiplier = value
+
+# --- VARIABLES INTERNAS ---
 var max_health: float = 100.0
 var current_health: float = 100.0
 var is_dead: bool = false 
-
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 const MOUSE_SENSITIVITY: float = 0.003
 var _cam_pitch: float = 0.0 
 var spine_bone_id: int = -1
 var knockback_velocity: Vector3 = Vector3.ZERO
-var knockback_friction: float = 8.0
 
+# Tiempos
 const TIME_TO_PRONE: float = 0.4
-const DIVE_MIN_TIME: float = 0.6 
+const DIVE_MIN_TIME: float = 0.5 
 var crouch_pressed_time: float = 0.0 
 var dive_timer: float = 0.0
+var sprint_timer: float = 0.0 # Cronómetro para calcular el impulso
 var was_in_air: bool = false
+var can_dodge: bool = true 
 
+# Estados
 enum State { NORMAL, SPRINT, CROUCH, PRONE, DODGING, DIVING, DEAD }
 var current_state: State = State.NORMAL
-var can_dodge: bool = true 
-var dodge_power: float = 25.0 
+
+signal on_state_changed(new_state_name)
 
 const PATH_STANDING = "parameters/StateMachine/Standing/blend_position"
 const PATH_SNEAKING = "parameters/StateMachine/Sneaking/blend_position"
 const PATH_CRAWLING = "parameters/StateMachine/Crawling/blend_position"
 const PATH_DODGE    = "parameters/StateMachine/Dodge/blend_position"
 var smooth_blend: Vector2 = Vector2.ZERO
-var blend_speed: float = 7.0
+var blend_speed: float = 10.0
 
 # ------------------------------------------------------------------------------
-# 3. CICLO DE VIDA
+# 2. CICLO DE VIDA E INPUTS
 # ------------------------------------------------------------------------------
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -54,12 +87,12 @@ func _ready():
 		if "max_health" in health_component:
 			max_health = health_component.max_health
 			current_health = health_component.current_health
-	print("✅ PLAYER LISTO.")
+			
+	emit_signal("on_state_changed", "NORMAL")
 
 func _input(event: InputEvent) -> void:
 	if is_dead: return 
 
-	# 1. CÁMARA (Mouse Motion)
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		_cam_pitch -= event.relative.y * MOUSE_SENSITIVITY
@@ -67,62 +100,47 @@ func _input(event: InputEvent) -> void:
 		camera.rotation.x = _cam_pitch
 		rotar_columna_hacia_camara()
 	
-	# 2. UI Y MOUSE MODE
 	if event.is_action_pressed("ui_cancel"): 
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if event is InputEventMouseButton and event.pressed:
 		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		
-		# 3. ATAQUE (Delegado al Manager)
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			if event.button_index == MOUSE_BUTTON_RIGHT:
 				combat_manager.try_attack("right")
 			elif event.button_index == MOUSE_BUTTON_LEFT:
 				combat_manager.try_attack("left")
 
-	# ----------------------------------------------------------------------
-	# 4. INPUTS DE ARMAS (RESTAURADOS)
-	# Leemos los slots del CombatManager y le decimos qué equipar.
-	# ----------------------------------------------------------------------
 	if event is InputEventKey and event.pressed:
 		var tab = Input.is_physical_key_pressed(KEY_TAB)
 		var mano = "left" if tab else "right"
-		
-		# Verificamos si podemos cambiar (si no estamos atacando con esa mano)
-		# Accedemos a las variables públicas del manager
 		if mano == "right" and combat_manager.is_attacking_r: return
 		if mano == "left" and combat_manager.is_attacking_l: return
 
 		match event.keycode:
-			KEY_1: 
-				combat_manager.unequip_weapon(mano)
-			KEY_2: 
-				# Accedemos al slot guardado en el manager
-				if combat_manager.slot_2: 
-					combat_manager.equip_weapon(combat_manager.slot_2, mano)
-			KEY_3: 
-				if combat_manager.slot_3: 
-					combat_manager.equip_weapon(combat_manager.slot_3, mano)
-			KEY_4: 
-				if combat_manager.slot_4: 
-					combat_manager.equip_weapon(combat_manager.slot_4, mano)
+			KEY_1: combat_manager.unequip_weapon(mano)
+			KEY_2: if combat_manager.slot_2: combat_manager.equip_weapon(combat_manager.slot_2, mano)
+			KEY_3: if combat_manager.slot_3: combat_manager.equip_weapon(combat_manager.slot_3, mano)
+			KEY_4: if combat_manager.slot_4: combat_manager.equip_weapon(combat_manager.slot_4, mano)
 
+# ------------------------------------------------------------------------------
+# 3. FÍSICAS
+# ------------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
+	if is_dead: return 
+
 	# 0. Gravedad
 	if not is_on_floor():
-		velocity.y -= gravity * delta
+		velocity.y -= (gravity * gravity_multiplier) * delta
 		was_in_air = true
 	elif was_in_air:
 		was_in_air = false
 		refrescar_animacion_aterrizaje()
 
-	if is_dead:
-		velocity.x = 0; velocity.z = 0; move_and_slide(); return 
-
-	# 1. Empuje
+	# 1. Empuje (Knockback)
 	if knockback_velocity.length() > 0.5:
-		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * delta)
+		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 15.0 * delta)
 		velocity.x = knockback_velocity.x
 		velocity.z = knockback_velocity.z
 		move_and_slide()
@@ -132,8 +150,7 @@ func _physics_process(delta: float) -> void:
 	if current_state == State.DODGING: procesar_dodge(delta); return
 	if current_state == State.DIVING: procesar_dive(delta); return
 	
-	# 3. LÓGICA DE MOVIMIENTO DURANTE ATAQUE
-	# Usamos la variable del Manager para saber si el arma actual nos congela
+	# 3. Ataque Congelado
 	if combat_manager.is_movement_locked:
 		velocity.x = move_toward(velocity.x, 0, 20.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, 20.0 * delta)
@@ -141,110 +158,209 @@ func _physics_process(delta: float) -> void:
 		actualizar_blendspaces(Vector2.ZERO, delta)
 		return 
 	
-	# 4. Movimiento Normal
+	# 4. Inputs y Estados
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	
+	# Detectar cambios (Sprint, Dive, Crouch)
 	controlar_inputs_postura(delta, input_dir.y > 0)
+	
+	# Seguridad: Si cambiamos a Dodge/Dive, no caminar
+	if current_state == State.DODGING or current_state == State.DIVING:
+		return 
+	
+	# 5. Lógica del Timer de Momento (Sprint)
+	if current_state == State.SPRINT:
+		# Aumentamos el contador hasta llegar al tope (0.9s)
+		sprint_timer = min(sprint_timer + delta, MAX_MOMENTUM_TIME)
+	else:
+		# Si dejamos de correr, perdemos el impulso instantáneamente (o podrías hacerlo gradual)
+		sprint_timer = 0.0
+
+	# 6. Moverse
 	procesar_movimiento_normal(delta, input_dir)
 	actualizar_blendspaces(input_dir, delta)
 
 # ------------------------------------------------------------------------------
-# 4. LÓGICA DE MOVIMIENTO (TU CÓDIGO ORIGINAL)
+# 4. CONTROL DE ESTADOS
 # ------------------------------------------------------------------------------
 func controlar_inputs_postura(delta, moving_back): 
-	# Salto
+	# --- SALTO ---
 	if Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("jump"):
 		match current_state:
 			State.PRONE: cambiar_estado(State.CROUCH)
 			State.CROUCH: cambiar_estado(State.NORMAL)
 			State.NORMAL, State.SPRINT:
 				if is_on_floor() and stamina.try_consume(15):
-					velocity.y = 5.0 # Salto
+					velocity.y = jump_force * mask_jump_mult 
 					state_machine.travel("Jump_Start")
 		return
 	
-	# Agacharse / Dive / Reptar
-	if Input.is_action_just_pressed("crouch"):
-		if current_state == State.SPRINT: iniciar_dive(); return
+	# --- DODGE ---
+	if Input.is_action_just_pressed("dodge") and can_dodge and is_on_floor():
+		iniciar_dodge()
+		return
+	
+	# --- SPRINT ---
+	var is_moving = velocity.x != 0 or velocity.z != 0
+	
+	if Input.is_action_pressed("sprint") and is_on_floor() and not moving_back and current_state == State.NORMAL and is_moving:
+		cambiar_estado(State.SPRINT)
+	
+	if current_state == State.SPRINT:
+		if not Input.is_action_pressed("sprint") or not is_moving:
+			cambiar_estado(State.NORMAL)
+		else:
+			if not stamina.try_consume(10 * delta):
+				cambiar_estado(State.NORMAL) 
 
-	if Input.is_action_pressed("crouch"):
+	# --- INPUT DE AGACHARSE (Dual: Dive vs Crouch) ---
+	
+	# CASO 1: PRESIONAR (Just Pressed)
+	if Input.is_action_just_pressed("crouch"):
+		# SOLO si estamos corriendo, iniciamos el DIVE
+		if current_state == State.SPRINT:
+			iniciar_dive()
+			return # Importante: salir para no procesar el crouch normal abajo
+
+	# CASO 2: MANTENER (Hold) para ir al suelo (Prone)
+	# Solo funciona si NO estamos corriendo (si corremos, ya nos tiramos en el paso anterior)
+	if Input.is_action_pressed("crouch") and current_state != State.SPRINT:
 		crouch_pressed_time += delta
 		if crouch_pressed_time > TIME_TO_PRONE:
 			if current_state != State.PRONE: cambiar_estado(State.PRONE)
+	
+	# CASO 3: SOLTAR (Release) para alternar Crouch/Stand
 	elif Input.is_action_just_released("crouch"):
-		if crouch_pressed_time <= TIME_TO_PRONE:
+		# Solo si fue un toque rápido y no un dive
+		if crouch_pressed_time <= TIME_TO_PRONE and current_state != State.DIVING:
 			if current_state == State.CROUCH: cambiar_estado(State.NORMAL)
 			elif current_state != State.PRONE: cambiar_estado(State.CROUCH)
 		crouch_pressed_time = 0.0
-	
-	# Sprint
-	if Input.is_action_pressed("sprint") and is_on_floor() and not moving_back and current_state == State.NORMAL:
-		if stamina.try_consume(10 * delta):
-			if current_state != State.SPRINT: cambiar_estado(State.SPRINT)
-	elif current_state == State.SPRINT and not Input.is_action_pressed("sprint"):
-		cambiar_estado(State.NORMAL)
-	
-	# Dodge
-	if Input.is_action_just_pressed("dodge") and can_dodge and is_on_floor():
-		if stamina.try_consume(10): iniciar_dodge()
 
 func procesar_movimiento_normal(delta, input_dir):
-	var speed = attributes.get_stat("move_speed") if attributes else 5.0
-	match current_state:
-		State.SPRINT: speed *= 1.5
-		State.CROUCH: speed *= 0.5
-		State.PRONE: speed *= 0.3
+	var base_spd = speed_walk
+	if attributes and attributes.has_method("get_stat"):
+		base_spd = attributes.get_stat("move_speed")
 	
-	var dir = (transform.basis * Vector3(-input_dir.x, 0, -input_dir.y)).normalized()
+	var final_speed = base_spd * mask_speed_mult
+	
+	match current_state:
+		State.SPRINT: final_speed *= 1.6
+		State.CROUCH: final_speed *= 0.5
+		State.PRONE: final_speed *= 0.3
+	
+	var dir = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	
 	if dir:
-		velocity.x = dir.x * speed
-		velocity.z = dir.z * speed
+		velocity.x = dir.x * final_speed
+		velocity.z = dir.z * final_speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, speed)
-		velocity.z = move_toward(velocity.z, 0, speed)
+		velocity.x = move_toward(velocity.x, 0, final_speed)
+		velocity.z = move_toward(velocity.z, 0, final_speed)
+	
 	move_and_slide()
 
-# --- FUNCIONES DE DODGE Y DIVE ---
+# ------------------------------------------------------------------------------
+# 5. SISTEMAS DE EVASIÓN
+# ------------------------------------------------------------------------------
 func iniciar_dodge():
-	current_state = State.DODGING; can_dodge = false
+	if not stamina.try_consume(dodge_cost): return
+
+	current_state = State.DODGING
+	can_dodge = false
+	emit_signal("on_state_changed", "DODGE")
+	
 	var i = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	if i == Vector2.ZERO: i = Vector2(0, 1)
-	anim_tree.set(PATH_DODGE, Vector2(i.x, -i.y))
+	if i == Vector2.ZERO: i = Vector2(0, 1) 
+	
+	anim_tree.set(PATH_DODGE, i)
 	state_machine.travel("Dodge")
-	var d = (transform.basis * Vector3(-i.x, 0, -i.y)).normalized()
-	velocity.x = d.x * dodge_power; velocity.z = d.z * dodge_power
+	
+	var dir_3d = (transform.basis * Vector3(i.x, 0, i.y)).normalized()
+	velocity.x = dir_3d.x * dodge_power
+	velocity.z = dir_3d.z * dodge_power
 
 func procesar_dodge(delta):
+	velocity.x = move_toward(velocity.x, 0, 40.0 * delta)
+	velocity.z = move_toward(velocity.z, 0, 40.0 * delta)
+	move_and_slide()
 	if str(state_machine.get_current_node()) != "Dodge": 
-		current_state = State.NORMAL; iniciar_cooldown_dodge()
-	else: 
-		velocity.x = move_toward(velocity.x, 0, 10.0 * delta)
-		velocity.z = move_toward(velocity.z, 0, 10.0 * delta)
-		move_and_slide()
+		current_state = State.NORMAL
+		emit_signal("on_state_changed", "NORMAL")
+		iniciar_cooldown_dodge()
 
 func iniciar_cooldown_dodge(): 
 	await get_tree().create_timer(0.5).timeout; can_dodge = true
 
+# --- DIVE (Con Momento Realista) ---
 func iniciar_dive():
-	current_state = State.DIVING; dive_timer = 0.0
-	var d = velocity.normalized(); if d == Vector3.ZERO: d = -transform.basis.z
-	velocity = d * 18.0; velocity.y = 6.0; state_machine.travel("Jump_Start")
-	await get_tree().create_timer(0.15).timeout
+	if not stamina.try_consume(dodge_cost): return
+	
+	current_state = State.DIVING
+	dive_timer = 0.0
+	emit_signal("on_state_changed", "DIVING")
+	
+	# 1. Dirección: Basada en INPUT, no solo en hacia donde miro
+	# Esto permite correr adelante y tirarse hacia la izquierda si cambias rápido
+	var i = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	
+	# Si no hay input (raro si corres), usamos hacia donde miramos
+	var d = Vector3.ZERO
+	if i != Vector2.ZERO:
+		d = (transform.basis * Vector3(i.x, 0, i.y)).normalized()
+	else:
+		d = -transform.basis.z 
+	
+	# 2. CÁLCULO DE MOMENTO (REALISMO)
+	# Calculamos el porcentaje de carga (0.0 a 1.0)
+	var momentum_percent = clamp(sprint_timer / MAX_MOMENTUM_TIME, 0.0, 1.0)
+	
+	# Interpolamos entre el mínimo (10%) y el máximo (100%)
+	# lerp(min, max, weight)
+	var impulso_final = lerp(MIN_MOMENTUM_MULT, 1.0, momentum_percent)
+	
+	# Aplicamos al poder total
+	var fuerza_dive = dodge_power * impulso_final * dive_sprint_damp
+	
+	print("🚀 DIVE! Tiempo carga: ", snapped(sprint_timer, 0.01), "s | Impulso: ", int(impulso_final * 100), "%")
+	
+	velocity = d * fuerza_dive
+	velocity.y = 5.0 # Salto vertical constante para la parábola
+	
+	state_machine.travel("Jump_Start") 
+	
+	await get_tree().create_timer(0.2).timeout
 	if current_state == State.DIVING: state_machine.travel("Crawling")
 	
 func procesar_dive(delta):
+	if not is_on_floor(): 
+		velocity.y -= (gravity * gravity_multiplier) * delta
+	
 	velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
 	velocity.z = move_toward(velocity.z, 0, 5.0 * delta)
-	if not is_on_floor(): velocity.y -= gravity * 1.5 * delta
-	move_and_slide(); dive_timer += delta
-	if is_on_floor() and dive_timer > DIVE_MIN_TIME: cambiar_estado(State.PRONE)
+	move_and_slide()
+	dive_timer += delta
+	
+	if is_on_floor() and dive_timer > 0.3: 
+		cambiar_estado(State.PRONE)
 
-# --- UTILIDADES ---
+# ------------------------------------------------------------------------------
+# 6. UTILIDADES Y DAÑO
+# ------------------------------------------------------------------------------
 func cambiar_estado(nuevo):
+	if current_state == nuevo: return
 	current_state = nuevo
+	
 	match current_state:
 		State.NORMAL, State.SPRINT: state_machine.travel("Standing")
 		State.CROUCH: state_machine.travel("Sneaking")
 		State.PRONE:  state_machine.travel("Crawling")
+	
+	var state_names = {
+		State.NORMAL: "NORMAL", State.SPRINT: "CORRIENDO", State.CROUCH: "AGACHADO",
+		State.PRONE: "SUELO", State.DODGING: "ESQUIVA", State.DIVING: "SALTO", State.DEAD: "MUERTO"
+	}
+	emit_signal("on_state_changed", state_names.get(current_state, "UNKNOWN"))
 
 func refrescar_animacion_aterrizaje():
 	match current_state:
@@ -258,6 +374,7 @@ func actualizar_blendspaces(input_dir, delta):
 	if input_dir.y > 0: t.y = -1
 	if input_dir.x != 0: t.y = 1
 	if current_state == State.SPRINT: t.y = 2
+	
 	smooth_blend = smooth_blend.lerp(t, blend_speed * delta)
 	anim_tree.set(PATH_STANDING, smooth_blend)
 	anim_tree.set(PATH_SNEAKING, smooth_blend)
@@ -269,9 +386,6 @@ func rotar_columna_hacia_camara():
 		var r = skeleton_3d.get_bone_rest(spine_bone_id).basis.get_rotation_quaternion()
 		skeleton_3d.set_bone_pose_rotation(spine_bone_id, r * m)
 
-# ------------------------------------------------------------------------------
-# 5. SISTEMA DE DAÑO Y MUERTE (INTEGRADO)
-# ------------------------------------------------------------------------------
 func take_damage(amount: float):
 	if health_component: health_component.take_damage(amount)
 	else: morir()
@@ -285,24 +399,19 @@ func morir():
 	if is_dead: return
 	is_dead = true
 	current_state = State.DEAD
-	print("💀 --- HAS MUERTO (CÁMARA FANTASMA) ---")
-	
+	emit_signal("on_state_changed", "MUERTO")
 	velocity = Vector3.ZERO
 	knockback_velocity = Vector3.ZERO
 	$CollisionShape3D.set_deferred("disabled", true)
-	var hb = find_child("Hurtbox", true, false)
-	if hb: hb.find_child("CollisionShape3D").set_deferred("disabled", true)
-
-	# Cámara Fantasma
+	
 	var death_cam = Camera3D.new()
 	get_tree().current_scene.add_child(death_cam)
 	death_cam.global_transform = camera.global_transform
-	death_cam.current = true
-	camera.visible = false 
+	death_cam.current = true; camera.visible = false 
 	
 	var t = create_tween()
-	t.tween_property(death_cam, "global_position:y", death_cam.global_position.y + 4.0, 2.5).set_trans(Tween.TRANS_SINE)
-	t.parallel().tween_property(death_cam, "rotation_degrees:x", -90.0, 2.0)
+	t.tween_property(death_cam, "global_position:y", death_cam.global_position.y + 3.0, 3.0).set_trans(Tween.TRANS_SINE)
+	t.parallel().tween_property(death_cam, "rotation_degrees:x", -90.0, 2.5)
 	
 	await get_tree().create_timer(4.0).timeout
 	death_cam.queue_free()

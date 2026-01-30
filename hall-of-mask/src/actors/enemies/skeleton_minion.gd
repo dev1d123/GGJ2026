@@ -199,9 +199,31 @@ func apply_knockback(dir: Vector3, knock: float, jump: float):
 func _on_damage_visual(amount, current):
 	flash_red()
 
+# Esta función se activa cuando HealthComponent emite "on_death"
 func _morir():
 	print("💀 Esqueleto destruido.")
-	# Puedes instanciar partículas de huesos aquí
+	
+	# 1. Obtener la cantidad de recompensa del CombatManager
+	var reward_amount = 0.0
+	if combat_manager:
+		reward_amount = combat_manager.ult_charge_reward
+	
+	# 2. Buscar al Jugador para darle la carga
+	# Usamos la referencia que ya tiene la IA, o buscamos por grupo si es nula
+	var target_player = player_ref
+	if not target_player:
+		target_player = get_tree().get_first_node_in_group("Player")
+	
+	# 3. Entregar la carga al MaskManager del jugador
+	if target_player and target_player.has_node("MaskManager"):
+		var mask_mgr = target_player.get_node("MaskManager")
+		if mask_mgr.has_method("add_charge"):
+			mask_mgr.add_charge(reward_amount)
+			print("⚡ Carga entregada: +", reward_amount)
+	
+	# 4. Desactivar y borrar enemigo
+	set_physics_process(false)
+	# Aquí podrías poner una animación de muerte antes del queue_free
 	queue_free()
 
 # --- EFECTOS VISUALES ---

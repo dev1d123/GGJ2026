@@ -5,7 +5,12 @@ signal on_empty
 
 @export var max_value: float = 100.0
 @export var regen_rate: float = 10.0
-@export var regen_delay: float = 3.0 # Segundos a esperar antes de recargar
+@export var regen_delay: float = 3.0 
+
+# --- MULTIPLICADORES (Modificados por Máscaras/Buffs) ---
+var cost_multiplier: float = 1.0    # 0.5 = Mitad de costo
+var regen_multiplier: float = 1.0   # 2.0 = Doble de velocidad de recarga
+var delay_multiplier: float = 1.0   # 0.5 = Espera la mitad de tiempo
 
 var current_value: float
 var can_regen: bool = true
@@ -14,29 +19,35 @@ var timer_delay: Timer
 func _ready():
 	current_value = max_value
 	
-	# Crear el temporizador automáticamente
 	timer_delay = Timer.new()
 	timer_delay.one_shot = true
-	timer_delay.wait_time = regen_delay
+	# El tiempo se setea dinámicamente al usarse
 	timer_delay.timeout.connect(func(): can_regen = true)
 	add_child(timer_delay)
 
 func _process(delta):
 	if can_regen and current_value < max_value:
-		current_value += regen_rate * delta
+		# Aplicamos multiplicador de regeneración
+		var real_regen = regen_rate * regen_multiplier
+		current_value += real_regen * delta
 		current_value = min(current_value, max_value)
 		on_value_changed.emit(current_value, max_value)
 
-# Función para intentar gastar (Stamina/Mana)
 func try_consume(amount: float) -> bool:
-	if current_value >= amount:
-		current_value -= amount
-		can_regen = false # Pausar regeneración
-		timer_delay.start() # Iniciar cuenta regresiva (3s o 20s)
+	# Aplicamos multiplicador de costo (Ej: Máscara reduce costo)
+	var real_cost = amount * cost_multiplier
+	
+	if current_value >= real_cost:
+		current_value -= real_cost
+		can_regen = false
+		
+		# Aplicamos multiplicador de delay (Ej: Máscara reduce espera)
+		var real_delay = regen_delay * delay_multiplier
+		timer_delay.start(real_delay) 
+		
 		on_value_changed.emit(current_value, max_value)
 		
 		if current_value <= 0:
 			on_empty.emit()
-			
-		return true # Gasto exitoso
-	return false # No hay suficiente
+		return true 
+	return false
