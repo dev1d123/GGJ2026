@@ -21,29 +21,29 @@ anchors_preset = 0
 script = ExtResource("1_alggg")
 
 [node name="Background" type="Sprite2D" parent="."]
-position = Vector2(577, 357)
-scale = Vector2(1.2119141, 1.1253603)
+position = Vector2(954.99994, 580)
+scale = Vector2(1.9584961, 1.9257927)
 texture = ExtResource("1_ptg3k")
 
 [node name="Logo" type="Sprite2D" parent="."]
-position = Vector2(600, 126)
+position = Vector2(959.25, 333.568)
 scale = Vector2(1.497, 1.712)
 texture = ExtResource("2_n8v1d")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 0
-offset_left = 394.0
-offset_top = 243.0
-offset_right = 787.0
-offset_bottom = 617.0
+offset_left = 753.25
+offset_top = 450.568
+offset_right = 1146.25
+offset_bottom = 824.568
 color = Color(0.012617188, 0.012617188, 0.012617188, 0.7882353)
 
 [node name="startButton" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 461.0
-offset_top = 319.0
-offset_right = 710.0
-offset_bottom = 390.0
+offset_left = 820.25
+offset_top = 526.568
+offset_right = 1069.25
+offset_bottom = 597.568
 texture_normal = ExtResource("3_ppsmk")
 texture_pressed = ExtResource("4_kpcnc")
 texture_hover = ExtResource("5_alggg")
@@ -62,10 +62,10 @@ autowrap_mode = 2
 
 [node name="exitButton" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 467.0
-offset_top = 470.0
-offset_right = 716.0
-offset_bottom = 541.0
+offset_left = 826.25
+offset_top = 677.568
+offset_right = 1075.25
+offset_bottom = 748.568
 texture_normal = ExtResource("3_ppsmk")
 texture_pressed = ExtResource("4_kpcnc")
 texture_hover = ExtResource("5_alggg")
