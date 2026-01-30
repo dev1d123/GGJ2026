@@ -1,7 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://djsofn7udtjbv"]
+[gd_scene load_steps=3 format=3 uid="uid://djsofn7udtjbv"]
 
 [ext_resource type="PackedScene" uid="uid://cu7m3tsmy4hem" path="res://src/levels/level3/structures/tomb1_model.tscn" id="1_0ndhp"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0ndhp"]
+size = Vector3(0.5012207, 1, 0.9055176)
 
 [node name="Tomb1" type="StaticBody3D"]
 
 [node name="tomb1" parent="." instance=ExtResource("1_0ndhp")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0037841797, 0, 0.0008544922)
+shape = SubResource("BoxShape3D_0ndhp")
