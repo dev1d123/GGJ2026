@@ -1,0 +1,127 @@
+[gd_scene load_steps=8 format=3 uid="uid://37k6hyctb077"]
+
+[ext_resource type="Texture2D" uid="uid://yekjiyb3yh0e" path="res://assets/historyImages/image1.png" id="1_8l2yi"]
+[ext_resource type="Script" uid="uid://doswye7wju3c" path="res://src/GUI/cinematic.gd" id="1_y7g73"]
+[ext_resource type="LabelSettings" uid="uid://bmopgkhe4cxe2" path="res://src/GUI/Cinematic.tres" id="2_8l2yi"]
+[ext_resource type="Texture2D" uid="uid://cwpam83wenfku" path="res://assets/historyImages/image2.png" id="3_m50fs"]
+[ext_resource type="Texture2D" uid="uid://nweqso7eng8g" path="res://assets/historyImages/image3.png" id="4_g6u1k"]
+[ext_resource type="Texture2D" uid="uid://cuvu38ig77h0i" path="res://assets/historyImages/image4.png" id="5_fbumk"]
+[ext_resource type="Texture2D" uid="uid://j6ve8x27ooet" path="res://assets/historyImages/image5.png" id="6_nwaxb"]
+
+[node name="Cinematic" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_y7g73")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = -46.0
+offset_top = -46.0
+offset_right = 2007.0
+offset_bottom = 1124.0
+color = Color(0, 0, 0, 1)
+
+[node name="Image1" type="Sprite2D" parent="."]
+position = Vector2(960, 460)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("1_8l2yi")
+
+[node name="Label1" type="Label" parent="Image1"]
+offset_left = -463.3333
+offset_top = 156.0
+offset_right = 474.6667
+offset_bottom = 397.33334
+text = "En noches de código interminable, el desarrollador creyó dominar sus mundos.
+Pero las pantallas lo observaban de vuelta.
+Cuando la computadora reclamó su creador, la realidad se fragmentó, y su carne fue traducida a datos.
+Así comenzó la caída: no como jugador… sino como prisionero de sus propias creaciones."
+label_settings = ExtResource("2_8l2yi")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Image2" type="Sprite2D" parent="."]
+position = Vector2(960, 480)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("3_m50fs")
+
+[node name="Label2" type="Label" parent="Image2"]
+offset_left = -465.3333
+offset_top = 142.66669
+offset_right = 474.6667
+offset_bottom = 384.00006
+text = "Las paredes del calabozo respiraban violencia y memoria.
+Cada golpe resonaba con errores pasados, cada enemigo portaba una máscara nacida del combate puro.
+Allí aprendió que la fuerza no era suficiente: debía recordar cómo diseñó la guerra para poder sobrevivirla."
+label_settings = ExtResource("2_8l2yi")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Image3" type="Sprite2D" parent="."]
+position = Vector2(960, 460)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("4_g6u1k")
+
+[node name="Label3" type="Label" parent="Image3"]
+offset_left = -465.3333
+offset_top = 142.66669
+offset_right = 474.6667
+offset_bottom = 384.00006
+text = "El mundo del tirador no perdonaba la quietud.
+Balas y luz cortaban el aire como sentencias inevitables.
+Entre reflejos y explosiones, el desarrollador recuperó la máscara de la velocidad, comprendiendo que reaccionar era tan vital como crear."
+label_settings = ExtResource("2_8l2yi")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Image4" type="Sprite2D" parent="."]
+position = Vector2(960, 460)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("5_fbumk")
+
+[node name="Label4" type="Label" parent="Image4"]
+offset_left = -465.3333
+offset_top = 142.66669
+offset_right = 474.6667
+offset_bottom = 384.00006
+text = "Donde la vida ya no obedecía a la muerte, el nigromante aguardaba.
+Sombras pixeladas se alzaban al comando de una voluntad corrupta.
+Al reclamar esa máscara, el desarrollador aceptó una verdad oscura: incluso los errores abandonados pueden volver a servir… si se les da propósito."
+label_settings = ExtResource("2_8l2yi")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Image5" type="Sprite2D" parent="."]
+position = Vector2(960, 460)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("6_nwaxb")
+
+[node name="Label5" type="Label" parent="Image5"]
+offset_left = -465.3333
+offset_top = 142.66669
+offset_right = 474.6667
+offset_bottom = 384.00006
+text = "Cuando los mundos colisionaron, el tiempo se quebró.
+Instantes pasados, presentes y futuros lucharon por existir.
+Con las máscaras reunidas y el control restaurado, el desarrollador enfrentó su obra final.
+No para destruirla… sino para reescribirse a sí mismo."
+label_settings = ExtResource("2_8l2yi")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Fade" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = -31.0
+offset_top = -13.0
+offset_right = 1954.0
+offset_bottom = 1098.0
+color = Color(0, 0, 0, 1)
