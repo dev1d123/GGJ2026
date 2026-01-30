@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://37k6hyctb077"]
+[gd_scene load_steps=9 format=3 uid="uid://37k6hyctb077"]
 
 [ext_resource type="Texture2D" uid="uid://yekjiyb3yh0e" path="res://assets/historyImages/image1.png" id="1_8l2yi"]
 [ext_resource type="Script" uid="uid://doswye7wju3c" path="res://src/GUI/cinematic.gd" id="1_y7g73"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://nweqso7eng8g" path="res://assets/historyImages/image3.png" id="4_g6u1k"]
 [ext_resource type="Texture2D" uid="uid://cuvu38ig77h0i" path="res://assets/historyImages/image4.png" id="5_fbumk"]
 [ext_resource type="Texture2D" uid="uid://j6ve8x27ooet" path="res://assets/historyImages/image5.png" id="6_nwaxb"]
+[ext_resource type="AudioStream" uid="uid://dex6rr3ivlni" path="res://assets/sounds/UnwritedHistory.wav" id="8_m50fs"]
 
 [node name="Cinematic" type="Control"]
 layout_mode = 3
@@ -125,3 +126,7 @@ offset_top = -13.0
 offset_right = 1954.0
 offset_bottom = 1098.0
 color = Color(0, 0, 0, 1)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_m50fs")
+autoplay = true
