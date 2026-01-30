@@ -1,7 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://dlamwlnh1eihi"]
+[gd_scene load_steps=3 format=3 uid="uid://dlamwlnh1eihi"]
 
 [ext_resource type="PackedScene" uid="uid://bwcit6hv1kjc7" path="res://src/levels/level4/structures/brass2_model.tscn" id="1_dq1cj"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dq1cj"]
+height = 0.12890625
 
 [node name="Brass2" type="StaticBody3D"]
 
 [node name="brass2" parent="." instance=ExtResource("1_dq1cj")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(-0.09377822, 0.99559313, 0, -0.99559313, -0.09377822, 0, 0, 0, 1, 0, 0.0034424067, 0)
+shape = SubResource("CylinderShape3D_dq1cj")
