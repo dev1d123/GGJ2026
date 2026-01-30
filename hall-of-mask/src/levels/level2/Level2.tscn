@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://deomqtukglycp"]
+[gd_scene load_steps=22 format=3 uid="uid://deomqtukglycp"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_cp82e"]
 [ext_resource type="Texture2D" uid="uid://l4lhdp6tiq2k" path="res://assets/textures/level2/level2Rocks_normal.dds" id="2_fyp4o"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://d1a72au1fvsx6" path="res://src/levels/level2/structures/rock_wall.tscn" id="10_sqpsr"]
 [ext_resource type="PackedScene" uid="uid://dli2g33ytcbkk" path="res://src/levels/level2/structures/rock1.tscn" id="11_5suer"]
 [ext_resource type="PackedScene" uid="uid://qa57fojc1bcm" path="res://src/levels/level2/structures/metal_stair.tscn" id="12_dpe5t"]
+[ext_resource type="PackedScene" uid="uid://bk3adcpyrs3s0" path="res://src/levels/level2/structures/rock1_model.tscn" id="13_0wu3u"]
 
 [sub_resource type="Gradient" id="Gradient_hp4bj"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -185,3 +186,12 @@ transform = Transform3D(3.6062295e-07, 8.250092, 23.599491, 25, -1.0927847e-06, 
 
 [node name="RockWall7" parent="." instance=ExtResource("10_sqpsr")]
 transform = Transform3D(3.6062295e-07, 8.250092, 23.599491, 25, -1.0927847e-06, -2.842171e-14, 1.0315665e-06, 23.599491, -8.250092, 41.04637, -132.20772, 13.602905)
+
+[node name="rock1" parent="." instance=ExtResource("13_0wu3u")]
+transform = Transform3D(18.293268, 0, -8.121363, 0, 20.015, 0, 8.121363, 0, 18.293268, -55.53273, 0, -18.195625)
+
+[node name="rock2" parent="." instance=ExtResource("13_0wu3u")]
+transform = Transform3D(18.03445, 0, 8.680945, 0, 20.015, 0, -8.680945, 0, 18.03445, -55.53273, 0, 16.727816)
+
+[node name="RockPlatafform8" parent="." instance=ExtResource("6_qamio")]
+transform = Transform3D(0.8522562, 9.963616, 0, -9.963616, 0.8522562, 0, 0, 0, 10, -77.96411, 2.8558989, 0.26533353)
