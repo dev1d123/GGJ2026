@@ -1,0 +1,10 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://bmopgkhe4cxe2"]
+
+[ext_resource type="FontFile" uid="uid://3qoskpc6gny4" path="res://assets/imagesGUI/font.TTF" id="1_73pex"]
+
+[resource]
+line_spacing = 7.0
+font = ExtResource("1_73pex")
+font_size = 24
+shadow_size = 15
+shadow_color = Color(0, 0, 0, 1)
