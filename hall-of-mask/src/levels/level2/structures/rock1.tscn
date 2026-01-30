@@ -1,7 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://dli2g33ytcbkk"]
+[gd_scene load_steps=4 format=3 uid="uid://dli2g33ytcbkk"]
 
 [ext_resource type="PackedScene" uid="uid://bk3adcpyrs3s0" path="res://src/levels/level2/structures/rock1_model.tscn" id="1_ei20p"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ei20p"]
+size = Vector3(0.35839844, 1, 0.19934082)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pn2jm"]
+size = Vector3(0.52734375, 0.92836, 0.2826538)
 
 [node name="Rock1" type="StaticBody3D"]
 
 [node name="rock1" parent="." instance=ExtResource("1_ei20p")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09814453, 0, 0.4003296)
+shape = SubResource("BoxShape3D_ei20p")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.076171875, -0.117759705, -0.110198975)
+shape = SubResource("BoxShape3D_pn2jm")

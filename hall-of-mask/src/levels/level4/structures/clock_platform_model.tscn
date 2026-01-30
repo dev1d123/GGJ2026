@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbbjmtcuf5u8m"]
+
+[ext_resource type="PackedScene" uid="uid://bfr6akyc8k5nh" path="res://assets/models/enviroment/level4/clockPlatform.fbx" id="1_liuyu"]
+
+[node name="clockPlatform" instance=ExtResource("1_liuyu")]

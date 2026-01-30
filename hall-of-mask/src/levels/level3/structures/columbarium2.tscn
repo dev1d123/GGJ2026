@@ -1,7 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://blihoduxvsoje"]
+[gd_scene load_steps=3 format=3 uid="uid://blihoduxvsoje"]
 
 [ext_resource type="PackedScene" uid="uid://dyiltw58b8phk" path="res://src/levels/level3/structures/columbarium2_model.tscn" id="1_gqsrj"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gqsrj"]
+size = Vector3(0.5215454, 1, 1)
 
 [node name="Columbarium2" type="StaticBody3D"]
 
 [node name="columbarion2" parent="." instance=ExtResource("1_gqsrj")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0047912598, 0, 0)
+shape = SubResource("BoxShape3D_gqsrj")

@@ -1,7 +1,21 @@
-[gd_scene load_steps=2 format=3 uid="uid://qa57fojc1bcm"]
+[gd_scene load_steps=4 format=3 uid="uid://qa57fojc1bcm"]
 
 [ext_resource type="PackedScene" uid="uid://bqnc45jj0bq6d" path="res://src/levels/level2/structures/metal_stair_model.tscn" id="1_18a2b"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_18a2b"]
+size = Vector3(1, 0.07116699, 0.21972656)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cek10"]
+size = Vector3(0.23388672, 0.07116699, 0.2935791)
 
 [node name="MetalStair" type="StaticBody3D"]
 
 [node name="metalStair" parent="." instance=ExtResource("1_18a2b")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.7436235, 0.6685987, 0, -0.6685987, 0.7436235, 0, 0, 0, 1.2531692, 0.050113708, -0.07872388, 0.025465518)
+shape = SubResource("BoxShape3D_18a2b")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.37347808, 0.22222906, 0.010464191)
+shape = SubResource("BoxShape3D_cek10")

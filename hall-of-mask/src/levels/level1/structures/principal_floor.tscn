@@ -1,7 +1,29 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqv551m5m6ag0"]
+[gd_scene load_steps=3 format=3 uid="uid://bqv551m5m6ag0"]
 
 [ext_resource type="PackedScene" uid="uid://dr563ta8ydbgx" path="res://src/levels/level1/structures/principal_floor_model.tscn" id="1_xa2kl"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xa2kl"]
 
 [node name="PrincipalFloor" type="StaticBody3D"]
 
 [node name="principalFloor" parent="." instance=ExtResource("1_xa2kl")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.12, 0, 0, 0, 1, 0, -0.26976088, 0)
+shape = SubResource("BoxShape3D_xa2kl")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.16, 0, 0, 0, 0.925, 0, 0, 0, 1, -0.4555048, -0.2397035, -0.010854602)
+shape = SubResource("BoxShape3D_xa2kl")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(-0.0032698142, 0, 0.99979115, 0, 0.92499995, 0, -0.15996657, 0, -0.02043634, 0.57511795, -0.36864236, 0.42661482)
+shape = SubResource("BoxShape3D_xa2kl")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="."]
+transform = Transform3D(-0.0032698142, 0, 0.14496972, 0, 0.925, 0, -0.15996657, 0, -0.0029632691, -0.13994443, -0.23637387, 0.41066873)
+shape = SubResource("BoxShape3D_xa2kl")
+
+[node name="CollisionShape3D5" type="CollisionShape3D" parent="."]
+transform = Transform3D(-0.006342951, 0, 0.14488602, 0, 0.92499995, 0, -0.15987422, 0, -0.0057483, 0.30757746, -0.23637387, 0.08803436)
+shape = SubResource("BoxShape3D_xa2kl")

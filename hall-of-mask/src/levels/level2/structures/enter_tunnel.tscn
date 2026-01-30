@@ -1,7 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://bttr6hyupm2vo"]
+[gd_scene load_steps=3 format=3 uid="uid://bttr6hyupm2vo"]
 
 [ext_resource type="PackedScene" uid="uid://ct23tc7r88tsc" path="res://src/levels/level2/structures/enter_tunnel_model.tscn" id="1_p86rq"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_p86rq"]
 
 [node name="EnterTunnel" type="StaticBody3D"]
 
 [node name="enterTunnel" parent="." instance=ExtResource("1_p86rq")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.12619977, 0, 0, 0, 1, 0, -0.42499518, 0.07668048)
+shape = SubResource("BoxShape3D_p86rq")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.0034972797, -0.9996161, 0, 0.12615131, 0.027712252, 0, -0.09369281, 0.23352894)
+shape = SubResource("BoxShape3D_p86rq")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.007666932, -0.99815285, 0, 0.12596665, 0.060752347, 0, -0.09369281, -0.20319095)
+shape = SubResource("BoxShape3D_p86rq")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.12619977, 0, 0, 0, 1, 0, 0.2236796, 0.07668048)
+shape = SubResource("BoxShape3D_p86rq")
