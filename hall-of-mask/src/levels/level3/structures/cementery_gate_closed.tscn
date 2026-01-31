@@ -1,7 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://su4fiu50o7a"]
+[gd_scene load_steps=3 format=3 uid="uid://su4fiu50o7a"]
 
 [ext_resource type="PackedScene" uid="uid://crhsuchitmp1r" path="res://src/levels/level3/structures/cementery_gate_closed_model.tscn" id="1_0xhqb"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0xhqb"]
+size = Vector3(0.18, 0.675, 1)
 
 [node name="CementeryGateClosed" type="StaticBody3D"]
 
 [node name="cementeryGateClosed" parent="." instance=ExtResource("1_0xhqb")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_0xhqb")
