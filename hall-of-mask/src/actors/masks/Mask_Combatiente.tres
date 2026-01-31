@@ -1,19 +1,14 @@
-[gd_resource type="Resource" script_class="MaskData" load_steps=3 format=3 uid="uid://bidblay1hqrnw"]
+[gd_resource type="Resource" script_class="MaskData" load_steps=4 format=3 uid="uid://bidblay1hqrnw"]
 
 [ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_ktn8c"]
-<<<<<<< HEAD
 [ext_resource type="PackedScene" uid="uid://cx7jdaye55ayx" path="res://src/actors/masks/Mask_Combatiente.glb" id="1_lur1r"]
 
-[resource]
-script = ExtResource("1_ktn8c")
-mask_visual_scene = ExtResource("1_lur1r")
-=======
-[ext_resource type="Texture2D" uid="uid://cadydt58x26be" path="res://src/actors/masks/WhatsApp_Image_2026-01-30_at_11.46.29_AM__1_-removebg-preview-convertido-a-128x128.jpeg" id="1_lur1r"]
+[ext_resource type="Texture2D" uid="uid://cadydt58x26be" path="res://src/actors/masks/WhatsApp_Image_2026-01-30_at_11.46.29_AM__1_-removebg-preview-convertido-a-128x128.jpeg" id="2_8u5a1"]
 
 [resource]
 script = ExtResource("1_ktn8c")
-icon = ExtResource("1_lur1r")
->>>>>>> main
+icon = ExtResource("2_8u5a1")
+mask_visual_scene = ExtResource("1_lur1r")
 screen_tint = Color(1, 0, 0, 0.101960786)
 speed_mult = 1.2
 jump_mult = 1.2
