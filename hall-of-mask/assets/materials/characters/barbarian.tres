@@ -1,9 +1,0 @@
-[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://bap0odboysymd"]
-
-[ext_resource type="Texture2D" uid="uid://chbhd2dn2yl" path="res://assets/models/characters/Barbarian_barbarian_texture.png" id="1_1duvs"]
-
-[resource]
-resource_name = "barbarian"
-cull_mode = 2
-albedo_texture = ExtResource("1_1duvs")
-roughness = 0.5

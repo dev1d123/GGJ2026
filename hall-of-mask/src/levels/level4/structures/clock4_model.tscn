@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://4pwxvg55i84"]
-
-[ext_resource type="PackedScene" uid="uid://dcaxel4cbqr8k" path="res://assets/models/enviroment/level4/clock4.fbx" id="1_srymp"]
-
-[node name="clock4" instance=ExtResource("1_srymp")]

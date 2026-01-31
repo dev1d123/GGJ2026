@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cxj2y71ajhy5"]
-
-[ext_resource type="PackedScene" uid="uid://3cestqlf8saa" path="res://assets/models/enviroment/level3/tomb3.fbx" id="1_8jhm8"]
-
-[node name="tomb3" instance=ExtResource("1_8jhm8")]

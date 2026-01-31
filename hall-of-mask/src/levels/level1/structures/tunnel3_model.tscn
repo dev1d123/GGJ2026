@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://4142ggtwmcf6"]
-
-[ext_resource type="PackedScene" uid="uid://sti00g8lmuva" path="res://assets/models/enviroment/tunnel3.fbx" id="1_nt0ed"]
-
-[node name="tunnel3" instance=ExtResource("1_nt0ed")]

@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bb4pfyorb1m7f"]
-
-[ext_resource type="PackedScene" uid="uid://dag58okceb6qi" path="res://assets/models/enviroment/plataform.fbx" id="1_neh7g"]
-
-[node name="plataform" instance=ExtResource("1_neh7g")]

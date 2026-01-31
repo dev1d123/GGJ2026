@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cjrwms6fij2hd"]
-
-[ext_resource type="PackedScene" uid="uid://cu7r8vq6q6mfx" path="res://assets/models/enviroment/level2/metalBridge.fbx" id="1_c8uca"]
-
-[node name="metalBridge" instance=ExtResource("1_c8uca")]

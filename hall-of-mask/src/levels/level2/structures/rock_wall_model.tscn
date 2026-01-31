@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cwn0nalf6lt0l"]
-
-[ext_resource type="PackedScene" uid="uid://da5krqw6kyt88" path="res://assets/models/enviroment/level2/rockWall.fbx" id="1_diaaj"]
-
-[node name="rockWall" instance=ExtResource("1_diaaj")]

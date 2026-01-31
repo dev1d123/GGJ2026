@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bs15cdaa3f7vo"]
-
-[ext_resource type="PackedScene" uid="uid://cppaivj5hbqqc" path="res://assets/models/enviroment/bossDungeon.fbx" id="1_3ok7i"]
-
-[node name="bossDungeon" instance=ExtResource("1_3ok7i")]

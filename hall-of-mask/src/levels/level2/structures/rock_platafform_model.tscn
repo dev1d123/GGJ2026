@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bdsgkumq0v3yo"]
-
-[ext_resource type="PackedScene" uid="uid://hj7qmh2j0k1v" path="res://assets/models/enviroment/level2/rockPlatafform.fbx" id="1_jeur0"]
-
-[node name="rockPlatafform" instance=ExtResource("1_jeur0")]

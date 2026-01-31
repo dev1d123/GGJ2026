@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dvb8wikxaijro"]
-
-[ext_resource type="PackedScene" uid="uid://bk4noxsryet41" path="res://assets/models/enviroment/level3/mausoleum.fbx" id="1_crri3"]
-
-[node name="mausoleum" instance=ExtResource("1_crri3")]

@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dbyea0vvqydcl"]
-
-[ext_resource type="PackedScene" uid="uid://crc6axonhb5yj" path="res://assets/models/enviroment/cave_tunnel.fbx" id="1_2lfee"]
-
-[node name="cave_tunnel" instance=ExtResource("1_2lfee")]

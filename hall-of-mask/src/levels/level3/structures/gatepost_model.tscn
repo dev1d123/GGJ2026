@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cywqtp1djiouv"]
-
-[ext_resource type="PackedScene" uid="uid://c7pyrsxllgjgs" path="res://assets/models/enviroment/level3/gatepost.fbx" id="1_f8gkm"]
-
-[node name="gatepost" instance=ExtResource("1_f8gkm")]

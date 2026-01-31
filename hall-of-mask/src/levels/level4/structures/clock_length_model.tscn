@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dej33r7iitjgt"]
-
-[ext_resource type="PackedScene" uid="uid://bvrpykawaqoho" path="res://assets/models/enviroment/level4/clockLength.fbx" id="1_h71sm"]
-
-[node name="clockLength" instance=ExtResource("1_h71sm")]

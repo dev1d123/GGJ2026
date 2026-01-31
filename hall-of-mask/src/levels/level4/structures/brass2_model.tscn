@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bwcit6hv1kjc7"]
-
-[ext_resource type="PackedScene" uid="uid://bsbuoqipj6qov" path="res://assets/models/enviroment/level4/brass2.glb" id="1_nhack"]
-
-[node name="brass2" instance=ExtResource("1_nhack")]

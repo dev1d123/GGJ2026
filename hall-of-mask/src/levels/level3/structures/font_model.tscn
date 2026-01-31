@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://c0so1j0xbtfvl"]
-
-[ext_resource type="PackedScene" uid="uid://cfijmarykt8qr" path="res://assets/models/enviroment/level3/font.fbx" id="1_w2dca"]
-
-[node name="font" instance=ExtResource("1_w2dca")]

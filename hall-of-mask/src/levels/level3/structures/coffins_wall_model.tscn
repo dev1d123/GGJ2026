@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://okjpwp0tcud4"]
-
-[ext_resource type="PackedScene" uid="uid://ufiyrvjeydi1" path="res://assets/models/enviroment/level3/coffinsWall.fbx" id="1_8yfvj"]
-
-[node name="coffinsWall" instance=ExtResource("1_8yfvj")]
