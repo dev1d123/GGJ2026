@@ -19,7 +19,7 @@ var transitioning := false
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
 @export var speed_walk: float = 5.0
-@export var jump_force: float = 9.0 
+@export var jump_force: float = 15.0 
 @export var gravity_multiplier: float = 2.0 
 
 @export_category("Evasión (Dodge & Dive)")
