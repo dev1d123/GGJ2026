@@ -303,4 +303,3 @@ func _evento_activar_ulti(motivo):
 	print("🔥 JEFE: ULTI - ", motivo)
 	mask_manager.current_ult_charge = mask_manager.max_ult_charge
 	mask_manager.activate_ultimate()
-
