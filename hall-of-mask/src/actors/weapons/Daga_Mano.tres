@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3 uid="uid://d2vcfhren1fkf"]
 
 [ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_2achy"]
-[ext_resource type="Texture2D" uid="uid://cik60fnxkt6y1" path="res://src/actors/weapons/daga.png" id="1_fxpi5"]
+[ext_resource type="Texture2D" uid="uid://bik8o3nqu86bv" path="res://src/actors/weapons/daga_mano.png" id="1_fxpi5"]
 [ext_resource type="PackedScene" uid="uid://c2qcqy6ukbj4o" path="res://src/actors/weapons/Daga_Mano.tscn" id="2_fxpi5"]
 
 [resource]

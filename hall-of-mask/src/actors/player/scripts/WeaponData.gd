@@ -1,7 +1,17 @@
 extends Resource
 class_name WeaponData
 
+# 🟢 NUEVO: Definimos explícitamente a qué slot pertenece
+enum WeaponCategory {
+	MELEE_LIGHT,  # Slot 1: Espadas, Dagas (1 Mano)
+	MELEE_HEAVY,  # Slot 2: Hachas, Mandobles (2 Manos)
+	MAGIC,        # Slot 3: Varitas, Báculos
+	BOW,          # Slot 4: Arcos, Ballestas
+	GUN           # Slot 5: Pistolas, Rifles
+}
+
 @export_category("Identidad")
+@export var category: WeaponCategory = WeaponCategory.MELEE_LIGHT
 @export var name: String = "Arma"
 @export var weapon_scene: PackedScene 
 @export var icon: Texture2D

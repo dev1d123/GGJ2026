@@ -4,50 +4,62 @@ class_name WeaponHitbox
 var damage: float = 0.0
 var knockback: float = 0.0
 var jump: float = 0.0
-var attacker_node: Node = null # REFERENCIA AL DUEÑO DEL ARMA
+var attacker_node: Node = null 
 var hit_history: Array[Node] = [] 
 
 func _ready():
 	monitoring = false
 	monitorable = false
-	area_entered.connect(_on_area_entered)
+	# Usamos body_entered para detectar CharacterBody3D (Player/Enemigo)
+	body_entered.connect(_on_body_entered)
 
-# Ahora recibimos "attacker" para saber a quién NO golpear
 func activate(dmg: float, kb: float, jmp: float, attacker: Node):
 	hit_history.clear()
 	damage = dmg
 	knockback = kb
 	jump = jmp
-	attacker_node = attacker # Guardamos quién está atacando
+	attacker_node = attacker 
 	monitoring = true
 	
 	# Revisión instantánea
-	for area in get_overlapping_areas():
-		_on_area_entered(area)
+	for body in get_overlapping_bodies():
+		_on_body_entered(body)
 
 func deactivate():
 	monitoring = false
 	attacker_node = null
 
-func _on_area_entered(area):
+func _on_body_entered(body):
 	if not monitoring: return
-	if area in hit_history: return
+	if body in hit_history: return
+	if body == attacker_node: return 
 	
-	# --- FIX SUICIDIO ---
-	# Si el área golpeada pertenece al mismo nodo que ataca, IGNORAR.
-	# Esto evita que el esqueleto se pegue a su propia Hurtbox.
-	if attacker_node and area.owner == attacker_node: 
-		return 
+	# Evitar fuego amigo entre enemigos (opcional)
+	# if attacker_node and attacker_node.is_in_group("Enemy") and body.is_in_group("Enemy"): return
 
-	if area.has_method("hit"):
-		hit_history.append(area)
+	print("⚔️ HITBOX impactó a: ", body.name)
+
+	var hit_connected = false
+
+	if body.has_method("take_damage"):
+		body.take_damage(damage)
+		hit_connected = true
+	elif body.has_node("HealthComponent"):
+		body.get_node("HealthComponent").take_damage(damage)
+		hit_connected = true
+	
+	if hit_connected:
+		hit_history.append(body)
 		
-		# Dirección del empuje: Desde el atacante hacia la víctima
-		var origin = global_position
-		if attacker_node: origin = attacker_node.global_position
-		
-		var dir = (area.global_position - origin).normalized()
-		dir.y = 0.2 
-		
-		area.hit(damage, dir, knockback, jump)
-		print("🩸 Golpe conectado a: ", area.owner.name)
+		if body.has_method("apply_knockback"):
+			# --- AQUÍ ESTÁ LA MAGIA DEL CÓDIGO ANTIGUO ---
+			var origin = global_position
+			if attacker_node: origin = attacker_node.global_position
+			
+			var dir = (body.global_position - origin).normalized()
+			
+			# ⚡ RESTAURADO: El ángulo hacia arriba que da la sensación de impacto
+			dir.y = 0.2 
+			
+			# Nota: No normalizamos de nuevo para conservar ese extra de fuerza vectorial
+			body.apply_knockback(dir, knockback, jump)

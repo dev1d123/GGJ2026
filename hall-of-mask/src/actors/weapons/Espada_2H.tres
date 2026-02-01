@@ -1,15 +1,14 @@
 [gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3 uid="uid://c8xdxdvj5sge3"]
 
+[ext_resource type="Texture2D" uid="uid://datryht02vjia" path="res://src/actors/weapons/espada_2h.png" id="1_cmre1"]
 [ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_rdymq"]
 [ext_resource type="PackedScene" uid="uid://dfmrg4q8f7nrg" path="res://src/actors/weapons/Espada_2H.tscn" id="2_wclpv"]
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vhbhf"]
-load_path = "res://.godot/imported/sword_2h.png-eb3d9b357310cd6a815e59943bcb83f4.ctex"
-
 [resource]
 script = ExtResource("1_rdymq")
+category = 1
 weapon_scene = ExtResource("2_wclpv")
-icon = SubResource("CompressedTexture2D_vhbhf")
+icon = ExtResource("1_cmre1")
 anim_attack = "Sword_2H_Attack"
 active_time = 0.5
 total_animation_time = 1.1

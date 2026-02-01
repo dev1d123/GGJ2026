@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="RangedWeaponData" load_steps=5 format=3 uid="uid://u6df3dcmanww"]
+
+[ext_resource type="Texture2D" uid="uid://di748dfqb7cef" path="res://src/actors/weapons/Ranged_Weapons/baculo_cargado.png" id="1_odylp"]
+[ext_resource type="PackedScene" uid="uid://ceylx36dwk0v0" path="res://src/actors/weapons/Ranged_Weapons/Projectile_Baculo_Cargado.tscn" id="1_puy43"]
+[ext_resource type="Script" uid="uid://co5n7cksvmyvw" path="res://src/actors/player/scripts/RangedWeaponData.gd" id="2_h6755"]
+[ext_resource type="PackedScene" uid="uid://bi6xc4wkoihgj" path="res://src/actors/weapons/Ranged_Weapons/Baculo_Cargado.tscn" id="3_h6755"]
+
+[resource]
+script = ExtResource("2_h6755")
+projectile_scene = ExtResource("1_puy43")
+launch_speed = 25.0
+recoil_shake = 0.2
+category = 2
+weapon_scene = ExtResource("3_h6755")
+icon = ExtResource("1_odylp")
+anim_attack = "Baculo_Cargado_2H_Attack"
+windup_time = 0.4
+total_animation_time = 1.27
+cooldown = 0.4
+is_two_handed = true
+damage = 15.0
+stamina_cost = 10.0

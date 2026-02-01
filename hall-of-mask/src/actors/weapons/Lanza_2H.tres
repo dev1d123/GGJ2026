@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3 uid="uid://ddjh5vwqag2ct"]
+
+[ext_resource type="Texture2D" uid="uid://c3a5jxhcb4lyw" path="res://src/actors/weapons/lanza_2h.png" id="1_rv5r3"]
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_wep8g"]
+[ext_resource type="PackedScene" uid="uid://blw4j5ohasnoi" path="res://src/actors/weapons/Lanza_2H.tscn" id="3_wy3mj"]
+
+[resource]
+script = ExtResource("1_wep8g")
+category = 1
+weapon_scene = ExtResource("3_wy3mj")
+icon = ExtResource("1_rv5r3")
+anim_attack = "Lanza_2H_Attack"
+windup_time = 0.45
+total_animation_time = 1.6
+cooldown = 0.4
+is_two_handed = true
+damage = 20.0
+jump_force = 1.0
+stamina_cost = 20.0

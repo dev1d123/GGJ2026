@@ -18,7 +18,7 @@ size = Vector3(2.3388062, 3.9105148, 1.4047852)
 [sub_resource type="BoxShape3D" id="BoxShape3D_im6gr"]
 size = Vector3(2.7020416, 3.907, 1.9729702)
 
-[node name="Orc_Brute_Green" type="CharacterBody3D" node_paths=PackedStringArray("anim_tree", "visual_mesh")]
+[node name="Orc_Brute_Green" type="CharacterBody3D" node_paths=PackedStringArray("visual_mesh", "anim_tree")]
 collision_layer = 4
 collision_mask = 6
 script = ExtResource("1_ypv3s")
@@ -33,19 +33,66 @@ atk3_active = 0.6
 atk3_dmg = 1.25
 loadout_weapon_r = ExtResource("2_ilf86")
 loadout_mask = ExtResource("3_iacak")
-anim_tree = NodePath("OrcBrute/AnimationTree")
 visual_mesh = NodePath("OrcBrute/Rig/Skeleton3D")
+anim_tree = NodePath("OrcBrute/AnimationTree")
 
 [node name="OrcBrute" parent="." instance=ExtResource("1_4i3xf")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
+[node name="Skeleton3D" parent="OrcBrute/Rig" index="0"]
+bones/4/rotation = Quaternion(-0.51412356, -0.48546582, -0.48546574, 0.51412344)
+bones/4/scale = Vector3(0.9999997, 0.99999976, 1)
+bones/5/rotation = Quaternion(1.8694193e-09, -6.666897e-08, -0.05529301, 0.9984702)
+bones/6/rotation = Quaternion(-8.6409655e-12, -4.5023152e-10, 0.0266581, 0.99964464)
+bones/7/rotation = Quaternion(6.3075647e-09, 1.4601335e-07, -1.7522536e-06, 1)
+bones/8/rotation = Quaternion(3.79333e-09, 3.7933297e-09, -0.7071068, 0.7071067)
+bones/8/scale = Vector3(1, 1, 1)
+bones/9/rotation = Quaternion(-0.51412356, 0.48546585, 0.48546576, 0.5141235)
+bones/9/scale = Vector3(0.9999997, 0.99999976, 1)
+bones/10/rotation = Quaternion(1.8694197e-09, 6.666896e-08, 0.05529301, 0.9984702)
+bones/11/rotation = Quaternion(-8.640964e-12, 4.5023157e-10, -0.0266581, 0.99964464)
+bones/12/rotation = Quaternion(6.3074874e-09, -1.0223015e-07, 1.7522536e-06, 1)
+bones/13/scale = Vector3(1, 1, 1)
+bones/15/rotation = Quaternion(0.9999039, -5.5808457e-08, -1.1316095e-08, 0.013863273)
+bones/15/scale = Vector3(1, 0.99999976, 1.0000001)
+bones/16/rotation = Quaternion(0.07813356, 5.641553e-08, -5.7139655e-08, 0.99694294)
+bones/16/scale = Vector3(1, 0.99999994, 0.99999976)
+bones/17/rotation = Quaternion(-0.43310812, 3.9441485e-08, -8.264325e-08, 0.901342)
+bones/18/rotation = Quaternion(2.7548703e-09, 0.92035484, -0.3910843, 9.798771e-08)
+bones/18/scale = Vector3(1, 1.0000006, 1.0000002)
+bones/19/rotation = Quaternion(0.9999039, 5.8078882e-08, -3.243097e-08, 0.013863273)
+bones/19/scale = Vector3(1, 0.99999976, 1.0000001)
+bones/20/rotation = Quaternion(0.07813356, -5.641557e-08, 5.713966e-08, 0.99694294)
+bones/20/scale = Vector3(1, 0.99999994, 0.99999976)
+bones/21/rotation = Quaternion(-0.43310812, 1.9118197e-07, 6.787563e-09, 0.901342)
+bones/22/rotation = Quaternion(8.1278216e-08, 0.92035484, -0.3910843, 9.6427186e-08)
+bones/22/scale = Vector3(1, 1.0000006, 1.0000002)
+bones/23/rotation = Quaternion(-0.7071068, -6.0662586e-08, -6.0662565e-08, 0.7071068)
+bones/24/rotation = Quaternion(0.49999994, 0.50000006, 0.50000006, -0.5)
+bones/25/rotation = Quaternion(-0.7071068, -6.066261e-08, -6.066258e-08, 0.7071068)
+bones/26/rotation = Quaternion(-0.50000006, 0.4999999, 0.5, 0.5)
+bones/27/rotation = Quaternion(0.7071068, -2.2930234e-07, -4.6055177e-08, 0.7071068)
+bones/28/rotation = Quaternion(-0.7071068, -7.052851e-08, -7.0528486e-08, 0.7071068)
+bones/29/rotation = Quaternion(7.10544e-15, -1.3832102e-22, 1, -3.351038e-34)
+bones/30/scale = Vector3(1, 0.99999994, 0.9999999)
+bones/31/rotation = Quaternion(-0.39108434, 2.9507857e-08, 1.0680487e-08, 0.92035484)
+bones/31/scale = Vector3(1, 0.99999994, 1)
+bones/32/rotation = Quaternion(1, -4.4409154e-16, 7.5497894e-08, 3.155427e-30)
+bones/34/rotation = Quaternion(0.7071068, -3.8238497e-08, 1.4500867e-07, 0.7071068)
+bones/35/rotation = Quaternion(-0.7071068, -7.0528515e-08, -7.05285e-08, 0.7071068)
+bones/37/rotation = Quaternion(3.4934562e-08, 0.39108434, 0.92035484, 2.9526053e-08)
+bones/37/scale = Vector3(1, 0.99999994, 0.9999999)
+bones/38/rotation = Quaternion(-0.39108434, 2.9507833e-08, 1.068052e-08, 0.92035484)
+bones/38/scale = Vector3(1, 0.99999994, 1)
+bones/39/rotation = Quaternion(1, -3.962816e-16, 7.5497894e-08, 1.341112e-22)
+
 [node name="Left Hand" type="BoneAttachment3D" parent="OrcBrute/Rig/Skeleton3D" index="8"]
-transform = Transform3D(-0.9999994, -3.9388814e-07, -1.7631994e-07, -1.4119937e-07, -2.5388667e-07, 0.99999994, -3.1938262e-07, 0.9999995, 2.1740138e-07, 1.247357, 1.2677608, -1.6891144e-07)
+transform = Transform3D(-0.9999992, -2.6722742e-07, 2.4940157e-09, -3.9260335e-08, 5.0476636e-08, 0.99999994, -2.5605223e-07, 0.9999994, -8.0621874e-08, 1.2473567, 1.2677608, -2.022417e-07)
 bone_name = "handslot.l"
 bone_idx = 8
 
 [node name="Right Hand" type="BoneAttachment3D" parent="OrcBrute/Rig/Skeleton3D" index="9"]
-transform = Transform3D(-0.9999994, 2.709536e-07, 1.7631986e-07, 1.3436956e-07, -2.8533373e-07, 0.99999994, 1.9644807e-07, 0.9999995, 2.4904438e-07, -1.2473569, 1.2677608, -2.743976e-07)
+transform = Transform3D(-0.9999992, 2.672274e-07, 5.7110558e-08, 9.53521e-08, 7.5121406e-08, 0.99999994, 2.5605223e-07, 0.9999994, -4.897888e-08, -1.2473565, 1.2677608, -2.1001324e-07)
 bone_name = "handslot.r"
 bone_idx = 13
 
@@ -75,7 +122,7 @@ parameters/StateMachine/conditions/is_on_floor() = false
 parameters/StateMachine/Crawling/blend_position = Vector2(0, 0)
 parameters/StateMachine/Dodge/blend_position = Vector2(0, 0)
 parameters/StateMachine/Sneaking/blend_position = Vector2(0, 0)
-parameters/StateMachine/Standing/blend_position = Vector2(0.001806736, -0.010204077)
+parameters/StateMachine/Standing/blend_position = Vector2(0.21119332, -1.7252748)
 parameters/Mezcla_L/blend_amount = 0.0
 parameters/Mezcla_R/blend_amount = 0.0
 parameters/Mezcla_2H/blend_amount = 0.0
@@ -95,9 +142,6 @@ right_hand_bone = NodePath("../OrcBrute/Rig/Skeleton3D/Right Hand/Marker3D")
 left_hand_bone = NodePath("../OrcBrute/Rig/Skeleton3D/Left Hand")
 mask_manager = NodePath("../MaskManager")
 attack_layer_mask = 2
-ult_charge_reward = 100.0
-slot_1_right = ExtResource("2_ilf86")
-mask_slot_1 = ExtResource("3_iacak")
 
 [node name="Hurtbox" type="Area3D" parent="." node_paths=PackedStringArray("health_component")]
 collision_layer = 4

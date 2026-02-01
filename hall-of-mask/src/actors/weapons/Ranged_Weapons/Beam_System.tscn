@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://b5qt3hr736k8t"]
+
+[ext_resource type="Script" uid="uid://cc086khny47yb" path="res://src/actors/weapons/Ranged_Weapons/Beam.gd" id="1_d4odr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d4odr"]
+albedo_color = Color(0.54509807, 0.31764707, 0.5568628, 1)
+emission_enabled = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hndd5"]
+material = SubResource("StandardMaterial3D_d4odr")
+top_radius = 0.01
+bottom_radius = 0.01
+height = 1.0
+
+[node name="BeamSystem" type="Node3D"]
+script = ExtResource("1_d4odr")
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+target_position = Vector3(0, -1, -100)
+collision_mask = 5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("CylinderMesh_hndd5")

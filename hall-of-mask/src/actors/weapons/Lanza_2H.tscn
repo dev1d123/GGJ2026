@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://blw4j5ohasnoi"]
+
+[ext_resource type="PackedScene" uid="uid://tfesadaudqkb" path="res://assets/models/weapons/Caveman_Spear.gltf" id="1_guu21"]
+[ext_resource type="Script" uid="uid://cn5kkl7yys5k1" path="res://src/actors/player/scripts/WeaponHitbox.gd" id="2_hejq3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_82cnb"]
+size = Vector3(0.60725117, 2.6576433, 0.76483154)
+
+[node name="Lanza_2H" type="Node3D"]
+
+[node name="Caveman_Spear2" parent="." instance=ExtResource("1_guu21")]
+
+[node name="Hitbox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("2_hejq3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.008076191, 0.48799562, -0.005279541)
+shape = SubResource("BoxShape3D_82cnb")

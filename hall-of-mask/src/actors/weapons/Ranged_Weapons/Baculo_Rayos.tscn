@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cict77y45qv1h"]
+
+[ext_resource type="PackedScene" uid="uid://was38oe5aqpg" path="res://assets/models/weapons/Lorekeeper_Staff.gltf" id="1_38i0s"]
+
+[node name="Baculo_Rayos" type="Node3D"]
+
+[node name="Lorekeeper_Staff2" parent="." instance=ExtResource("1_38i0s")]
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85408294, 0)

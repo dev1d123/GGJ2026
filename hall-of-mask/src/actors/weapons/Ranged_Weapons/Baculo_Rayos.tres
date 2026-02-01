@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="RangedWeaponData" load_steps=5 format=3 uid="uid://crlcs0o2exo1t"]
+
+[ext_resource type="PackedScene" uid="uid://b5qt3hr736k8t" path="res://src/actors/weapons/Ranged_Weapons/Beam_System.tscn" id="1_a5qgs"]
+[ext_resource type="Texture2D" uid="uid://c6lseeco24umf" path="res://src/actors/weapons/Ranged_Weapons/baculo_rayos.png" id="1_ddqck"]
+[ext_resource type="Script" uid="uid://co5n7cksvmyvw" path="res://src/actors/player/scripts/RangedWeaponData.gd" id="2_sy8kw"]
+[ext_resource type="PackedScene" uid="uid://cict77y45qv1h" path="res://src/actors/weapons/Ranged_Weapons/Baculo_Rayos.tscn" id="4_dr46e"]
+
+[resource]
+script = ExtResource("2_sy8kw")
+projectile_scene = ExtResource("1_a5qgs")
+is_beam_weapon = true
+beam_tick_rate = 0.2
+category = 2
+weapon_scene = ExtResource("4_dr46e")
+icon = ExtResource("1_ddqck")
+anim_attack = "Baculo_Rayos_2H_Attack"
+windup_time = 0.35
+total_animation_time = 6.35
+cooldown = 0.5
+is_two_handed = true
+damage = 2.0
+knockback_force = 1.0
+jump_force = 1.0
+stamina_cost = 0.0

@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://ceylx36dwk0v0"]
+
+[ext_resource type="Script" uid="uid://cjga1smpup5mx" path="res://src/actors/player/scripts/Projectile.gd" id="1_fy5vk"]
+[ext_resource type="SphereMesh" uid="uid://bmqb5pmqxa0hd" path="res://src/actors/weapons/Ranged_Weapons/Projectile_Baculo_Cargado.tres" id="2_dvfpi"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_gbvfp"]
+radius = 0.1
+
+[node name="ProjectileBase" type="Area3D"]
+collision_layer = 0
+collision_mask = 5
+script = ExtResource("1_fy5vk")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_gbvfp")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D"]
+mesh = ExtResource("2_dvfpi")

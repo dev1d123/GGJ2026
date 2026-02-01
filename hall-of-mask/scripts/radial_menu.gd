@@ -5,7 +5,8 @@ signal equip_item(hand_side, item_data) # hand_side: "LEFT", "RIGHT"
 
 # --- CONFIGURACIÓN DE RUTAS ---
 # Ajusta estas rutas si tus carpetas reales son diferentes
-var ruta_armas = "res://src/actors/weapons/" 
+var ruta_armas_melee = "res://src/actors/weapons/" 
+var ruta_armas_rango = "res://src/actors/weapons/Ranged_Weapons/" # <--- TU CARPETA
 var ruta_mascaras = "res://src/actors/masks/"
 
 var num_sectors = 6
@@ -40,7 +41,8 @@ func _ready():
 		wheel_origin.position = get_viewport_rect().size / 2
 	
 	# --- CARGA AUTOMÁTICA DE DATOS ---
-	_escanear_carpeta(ruta_armas)
+	_escanear_carpeta(ruta_armas_melee)
+	_escanear_carpeta(ruta_armas_rango)
 	_escanear_carpeta(ruta_mascaras)
 	
 	# Actualizar iconos iniciales
@@ -76,19 +78,30 @@ func _clasificar_item(item):
 	if item is MaskData:
 		inventory_data[0].append(item)
 		print("   -> [SECTOR 0] Máscara: ", item.mask_name)
-		
-	# CASO 2: ARMA ⚔️ (Sector 1 o 2)
-	elif item is WeaponData:
-		if item.is_two_handed:
-			inventory_data[2].append(item)
-			print("   -> [SECTOR 2] Pesada: ", item.name)
-		else:
-			inventory_data[1].append(item)
-			print("   -> [SECTOR 1] Ligera: ", item.name)
+		return
 
-# -----------------------------------------------------------
-# 🎨 VISUALIZACIÓN E INPUT
-# -----------------------------------------------------------
+	# CASO 2: ARMAS (Usando la nueva Categoría)
+	if item is WeaponData:
+		match item.category:
+			WeaponData.WeaponCategory.MELEE_LIGHT:
+				inventory_data[1].append(item)
+				print("   -> [SECTOR 1] Ligera: ", item.name)
+				
+			WeaponData.WeaponCategory.MELEE_HEAVY:
+				inventory_data[2].append(item)
+				print("   -> [SECTOR 2] Pesada: ", item.name)
+				
+			WeaponData.WeaponCategory.MAGIC:
+				inventory_data[3].append(item)
+				print("   -> [SECTOR 3] Magia: ", item.name)
+				
+			WeaponData.WeaponCategory.BOW:
+				inventory_data[4].append(item)
+				print("   -> [SECTOR 4] Arco/Ballesta: ", item.name)
+				
+			WeaponData.WeaponCategory.GUN:
+				inventory_data[5].append(item)
+				print("   -> [SECTOR 5] Fuego: ", item.name)
 
 func _input(event):
 	# 1. ABRIR / CERRAR

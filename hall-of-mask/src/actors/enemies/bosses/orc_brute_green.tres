@@ -377,8 +377,8 @@ transitions = ["Start", "Standing", SubResource("AnimationNodeStateMachineTransi
 graph_offset = Vector2(-256.0782, -47.866245)
 
 [resource]
-graph_offset = Vector2(-230.83063, -81.776215)
-nodes/output/position = Vector2(1360, 140)
+graph_offset = Vector2(-364.96344, -110.701744)
+nodes/output/position = Vector2(-20, -40)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_786ps")
 nodes/StateMachine/position = Vector2(-300, 100)
 nodes/Mezcla_L/node = SubResource("AnimationNodeBlend2_hpkk0")
@@ -393,4 +393,4 @@ nodes/Combat_2H/node = SubResource("AnimationNodeStateMachine_hpkk0")
 nodes/Combat_2H/position = Vector2(840, 260)
 nodes/Mezcla_2H/node = SubResource("AnimationNodeBlend2_41a57")
 nodes/Mezcla_2H/position = Vector2(1111.1289, 48.732193)
-node_connections = [&"output", 0, &"Mezcla_2H", &"Mezcla_L", 0, &"Mezcla_R", &"Mezcla_L", 1, &"Combat_L", &"Mezcla_R", 0, &"StateMachine", &"Mezcla_R", 1, &"Combat_R", &"Mezcla_2H", 0, &"Mezcla_L", &"Mezcla_2H", 1, &"Combat_2H"]
+node_connections = [&"Mezcla_L", 0, &"Mezcla_R", &"Mezcla_L", 1, &"Combat_L", &"Mezcla_R", 0, &"StateMachine", &"Mezcla_R", 1, &"Combat_R", &"Mezcla_2H", 0, &"Mezcla_L", &"Mezcla_2H", 1, &"Combat_2H"]
