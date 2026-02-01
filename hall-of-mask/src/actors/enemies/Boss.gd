@@ -1,5 +1,6 @@
 extends Enemy
 class_name BossOrc
+signal boss_died
 
 # ----------------------------------------------------------------
 # CONFIGURACIÓN DE COMBATE
@@ -249,3 +250,27 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 		cooldown_time = 0.5 
 		
 	_entrar_cooldown(cooldown_time)
+func _morir():
+	print("💀 JEFE ORCO DERROTADO")
+
+	# --- lógica original de Enemy ---
+	var reward_amount = 0.0
+	if combat_manager:
+		reward_amount = combat_manager.ult_charge_reward
+	
+	var target_player = player_ref
+	if not target_player:
+		target_player = get_tree().get_first_node_in_group("Player")
+	
+	if target_player and target_player.has_node("MaskManager"):
+		target_player.get_node("MaskManager").add_charge(reward_amount)
+
+	# --- EMITIR SEÑAL DEL JEFE ---
+	boss_died.emit(self)
+
+	# --- desactivar física para evitar bugs ---
+	set_physics_process(false)
+	set_process(false)
+	velocity = Vector3.ZERO
+
+	queue_free()

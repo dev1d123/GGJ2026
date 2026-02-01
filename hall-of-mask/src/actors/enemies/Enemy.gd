@@ -284,6 +284,14 @@ func _entrar_cooldown(tiempo):
 # 6. MOVIMIENTO BASE Y UTILIDADES
 # ------------------------------------------------------------------------------
 func _mover_hacia_destino(delta, velocidad):
+	var nav_map = nav_agent.get_navigation_map()
+	var closest = NavigationServer3D.map_get_closest_point(nav_map, global_position)
+	var dist_to_nav = global_position.distance_to(closest)
+
+	if dist_to_nav > 3.0: # ajusta este umbral
+		velocity.x = 0
+		velocity.z = 0
+		return true
 	if nav_agent.is_navigation_finished():
 		velocity.x = move_toward(velocity.x, 0, 1.0)
 		velocity.z = move_toward(velocity.z, 0, 1.0)
