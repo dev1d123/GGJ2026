@@ -1034,38 +1034,47 @@ bones/22/rotation = Quaternion(-0.054505423, -0.054505408, 0.5391622, 0.838667)
 bones/22/scale = Vector3(0.99999994, 1, 0.99999994)
 
 [node name="Skeleton_Minion_ArmLeft" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_i6nb8")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_ArmRight" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_5migo")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_Body" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_4n15s")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_Cloak" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_t4rmq")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_Eyes" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_ujdjs")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_Head" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_j4ake")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_Jaw" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_ay82e")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_LegLeft" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_rojad")
 skin = SubResource("Skin_ei4fh")
 
 [node name="Skeleton_Minion_LegRight" type="MeshInstance3D" parent="Skeleton_Minion/Rig_Medium/Skeleton3D"]
+visibility_range_end = 0.0
 mesh = SubResource("ArrayMesh_s3vep")
 skin = SubResource("Skin_ei4fh")
 

@@ -12,6 +12,8 @@ func _ready():
 	monitorable = false
 	# Usamos body_entered para detectar CharacterBody3D (Player/Enemigo)
 	body_entered.connect(_on_body_entered)
+	# También detectamos areas como Hurtbox
+	area_entered.connect(_on_area_entered)
 
 func activate(dmg: float, kb: float, jmp: float, attacker: Node):
 	hit_history.clear()
@@ -21,9 +23,11 @@ func activate(dmg: float, kb: float, jmp: float, attacker: Node):
 	attacker_node = attacker 
 	monitoring = true
 	
-	# Revisión instantánea
+	# Revisión instantánea de bodies y areas
 	for body in get_overlapping_bodies():
 		_on_body_entered(body)
+	for area in get_overlapping_areas():
+		_on_area_entered(area)
 
 func deactivate():
 	monitoring = false
@@ -63,3 +67,24 @@ func _on_body_entered(body):
 			
 			# Nota: No normalizamos de nuevo para conservar ese extra de fuerza vectorial
 			body.apply_knockback(dir, knockback, jump)
+
+func _on_area_entered(area):
+	if not monitoring: return
+	if area in hit_history: return
+	if area == attacker_node: return
+	
+	# Si es un Hurtbox, usar su método hit()
+	if area is Hurtbox or area.has_method("hit"):
+		print("⚔️ HITBOX impactó Hurtbox de: ", area.owner.name if area.owner else area.name)
+		
+		var origin = global_position
+		if attacker_node: origin = attacker_node.global_position
+		
+		var target_pos = area.global_position
+		if area.owner: target_pos = area.owner.global_position
+		
+		var dir = (target_pos - origin).normalized()
+		dir.y = 0.2
+		
+		area.hit(damage, dir, knockback, jump)
+		hit_history.append(area)

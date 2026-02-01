@@ -13,21 +13,29 @@ var current_color = Color.RED                   # El color actual (Rojo para def
 
 # --- FUNCIÓN NUEVA PARA CAMBIAR ICONOS (Llamada desde HUD) ---
 func update_life_icons_texture(new_icon: Texture2D):
+	print("📊 StatsPanel: update_life_icons_texture llamado, nuevo icono: ", new_icon)
+	
 	# 1. Decidir qué textura y color usar
 	if new_icon == null:
 		# Si no hay máscara, volvemos al Godot Rojo
 		current_texture = default_texture
-		current_color = Color.RED 
+		current_color = Color.RED
+		print("  -> Usando icono por defecto (Godot rojo)")
 	else:
 		# Si hay máscara, usamos su icono en color original (Blanco)
 		current_texture = new_icon
-		current_color = Color.WHITE 
+		current_color = Color.WHITE
+		print("  -> Usando icono de máscara (blanco)")
 	
 	# 2. Actualizar INMEDIATAMENTE los iconos que ya están en pantalla
+	var updated_count = 0
 	for child in life_container.get_children():
 		if child is TextureRect:
 			child.texture = current_texture
 			child.modulate = current_color
+			updated_count += 1
+	
+	print("  -> Iconos actualizados: ", updated_count)
 
 # --- ACTUALIZACIÓN DE SALUD ---
 func update_health(cantidad: int):

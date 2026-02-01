@@ -23,6 +23,11 @@ func _ready() -> void:
 	# Reproducir audio normal
 	audio_normal.play()
 
+func _process(delta):
+	# Atajo para completar nivel con tecla M
+	if Input.is_key_pressed(KEY_M):
+		_complete_level()
+
 func _on_audio_normal_finished() -> void:
 	audio_normal.play()
 
@@ -43,4 +48,9 @@ func _on_zone_exited(body: Node) -> void:
 	audio_normal.play()
 
 func _on_boss_died(_boss):
+	_complete_level()
+
+func _complete_level():
+	GameManager.complete_level("level1")
+	await get_tree().create_timer(2.0).timeout
 	get_tree().change_scene_to_file(LOBBY_SCENE)

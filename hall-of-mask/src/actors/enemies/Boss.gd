@@ -303,3 +303,17 @@ func _evento_activar_ulti(motivo):
 	print("🔥 JEFE: ULTI - ", motivo)
 	mask_manager.current_ult_charge = mask_manager.max_ult_charge
 	mask_manager.activate_ultimate()
+
+# ----------------------------------------------------------------
+# 8. MUERTE
+# ----------------------------------------------------------------
+func _morir():
+	print("💀 Boss Orc derrotado!")
+	boss_died.emit(self)
+	
+	# Recompensa de carga
+	if player_ref and player_ref.has_node("MaskManager"):
+		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
+	
+	set_physics_process(false)
+	queue_free()

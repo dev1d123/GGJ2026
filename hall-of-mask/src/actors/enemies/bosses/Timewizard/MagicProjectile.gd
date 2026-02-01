@@ -15,13 +15,17 @@ func _ready():
 	if direction.length_squared() <= 0.0001:
 		direction = -global_transform.basis.z.normalized()
 	# Visibilidad y colisión
-	collision_layer = 4
+	collision_layer = 8
 	collision_mask = 2
 	_build_visuals()
-	monitoring = true
-	monitorable = true
+	monitoring = false
+	monitorable = false
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
+	# Activar colisiones después de un frame
+	await get_tree().process_frame
+	monitoring = true
+	monitorable = true
 
 func _physics_process(delta):
 	global_position += direction * speed * delta
@@ -52,14 +56,30 @@ func _build_visuals():
 	add_child(collision)
 
 func _on_body_entered(body):
+	if not _is_player(body):
+		return
 	_apply_damage(body)
 	queue_free()
 
 func _on_area_entered(area):
 	if area == self:
 		return
+	if not _is_player(area):
+		return
 	_apply_damage(area)
 	queue_free()
+
+func _is_player(node) -> bool:
+	if node == null:
+		return false
+	if node.name == "Player":
+		return true
+	if node.is_in_group("player"):
+		return true
+	var parent = node.get_parent()
+	if parent and parent.name == "Player":
+		return true
+	return false
 
 func _apply_damage(target):
 	if target == null:

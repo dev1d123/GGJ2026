@@ -4,8 +4,8 @@ signal on_value_changed(current, max)
 signal on_empty
 
 @export var max_value: float = 100.0
-@export var regen_rate: float = 10.0
-@export var regen_delay: float = 3.0 
+@export var regen_rate: float = 25.0
+@export var regen_delay: float = 1.5 
 
 # --- MULTIPLICADORES (Modificados por Máscaras/Buffs) ---
 var cost_multiplier: float = 1.0    # 0.5 = Mitad de costo

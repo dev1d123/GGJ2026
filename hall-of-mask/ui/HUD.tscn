@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=23 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -18,6 +18,8 @@
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
 [ext_resource type="Texture2D" uid="uid://cao2fhyhavqds" path="res://assets/imagesGUI/container_minimap.png" id="17_tlkqj"]
 [ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="18_reticle"]
+[ext_resource type="Script" path="res://scripts/components/mask_selection_panel.gd" id="19_mask_panel"]
+[ext_resource type="Script" path="res://scripts/components/notification_ui.gd" id="20_notification"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -246,6 +248,46 @@ grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("5_3q2by")
 
+[node name="MaskSelectionPanel" type="PanelContainer" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -160.0
+offset_right = 110.0
+offset_bottom = 160.0
+grow_vertical = 2
+script = ExtResource("19_mask_panel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/MaskSelectionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="FighterSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ShooterSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="UndeadSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TimeSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
 [node name="SkillQ" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
 visible = false
 layout_mode = 0
@@ -413,19 +455,22 @@ grow_vertical = 2
 pivot_offset = Vector2(40, 40)
 
 [node name="Icon_Mask" type="TextureRect" parent="RadialMenu/WheelOrigin/RomboCentro"]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -36.0
+offset_left = -50.0
 offset_top = -120.0
-offset_right = 44.0
-offset_bottom = -40.0
+offset_right = 50.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(40, 40)
+pivot_offset = Vector2(50, 50)
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Sector0" type="TextureRect" parent="RadialMenu/WheelOrigin"]
 layout_mode = 1
@@ -531,3 +576,42 @@ offset_right = 0.0
 offset_bottom = 0.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
+
+[node name="NotificationUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -150.0
+offset_right = 250.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("20_notification")
+
+[node name="PanelContainer" type="PanelContainer" parent="NotificationUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="NotificationUI/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Label" type="Label" parent="NotificationUI/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_font_sizes/font_size = 28
+text = "🎭 ¡NUEVA MÁSCARA DESBLOQUEADA!"
+horizontal_alignment = 1
+vertical_alignment = 1
+

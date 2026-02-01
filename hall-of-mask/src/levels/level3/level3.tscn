@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://drc75wnvc5krj"]
+[gd_scene load_steps=37 format=3 uid="uid://drc75wnvc5krj"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_40ody"]
 [ext_resource type="Script" uid="uid://ol4wcmbkt4d4" path="res://src/levels/level3/level_3.gd" id="1_710q4"]
@@ -23,6 +23,10 @@
 [ext_resource type="PackedScene" uid="uid://fkknnwxtt25e" path="res://src/levels/level3/structures/shrub3.tscn" id="20_eavg7"]
 [ext_resource type="PackedScene" uid="uid://g4uowe3svs3x" path="res://src/levels/level3/structures/mausoleum.tscn" id="21_8a8h7"]
 [ext_resource type="AudioStream" uid="uid://f0r58ojm1lll" path="res://assets/sounds/LivingSoul.wav" id="23_xw760"]
+[ext_resource type="PackedScene" uid="uid://fjmfpedjk6b" path="res://src/actors/enemies/Skeleton_Mage.tscn" id="24_5deba"]
+[ext_resource type="PackedScene" uid="uid://bip75ya5ux6hv" path="res://src/actors/enemies/Skeleton_Minion.tscn" id="25_tvdmr"]
+[ext_resource type="PackedScene" uid="uid://550j3hb7qwen" path="res://src/actors/enemies/Skeleton_Rogue.tscn" id="26_oyg6j"]
+[ext_resource type="PackedScene" uid="uid://5y3h1r2k7nhq" path="res://src/actors/enemies/Skeleton_Warrior.tscn" id="27_5y5qm"]
 
 [sub_resource type="Gradient" id="Gradient_ggtw4"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -95,11 +99,14 @@ detiling_shift = 0.215
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_ofe6v")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_7t7ym")])
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_5deba"]
+size = Vector3(137.10155, 1, 140.15771)
+
 [node name="Level3" type="Node3D"]
 script = ExtResource("1_710q4")
 
 [node name="Player" parent="." instance=ExtResource("2_xw760")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7723417, 3.1063814, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0280151, 3.1063814, -2.2291145)
 collision_mask = 133
 
 [node name="Terrain3D" type="Terrain3D" parent="."]
@@ -826,3 +833,84 @@ transform = Transform3D(9.999401, 0.11670041, -0.022715747, -2.2862433e-07, -2.2
 
 [node name="Shrub48" parent="Elements" instance=ExtResource("10_sui43")]
 transform = Transform3D(9.999403, 0.09590554, -0.06498802, -7.9512347e-07, -6.495464, -8.0385685, -0.109255075, 8.777594, -5.947872, 19.592543, 2.761568, 52.643265)
+
+[node name="Skeleton_Minion" parent="." instance=ExtResource("24_5deba")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.978926, 0.50002646, 85.00737)
+collision_mask = 135
+
+[node name="Skeleton_Minion2" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -33.02042, 0.50002646, 79.299706)
+collision_mask = 135
+
+[node name="Skeleton_Minion3" parent="." instance=ExtResource("26_oyg6j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.772903, 0.5000265, 6.3487387)
+collision_mask = 135
+
+[node name="Skeleton_Minion4" parent="." instance=ExtResource("27_5y5qm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.30749, 0.5000265, 72.37255)
+collision_mask = 135
+
+[node name="Skeleton_Minion5" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.177074, 0.50002646, 6.6751537)
+collision_mask = 135
+
+[node name="Skeleton_Minion6" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.569595, 0.50002646, 79.67403)
+collision_mask = 135
+
+[node name="Skeleton_Minion7" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34.018803, 0.50002646, 71.00585)
+collision_mask = 135
+
+[node name="Skeleton_Minion8" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6539116, 0.50002646, 44.1345)
+collision_mask = 135
+
+[node name="Skeleton_Minion9" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.46574, 0.50002646, 27.448254)
+collision_mask = 135
+
+[node name="Skeleton_Minion10" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.63732, 0.50002646, 33.082573)
+collision_mask = 135
+
+[node name="Skeleton_Minion11" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.445934, 0.50002646, 9.725736)
+collision_mask = 135
+
+[node name="Skeleton_Minion12" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29.946205, 0.50002646, 10.194049)
+collision_mask = 135
+
+[node name="Skeleton_Minion13" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.783142, 0.50002646, 54.04845)
+collision_mask = 135
+
+[node name="Skeleton_Minion14" parent="." instance=ExtResource("25_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.080673, 0.50002646, 41.052715)
+collision_mask = 135
+
+[node name="Skeleton_Minion15" parent="." instance=ExtResource("27_5y5qm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.008544922, 0.5000265, 71.96148)
+collision_mask = 135
+
+[node name="Skeleton_Minion16" parent="." instance=ExtResource("27_5y5qm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.582241, 0.5000265, 81.91317)
+collision_mask = 135
+
+[node name="Skeleton_Minion17" parent="." instance=ExtResource("24_5deba")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.338872, 0.50002646, 45.573788)
+collision_mask = 135
+
+[node name="Skeleton_Minion18" parent="." instance=ExtResource("26_oyg6j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.10584, 0.5000265, 33.04637)
+collision_mask = 135
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 255
+collision_mask = 255
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.71299, -0.25592422, 43.760254)
+shape = SubResource("BoxShape3D_5deba")
+debug_color = Color(0.90588236, 0.12156863, 0.6784314, 1)

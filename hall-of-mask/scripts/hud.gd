@@ -7,17 +7,22 @@ extends CanvasLayer
 @onready var radar = $GameUI/Radar
 @onready var radial_menu = $RadialMenu
 @onready var mask_icon_grande = $GameUI/StatsPanel/MaskIcon
+@onready var mask_selection_panel = $GameUI/MaskSelectionPanel
+@onready var notification_ui = $NotificationUI
 
 # Referencias iconos mano
 @onready var icon_hand_l = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_L
 @onready var icon_hand_r = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_R
+
+# Referencia al jugador
+var player: CharacterBody3D = null
 
 func _ready():
 	# 1. Conexión Menú Radial
 	radial_menu.equip_item.connect(_on_item_equipped)
 	
 	# 2. BUSCAR AL JUGADOR Y CONECTARSE (EL CABLEADO REAL)
-	var player = get_tree().root.find_child("Player", true, false)
+	player = get_tree().root.find_child("Player", true, false)
 	
 	if player:
 		print("HUD: ✅ Player encontrado. Conectando señales...")
@@ -35,6 +40,14 @@ func _ready():
 			player.mascara_cambiada.connect(_on_mask_changed)
 	else:
 		print("HUD: ❌ ¡NO encuentro al Player! Asegúrate que el nodo se llame 'Player'")
+	
+	# 3. Conectar panel de selección de máscaras
+	if mask_selection_panel:
+		mask_selection_panel.mask_equipped.connect(_on_mask_selected_from_ui)
+	
+	# 4. Conectar con GameManager para notificaciones de máscaras desbloqueadas
+	if GameManager:
+		GameManager.mask_unlocked.connect(_on_mask_unlocked_notification)
 
 func _on_mask_changed(mask_data):
 	# PROTECCIÓN: Si olvidamos poner el nodo en la escena
@@ -94,21 +107,81 @@ func _on_player_ulti_cambiada(nueva_carga, max_carga):
 	# 2. Actualizar el icono pequeño de abajo (R)
 	skills_panel.update_ulti_charge(nueva_carga, max_carga)
 
+# --- NUEVA FUNCIÓN: Cuando se selecciona una máscara desde el panel ---
+func _on_mask_selected_from_ui(mask_name: String):
+	if player and player.has_method("equip_mask_visual"):
+		player.equip_mask_visual(mask_name)
+		print("🎭 HUD: Solicitando equipar máscara visual: ", mask_name)
+
+# --- NUEVA FUNCIÓN: Notificación cuando se desbloquea una máscara ---
+func _on_mask_unlocked_notification(mask_name: String):
+	if notification_ui:
+		var mask_names = {
+			"fighter": "LUCHADOR",
+			"shooter": "TIRADOR",
+			"undead": "NO MUERTO",
+			"time": "TIEMPO"
+		}
+		var display_name = mask_names.get(mask_name, mask_name.to_upper())
+		notification_ui.show_notification("🎭 ¡MÁSCARA " + display_name + " DESBLOQUEADA!")
+		print("🎭 HUD: Mostrando notificación de máscara: ", display_name)
+
+# --- FUNCIÓN: Equipar máscara desde el menú radial ---
+func _equip_mask_from_radial(mask_data: MaskData):
+	if not player:
+		return
+	
+	# Mapear el nombre de la máscara de MaskData a los nombres del sistema
+	var mask_name_map = {
+		"Fighter": "fighter",
+		"Luchador": "fighter",
+		"Shooter": "shooter",
+		"Tirador": "shooter",
+		"Undead": "undead",
+		"No Muerto": "undead",
+		"NoMuerto": "undead",
+		"Time": "time",
+		"Tiempo": "time"
+	}
+	
+	var mask_key = mask_name_map.get(mask_data.mask_name, mask_data.mask_name.to_lower())
+	
+	# Activar shader visual
+	if player.has_method("equip_mask_visual"):
+		player.equip_mask_visual(mask_key)
+		print("🎭 HUD: Equipando máscara desde menú radial: ", mask_data.mask_name, " -> ", mask_key)
+	
+	# Sincronizar el panel de selección para resaltar la máscara equipada
+	if mask_selection_panel and mask_selection_panel.has_method("sync_equipped_mask"):
+		mask_selection_panel.sync_equipped_mask(mask_key)
+
+# --- FUNCIÓN: Quitar máscara ---
+func _remove_mask():
+	if player and player.has_method("equip_mask_visual"):
+		player.equip_mask_visual("")  # String vacío para quitar
+		print("🎭 HUD: Quitando máscara")
+	
+	# Resetear el panel de selección
+	if mask_selection_panel and mask_selection_panel.has_method("sync_equipped_mask"):
+		mask_selection_panel.sync_equipped_mask("")
+
 # --- LÓGICA DE EQUIPAMIENTO (Radial Menu) ---
 
 func _on_item_equipped(hand_side, item_data):
-	if item_data == null: return
+	# Si item_data es null, significa quitar máscara
+	if item_data == null:
+		_remove_mask()
+		return
+	
+	# --- FILTRO: Si es una MÁSCARA, activar shader visual ---
+	if item_data is MaskData:
+		_equip_mask_from_radial(item_data)
+		return 
 	
 	# ENVIAR ORDEN AL PLAYER PRIMERO (Para que la lógica funcione siempre)
-	var player = get_tree().root.find_child("Player", true, false)
 	if player and player.has_method("equipar_desde_ui"):
 		player.equipar_desde_ui(item_data, hand_side)
 
-	# --- FILTRO DE SEGURIDAD ---
-	# Si es una MÁSCARA, no hacemos nada con los iconos de las MANOS y terminamos aquí.
-	if item_data is MaskData:
-		return 
-	
 	# ===============================================
 	# DE AQUÍ PARA ABAJO ES SOLO PARA ARMAS (WeaponData)
 	# ===============================================

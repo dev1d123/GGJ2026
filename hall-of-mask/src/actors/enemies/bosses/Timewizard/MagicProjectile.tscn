@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxn1m5y2qw8pa"]
+
+[ext_resource type="Script" path="res://src/actors/enemies/bosses/Timewizard/MagicProjectile.gd" id="1_magic"]
+
+[node name="MagicProjectile" type="Area3D"]
+script = ExtResource("1_magic")
+collision_layer = 8
+collision_mask = 2

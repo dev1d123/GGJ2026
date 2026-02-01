@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MaskData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://demo/data/MaskData.gd" id="1_mask_none"]
+
+[resource]
+script = ExtResource("1_mask_none")
+mask_name = "None"
+icon = null
+description = "Quitar máscara"
+screen_tint = Color(1, 1, 1, 1)
+speed_multiplier = 1.0
+damage_multiplier = 1.0
+defense_multiplier = 1.0
+crit_chance = 0.0

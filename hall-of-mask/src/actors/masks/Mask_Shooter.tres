@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="MaskData" load_steps=3 format=3 uid="uid://shooter_mask_002"]
+
+[ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_shooter"]
+[ext_resource type="Texture2D" path="res://assets/imagesGUI/shooter_mask.png" id="2_shooter_icon"]
+
+[resource]
+script = ExtResource("1_shooter")
+mask_name = "Shooter"
+icon = ExtResource("2_shooter_icon")
+description = "Máscara del Tirador - Aumenta precisión y velocidad de ataque a distancia"
+screen_tint = Color(0.2, 1, 0.2, 0.1)
+ult_screen_tint = Color(0, 1, 0, 0.3)
+speed_mult = 1.3
+jump_mult = 1.2
+defense_mult = 0.9
+damage_mult = 1.3
+attack_speed_mult = 1.4
+crit_chance = 0.15
+stamina_cost_mult = 0.9
+stamina_regen_mult = 1.3
+stamina_delay_mult = 0.8
+ultimate_duration = 10.0
+ult_speed_mult = 1.6
+ult_jump_mult = 1.4
+ult_defense_mult = 1.2
+ult_damage_mult = 2.0
+ult_attack_speed_mult = 2.5
+ult_crit_chance = 0.4
+ult_stamina_cost_mult = 0.4
+ult_stamina_regen_mult = 2.5
+ult_stamina_delay_mult = 0.3
+crit_damage = 3.0
