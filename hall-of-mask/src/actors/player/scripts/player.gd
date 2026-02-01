@@ -57,6 +57,13 @@ var trauma: float = 0.0
 var trauma_power: float = 2.0 
 var shake_decay: float = 1.5  
 
+# --- VARIABLES VISUALES DE MÁSCARAS ---
+@onready var fighter_overlay: ColorRect = $fighterMask
+@onready var shooter_overlay: ColorRect = $shooterMask
+@onready var undead_overlay: ColorRect = $undeadMask
+@onready var time_overlay: ColorRect = $timeMask
+var current_mask_visual: String = "" # "fighter", "shooter", "undead", "time", o ""
+
 # --- VARIABLES INTERNAS ---
 var max_health: float = 100.0
 var current_health: float = 100.0
@@ -485,6 +492,55 @@ func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 
 	# 4. Feedback
 	add_camera_trauma(0.5) 
+
+# ------------------------------------------------------------------------------
+# SISTEMA VISUAL DE MÁSCARAS (Solo visual, sin stats)
+# ------------------------------------------------------------------------------
+func equip_mask_visual(mask_name: String):
+	# Ocultar todas las máscaras primero
+	if fighter_overlay: fighter_overlay.visible = false
+	if shooter_overlay: shooter_overlay.visible = false
+	if undead_overlay: undead_overlay.visible = false
+	if time_overlay: time_overlay.visible = false
+	
+	# Activar la máscara seleccionada
+	match mask_name:
+		"fighter":
+			if fighter_overlay: fighter_overlay.visible = true
+			current_mask_visual = "fighter"
+			_update_health_icons("fighter")
+		"shooter":
+			if shooter_overlay: shooter_overlay.visible = true
+			current_mask_visual = "shooter"
+			_update_health_icons("shooter")
+		"undead":
+			if undead_overlay: undead_overlay.visible = true
+			current_mask_visual = "undead"
+			_update_health_icons("undead")
+		"time":
+			if time_overlay: time_overlay.visible = true
+			current_mask_visual = "time"
+			_update_health_icons("time")
+		_:
+			current_mask_visual = ""
+			_update_health_icons("")
+	
+	print("🎭 Player: Máscara visual equipada: ", mask_name)
+
+func _update_health_icons(mask_name: String):
+	# Emitir señal para que el HUD actualice los iconos de vida
+	var icon_texture = null
+	if mask_name != "":
+		var icon_path = "res://assets/imagesGUI/" + mask_name + "_mask.png"
+		if ResourceLoader.exists(icon_path):
+			icon_texture = load(icon_path)
+	
+	# Notificar al HUD (si tiene el método)
+	var hud = get_node_or_null("HUD")
+	if hud and hud.has_node("GameUI/StatsPanel"):
+		var stats_panel = hud.get_node("GameUI/StatsPanel")
+		if stats_panel.has_method("update_life_icons_texture"):
+			stats_panel.update_life_icons_texture(icon_texture)
 
 func _play_attack_sound():
 	if attack_sounds.is_empty():

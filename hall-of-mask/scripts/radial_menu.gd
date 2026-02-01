@@ -45,6 +45,10 @@ func _ready():
 	_escanear_carpeta(ruta_armas_rango)
 	_escanear_carpeta(ruta_mascaras)
 	
+	# Conectar con GameManager para actualizar máscaras desbloqueadas
+	if GameManager:
+		GameManager.mask_unlocked.connect(_on_mask_unlocked)
+	
 	# Actualizar iconos iniciales
 	_actualizar_iconos_sectores()
 
@@ -76,8 +80,12 @@ func _escanear_carpeta(ruta):
 func _clasificar_item(item):
 	# CASO 1: MÁSCARA 🎭 (Sector 0)
 	if item is MaskData:
-		inventory_data[0].append(item)
-		print("   -> [SECTOR 0] Máscara: ", item.mask_name)
+		# Solo agregar si está desbloqueada o no hay GameManager (modo debug)
+		if not GameManager or _is_mask_unlocked_by_data(item):
+			inventory_data[0].append(item)
+			print("   -> [SECTOR 0] Máscara: ", item.mask_name)
+		else:
+			print("   -> [SECTOR 0] Máscara bloqueada (ignorando): ", item.mask_name)
 		return
 
 	# CASO 2: ARMAS (Usando la nueva Categoría)
@@ -166,13 +174,21 @@ func _input(event):
 		# EQUIPAR (Izquierdo)
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			var item = lista[sector_scroll_indices[current_sector_index]]
-			emit_signal("equip_item", "LEFT", item)
 			
-			# ¡AQUÍ ESTÁ EL CAMBIO! 
-			# Si equipamos una máscara, la guardamos como la "actual"
-			if item is MaskData:
-				current_equipped_mask = item
-				_actualizar_resaltado() # Refrescamos para fijar el icono
+			# Si estamos en el sector de máscaras (0) y es la primera posición, quitar máscara
+			if current_sector_index == 0 and sector_scroll_indices[0] == 0:
+				# Señal especial para quitar máscara
+				emit_signal("equip_item", "LEFT", null)
+				current_equipped_mask = null
+				_actualizar_resaltado()
+			else:
+				emit_signal("equip_item", "LEFT", item)
+				
+				# ¡AQUÍ ESTÁ EL CAMBIO! 
+				# Si equipamos una máscara, la guardamos como la "actual"
+				if item is MaskData:
+					current_equipped_mask = item
+					_actualizar_resaltado() # Refrescamos para fijar el icono
 			
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			var item = lista[sector_scroll_indices[current_sector_index]]
@@ -236,3 +252,41 @@ func _actualizar_resaltado():
 			if icon_mask_preview:
 				icon_mask_preview.texture = item_preview.icon
 				icon_mask_preview.modulate = Color(1, 1, 1, 0.7) # Un poco transparente para indicar "preview"
+
+# -----------------------------------------------------------
+# 🎭 SISTEMA DE MÁSCARAS DESBLOQUEABLES
+# -----------------------------------------------------------
+func _is_mask_unlocked_by_data(mask_data: MaskData) -> bool:
+	if not GameManager:
+		return true # Si no hay GameManager, desbloqueamos todo (modo debug)
+	
+	# Mapeo de nombres de máscaras en MaskData a nombres en GameManager
+	var mask_name_map = {
+		"Fighter": "figh,
+		"None": "none",  # Opción especial para quitar máscara
+		"Ninguna": "none"
+	}
+	
+	# Si es la opción de quitar máscara, siempre está disponible
+	if mask_data.mask_name == "None" or mask_data.mask_name == "Ninguna":
+		return true"Luchador": "fighter",
+		"Shooter": "shooter",
+		"Tirador": "shooter",
+		"Undead": "undead",
+		"No Muerto": "undead",
+		"NoMuerto": "undead",
+		"Time": "time",
+		"Tiempo": "time"
+	}
+	
+	var mask_key = mask_name_map.get(mask_data.mask_name, mask_data.mask_name.to_lower())
+	return GameManager.is_mask_unlocked(mask_key)
+
+func _on_mask_unlocked(mask_name: String):
+	# Reescanear carpeta de máscaras para actualizar inventario
+	print("🎭 RadialMenu: Máscara desbloqueada, actualizando inventario...")
+	inventory_data[0].clear()
+	_escanear_carpeta(ruta_mascaras)
+	_actualizar_iconos_sectores(0)
+	sector_scroll_indices[0] = 0 # Reset scroll
+

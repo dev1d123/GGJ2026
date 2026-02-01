@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="MaskData" load_steps=3 format=3 uid="uid://time_mask_004"]
+
+[ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_time"]
+[ext_resource type="Texture2D" path="res://assets/imagesGUI/time_mask.png" id="2_time_icon"]
+
+[resource]
+script = ExtResource("1_time")
+mask_name = "Time"
+icon = ExtResource("2_time_icon")
+description = "Máscara del Tiempo - Manipula el tiempo para aumentar velocidad extrema"
+screen_tint = Color(0.2, 0.5, 1, 0.1)
+ult_screen_tint = Color(0, 0.5, 1, 0.3)
+speed_mult = 1.4
+jump_mult = 1.3
+defense_mult = 1.0
+damage_mult = 1.2
+attack_speed_mult = 1.5
+crit_chance = 0.12
+stamina_cost_mult = 0.85
+stamina_regen_mult = 1.4
+stamina_delay_mult = 0.7
+ultimate_duration = 8.0
+ult_speed_mult = 2.0
+ult_jump_mult = 1.8
+ult_defense_mult = 1.3
+ult_damage_mult = 1.7
+ult_attack_speed_mult = 3.0
+ult_crit_chance = 0.35
+ult_stamina_cost_mult = 0.2
+ult_stamina_regen_mult = 3.5
+ult_stamina_delay_mult = 0.1
+crit_damage = 2.2
