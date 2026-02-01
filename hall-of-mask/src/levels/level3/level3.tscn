@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://drc75wnvc5krj"]
+[gd_scene load_steps=37 format=3 uid="uid://drc75wnvc5krj"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_40ody"]
 [ext_resource type="Script" uid="uid://ol4wcmbkt4d4" path="res://src/levels/level3/level_3.gd" id="1_710q4"]
@@ -99,16 +99,14 @@ detiling_shift = 0.215
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_ofe6v")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_7t7ym")])
 
-[sub_resource type="NavigationMesh" id="NavigationMesh_5deba"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_xw760"]
-size = Vector3(106.9618, 1, 92.86372)
+[sub_resource type="BoxShape3D" id="BoxShape3D_5deba"]
+size = Vector3(137.10155, 1, 140.15771)
 
 [node name="Level3" type="Node3D"]
 script = ExtResource("1_710q4")
 
 [node name="Player" parent="." instance=ExtResource("2_xw760")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.7723417, 3.1063814, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.659447, 3.1063814, 20.19009)
 collision_mask = 133
 
 [node name="Terrain3D" type="Terrain3D" parent="."]
@@ -836,17 +834,6 @@ transform = Transform3D(9.999401, 0.11670041, -0.022715747, -2.2862433e-07, -2.2
 [node name="Shrub48" parent="Elements" instance=ExtResource("10_sui43")]
 transform = Transform3D(9.999403, 0.09590554, -0.06498802, -7.9512347e-07, -6.495464, -8.0385685, -0.109255075, 8.777594, -5.947872, 19.592543, 2.761568, 52.643265)
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
-navigation_mesh = SubResource("NavigationMesh_5deba")
-
-[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.69955635, 0)
-collision_layer = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9845047, 0.14781448, 43.30288)
-shape = SubResource("BoxShape3D_xw760")
-
 [node name="Skeleton_Minion" parent="." instance=ExtResource("24_5deba")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.978926, 0.50002646, 85.00737)
 collision_mask = 135
@@ -918,3 +905,12 @@ collision_mask = 135
 [node name="Skeleton_Minion18" parent="." instance=ExtResource("26_oyg6j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.10584, 0.5000265, 33.04637)
 collision_mask = 135
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 255
+collision_mask = 255
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.71299, -0.25592422, 43.760254)
+shape = SubResource("BoxShape3D_5deba")
+debug_color = Color(0.90588236, 0.12156863, 0.6784314, 1)

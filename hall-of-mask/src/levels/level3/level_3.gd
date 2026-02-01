@@ -1,7 +1,7 @@
 extends Node3D
 
 @onready var audio: AudioStreamPlayer = $AudioStreamPlayer
-@onready var enemy_container = $NavigationRegion3D/StaticBody3D
+@onready var enemy_container = $"."
 
 var total_enemies: int = 0
 var enemies_killed: int = 0
@@ -39,15 +39,16 @@ func _count_enemies():
 
 func _connect_enemy_signals():
 	for enemy in enemies_list:
-		if enemy.has_signal("enemy_died"):
-			enemy.enemy_died.connect(_on_enemy_died)
-		elif enemy.has_node("HealthComponent"):
+		if enemy.has_node("HealthComponent"):
 			var health_comp = enemy.get_node("HealthComponent")
 			if health_comp.has_signal("on_death"):
-				health_comp.on_death.connect(_on_enemy_died)
+				# Conectar con lambda para ignorar parámetros extra
+				health_comp.on_death.connect(func(): _on_enemy_died())
+				print("  ✅ Conectado: ", enemy.name)
 
 func _on_enemy_died():
 	enemies_killed += 1
+	print("💀 Enemigo eliminado! Total: ", enemies_killed, "/", total_enemies)
 	_update_ui()
 	
 	if enemies_killed >= total_enemies:

@@ -3,7 +3,7 @@ class_name AttributeManager extends Node
 # Estos son los valores BASE del personaje (sin máscaras)
 var base_stats = {
 	"max_health": 100.0,
-	"move_speed": 3.0,
+	"move_speed": 15.0,
 	"jump_force": 4.5,
 	"defense": 0.0,           # 0% reducción
 	"melee_damage": 1.0,      # Multiplicador x1
