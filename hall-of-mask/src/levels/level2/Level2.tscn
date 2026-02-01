@@ -239,7 +239,7 @@ transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 42.50197, -149
 transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 36.572357, -166.9045, -26.974756)
 
 [node name="RockPlatafform11" parent="." instance=ExtResource("6_qamio")]
-transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 36.572357, -193.53448, -57.387825)
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, 36.572357, -193.53448, -11.496826)
 
 [node name="Rock11" parent="." instance=ExtResource("11_5suer")]
 transform = Transform3D(-6.6397285, 12.521384, 4.9121213, -3.615733e-08, 5.478028, -13.963924, -13.450424, -6.1811123, -2.4248407, -42.99664, -116.283, -9.337408)
