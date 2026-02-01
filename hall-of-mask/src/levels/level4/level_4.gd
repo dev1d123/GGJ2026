@@ -2,6 +2,7 @@ extends Node3D
 
 # ---------------- AUDIO ----------------
 @onready var audio: AudioStreamPlayer = $AudioStreamPlayer
+@onready var boss: BossWizard = $Time_Boss
 
 # ---------------- PLATFORMS ----------------
 @onready var platforms: Array[Node3D] = [
@@ -12,9 +13,11 @@ extends Node3D
 	$Elements/Node/ClockPlatform5
 ]
 
-const MOVE_HEIGHT := 10.0
+const MOVE_HEIGHT := 15.0
 const MOVE_TIME := 2.5
 const OFFSET_TIME := 0.4 # desfase entre plataformas
+
+const LOBBY_SCENE := "res://src/levels/lobby/Lobby.tscn"
 
 # ---------------- BRASS ----------------
 @onready var brass_parts: Array[Node3D] = [
@@ -22,7 +25,6 @@ const OFFSET_TIME := 0.4 # desfase entre plataformas
 	$Elements/Brass14,
 	$Elements/Brass15
 ]
-
 const BRASS_ROT_SPEED := 1.5 # radianes por segundo
 
 # ---------------- READY ----------------
@@ -30,6 +32,10 @@ func _ready() -> void:
 	# audio en loop
 	audio.finished.connect(_on_audio_finished)
 	audio.play()
+
+	# muerte del boss -> volver al lobby
+	if boss:
+		boss.boss_died.connect(_on_boss_died)
 
 	# iniciar plataformas con desfase
 	for i in platforms.size():
@@ -73,3 +79,6 @@ func start_platform_loop(platform: Node3D, offset: float) -> void:
 func _process(delta: float) -> void:
 	for brass in brass_parts:
 		brass.rotate_y(BRASS_ROT_SPEED * delta)
+
+func _on_boss_died(_boss) -> void:
+	get_tree().change_scene_to_file(LOBBY_SCENE)

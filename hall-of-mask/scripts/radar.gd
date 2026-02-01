@@ -30,12 +30,15 @@ func _draw():
 		# Convertimos 3D (X, Z) a 2D del radar (X, Y)
 		# Nota: En 3D "Adelante" suele ser -Z. En 2D UI "Arriba" es -Y.
 		# Rotamos el vector según la rotación del jugador para que el radar gire contigo
-		var rotated_pos = Vector2(relative_pos_3d.x, relative_pos_3d.z).rotated(-player.rotation.y)
-		
+		# Convertimos la posición del enemigo al espacio LOCAL del jugador
+		var local_pos = player.global_transform.basis.inverse() * relative_pos_3d
+
+		# Pasamos a 2D (X derecha, Y arriba)
+		var radar_pos = Vector2(local_pos.x, local_pos.z)
 		# 3. Escalar al tamaño del radar UI
 		# Si detection_range es 20m y radar_radius es 100px -> 1m = 5px
 		var scale_factor = radar_radius_pixels / detection_range
-		var draw_pos = rotated_pos * scale_factor
+		var draw_pos = radar_pos * scale_factor
 		
 		# 4. Limitar al borde (Clamping) si está muy lejos
 		if draw_pos.length() > radar_radius_pixels:
@@ -44,4 +47,4 @@ func _draw():
 			continue 
 			
 		# 5. Dibujar punto rojo
-		draw_circle(center + draw_pos, 3.0, Color.RED)
+		draw_circle(center + draw_pos, 7.0, Color.RED)

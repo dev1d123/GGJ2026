@@ -16,7 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://btbet8x5kodvd" path="res://UI_assets/star-trek.png" id="12_5d7l6"]
 [ext_resource type="Texture2D" uid="uid://djyq0cf5cybfu" path="res://UI_assets/diamante.png" id="15_wxjpw"]
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
-[ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="17_tlkqj"]
+[ext_resource type="Texture2D" uid="uid://cao2fhyhavqds" path="res://assets/imagesGUI/container_minimap.png" id="17_tlkqj"]
+[ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="18_reticle"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -337,6 +338,11 @@ offset_bottom = 5.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="ContainerMinimap" type="Sprite2D" parent="GameUI/Radar"]
+position = Vector2(94, 93)
+scale = Vector2(0.605, 0.605)
+texture = ExtResource("17_tlkqj")
+
 [node name="RadialMenu" type="Control" parent="."]
 process_mode = 3
 layout_mode = 3
@@ -518,7 +524,7 @@ grow_vertical = 2
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("16_l08fo")
 
-[node name="ReticleUI" parent="." instance=ExtResource("17_tlkqj")]
+[node name="ReticleUI" parent="." instance=ExtResource("18_reticle")]
 offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0

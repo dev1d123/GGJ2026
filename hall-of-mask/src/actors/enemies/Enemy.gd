@@ -272,7 +272,6 @@ func _maniobra_alejarse(delta):
 func _entrar_cooldown(tiempo):
 	current_state = State.COOLDOWN
 	ai_cooldown_timer = tiempo
-
 func _comportamiento_cooldown(delta):
 	ai_cooldown_timer -= delta
 	if player_ref: _mirar_hacia(player_ref.global_position, delta * 5.0)
@@ -286,6 +285,31 @@ func _comportamiento_cooldown(delta):
 		strafe_dir *= -1
 		current_state = State.COMBAT_MANEUVER
 		ai_decision_timer = 0.0 # ¡Atacar inmediatamente al terminar CD!
+
+# ------------------------------------------------------------------------------
+# 6. MOVIMIENTO BASE Y UTILIDADES
+# ------------------------------------------------------------------------------
+func _mover_hacia_destino(delta, velocidad):
+	var nav_map = nav_agent.get_navigation_map()
+	var closest = NavigationServer3D.map_get_closest_point(nav_map, global_position)
+	var dist_to_nav = global_position.distance_to(closest)
+
+	if dist_to_nav > 3.0: # ajusta este umbral
+		velocity.x = 0
+		velocity.z = 0
+		return true
+	if nav_agent.is_navigation_finished():
+		velocity.x = move_toward(velocity.x, 0, 1.0)
+		velocity.z = move_toward(velocity.z, 0, 1.0)
+		return true 
+
+	var next_pos = nav_agent.get_next_path_position()
+	var dir = (next_pos - global_position).normalized()
+	dir.y = 0
+	velocity.x = dir.x * velocidad
+	velocity.z = dir.z * velocidad
+	_mirar_hacia(next_pos, delta * 8.0)
+	return false
 
 # ------------------------------------------------------------------------------
 # UTILIDADES Y EVENTOS

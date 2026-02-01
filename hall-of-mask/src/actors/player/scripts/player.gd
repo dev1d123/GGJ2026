@@ -1,4 +1,9 @@
 extends CharacterBody3D
+@onready var footstep_audio: AudioStreamPlayer3D = $FootStep
+@export var footstep_sounds: Array[AudioStream] = []
+
+@onready var attack_audio: AudioStreamPlayer3D = $WeaponAudio
+@export var attack_sounds: Array[AudioStream] = []
 
 # ------------------------------------------------------------------------------
 # 1. CONFIGURACIÓN Y REFERENCIAS
@@ -20,7 +25,7 @@ var transitioning := false
 
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
-@export var speed_walk: float = 5.0
+@export var speed_walk: float = 200.0
 @export var jump_force: float = 15.0 
 @export var gravity_multiplier: float = 2.0 
 
@@ -158,6 +163,12 @@ func _physics_process(delta: float) -> void:
 	_apply_shake(delta)
 	_procesar_modificadores_combate(delta)
 
+	if is_on_floor() and (abs(velocity.x) > 0.1 or abs(velocity.z) > 0.1):
+		if not footstep_audio.playing and footstep_sounds.size() > 0:
+			footstep_audio.stream = footstep_sounds.pick_random()
+			footstep_audio.play()
+	else:
+		footstep_audio.stop()
 	# Gravedad
 	if not is_on_floor():
 		velocity.y -= (gravity * gravity_multiplier) * delta
@@ -455,7 +466,6 @@ func usar_pocion(index):
 				health_component.current_health = health_component.max_health
 			emit_signal("vida_cambiada", health_component.current_health)
 		emit_signal("pociones_cambiadas", index + 1, pociones_ui[index])
-
 func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 	if is_dead: return
 	
@@ -475,3 +485,11 @@ func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 
 	# 4. Feedback
 	add_camera_trauma(0.5) 
+
+func _play_attack_sound():
+	if attack_sounds.is_empty():
+		return
+
+	attack_audio.stream = attack_sounds.pick_random()
+	attack_audio.pitch_scale = randf_range(0.95, 1.05)
+	attack_audio.play()

@@ -1,10 +1,61 @@
-[gd_scene load_steps=128 format=3 uid="uid://oprw0dsewh7i"]
+[gd_scene load_steps=252 format=3 uid="uid://oprw0dsewh7i"]
 
 [ext_resource type="PackedScene" uid="uid://c7qnseftm8dje" path="res://assets/models/characters/Ranger.glb" id="1_7u6rr"]
 [ext_resource type="Script" uid="uid://dr7maxxlou66f" path="res://src/actors/player/scripts/player.gd" id="1_fpfku"]
 [ext_resource type="Script" uid="uid://jcg751xxldjo" path="res://src/actors/player/scripts/Hurtbox.gd" id="2_hpkk0"]
+[ext_resource type="AudioStream" uid="uid://q0b7fy4r156t" path="res://assets/sfx/footstep_1.mp3" id="2_mlbc3"]
 [ext_resource type="Shader" uid="uid://dmw8amedbfn2g" path="res://src/actors/player/timeShader.gdshader" id="2_y6caj"]
 [ext_resource type="AnimationLibrary" path="res://assets/animations/characters/animations/Player.res" id="5_nu02w"]
+[ext_resource type="AudioStream" uid="uid://bsymqcedrgh4j" path="res://assets/sfx/footstep_3.mp3" id="3_5ub7k"]
+[ext_resource type="Animation" uid="uid://cjanhr82fsy44" path="res://assets/animations/characters/Cheering.res" id="3_pu5r6"]
+[ext_resource type="Animation" uid="uid://cbks7u23fro4r" path="res://assets/animations/characters/Chop.res" id="4_1vjq4"]
+[ext_resource type="AudioStream" uid="uid://xsrc7uvi33ic" path="res://assets/sfx/foot_step_2.mp3" id="4_oloty"]
+[ext_resource type="AudioStream" uid="uid://bd6y6hhxkgp7u" path="res://assets/sfx/axe_hit.mp3" id="5_ddy8x"]
+[ext_resource type="Animation" uid="uid://c5udvs20uglnn" path="res://assets/animations/characters/Chopping.res" id="5_quyfe"]
+[ext_resource type="Animation" uid="uid://dwnp57wfqvxn6" path="res://assets/animations/characters/Crawling.res" id="6_fpfku"]
+[ext_resource type="Animation" uid="uid://dpqkpucl2f2hk" path="res://assets/animations/characters/Crouching.res" id="7_120y8"]
+[ext_resource type="AudioStream" uid="uid://ciwhwbgcrr32v" path="res://assets/sfx/slice_3.mp3" id="7_rq268"]
+[ext_resource type="Animation" uid="uid://y05uj727ubfx" path="res://assets/animations/characters/Death_A.res" id="8_eca1l"]
+[ext_resource type="Animation" uid="uid://c0bq1uw5piyfu" path="res://assets/animations/characters/Death_A_Pose.res" id="9_gcuji"]
+[ext_resource type="AudioStream" uid="uid://b85vqlofsutan" path="res://assets/sfx/slice.mp3" id="9_ubrgq"]
+[ext_resource type="Animation" uid="uid://7qir887xnnit" path="res://assets/animations/characters/Death_B.res" id="10_hpkk0"]
+[ext_resource type="AudioStream" uid="uid://cs4x44k6cl204" path="res://assets/sfx/slice_2.mp3" id="10_krq8h"]
+[ext_resource type="Animation" uid="uid://domr1f0aw1l4d" path="res://assets/animations/characters/Death_B_Pose.res" id="11_rad4r"]
+[ext_resource type="Animation" uid="uid://be4rmh7p1x31b" path="res://assets/animations/characters/Dig.res" id="12_ro74b"]
+[ext_resource type="Animation" uid="uid://bdg6icdtcck5a" path="res://assets/animations/characters/Digging.res" id="13_xaflg"]
+[ext_resource type="Animation" uid="uid://caxri8upqgemn" path="res://assets/animations/characters/Dodge_Backward.res" id="14_dgq00"]
+[ext_resource type="Animation" uid="uid://qj0qialqvcgt" path="res://assets/animations/characters/Dodge_Forward.res" id="15_eirhp"]
+[ext_resource type="Animation" uid="uid://cslfln25sb357" path="res://assets/animations/characters/Dodge_Left.res" id="16_ap68l"]
+[ext_resource type="Animation" uid="uid://83t7oyf3k4ji" path="res://assets/animations/characters/Dodge_Right.res" id="17_0bbgj"]
+[ext_resource type="Animation" uid="uid://1ph6j1a22cpq" path="res://assets/animations/characters/EXPERIMENTAL_Medium_Transform.res" id="18_aiyuc"]
+[ext_resource type="Animation" uid="uid://dgdn4o22c8nk" path="res://assets/animations/characters/Fishing_Bite.res" id="19_j1o44"]
+[ext_resource type="Animation" uid="uid://dn0ht7y5pikbt" path="res://assets/animations/characters/Fishing_Cast.res" id="20_6cogj"]
+[ext_resource type="Animation" uid="uid://bhj0dy8f3jxiv" path="res://assets/animations/characters/Fishing_Catch.res" id="21_pohdh"]
+[ext_resource type="Animation" uid="uid://c2g7dd3rnrgvr" path="res://assets/animations/characters/Fishing_Idle.res" id="22_1jwps"]
+[ext_resource type="Animation" uid="uid://c6f0t6owu43f6" path="res://assets/animations/characters/Fishing_Reeling.res" id="23_ipwkd"]
+[ext_resource type="Animation" uid="uid://bugu06i1pm3ue" path="res://assets/animations/characters/Fishing_Struggling.res" id="24_k8mt3"]
+[ext_resource type="Animation" uid="uid://df0jh23n54grh" path="res://assets/animations/characters/Fishing_Tug.res" id="25_y6caj"]
+[ext_resource type="Animation" uid="uid://bberjiwcpwl7i" path="res://assets/animations/characters/Hammer.res" id="26_cupkb"]
+[ext_resource type="Animation" uid="uid://c7xwcbjbwe1eu" path="res://assets/animations/characters/Hammering.res" id="27_2ph0s"]
+[ext_resource type="Animation" uid="uid://c50smtbkhkwv6" path="res://assets/animations/characters/Hit_A.res" id="28_x7dbd"]
+[ext_resource type="Animation" uid="uid://cgy4bfpxcr5jb" path="res://assets/animations/characters/Hit_B.res" id="29_mlbc3"]
+[ext_resource type="Animation" uid="uid://byucjq1qmrltg" path="res://assets/animations/characters/Holding_A.res" id="30_5ub7k"]
+[ext_resource type="Animation" uid="uid://nh7m0tw052ee" path="res://assets/animations/characters/Holding_B.res" id="31_oloty"]
+[ext_resource type="Animation" uid="uid://nm3unwyrar3p" path="res://assets/animations/characters/Holding_C.res" id="32_rq268"]
+[ext_resource type="Animation" uid="uid://wnna2miayc7c" path="res://assets/animations/characters/Idle_A.res" id="33_vy33o"]
+[ext_resource type="Animation" uid="uid://drdclc637s0r0" path="res://assets/animations/characters/Idle_B.res" id="34_fq326"]
+[ext_resource type="Animation" uid="uid://dktjqmyefkcf1" path="res://assets/animations/characters/Interact.res" id="35_ddy8x"]
+[ext_resource type="Animation" uid="uid://itxjd0vn280j" path="res://assets/animations/characters/Jump_Full_Long.res" id="36_o1hkf"]
+[ext_resource type="Animation" uid="uid://3uga5i2bhhbs" path="res://assets/animations/characters/Jump_Full_Short.res" id="37_yca3x"]
+[ext_resource type="Animation" uid="uid://b6btrhflbh21c" path="res://assets/animations/characters/Jump_Idle.res" id="38_2dvjl"]
+[ext_resource type="Animation" uid="uid://c8whxh0lir76n" path="res://assets/animations/characters/Jump_Land.res" id="39_ubrgq"]
+[ext_resource type="Animation" uid="uid://bj07o3utp4h27" path="res://assets/animations/characters/Jump_Start.res" id="40_krq8h"]
+[ext_resource type="Animation" uid="uid://87xdnmt2s0g" path="res://assets/animations/characters/Lie_Down.res" id="41_xfxqg"]
+[ext_resource type="Animation" uid="uid://b5mo56ggt6ccx" path="res://assets/animations/characters/Lie_Idle.res" id="42_i2gpw"]
+[ext_resource type="Animation" uid="uid://bxd3nnwkaeg10" path="res://assets/animations/characters/Lie_StandUp.res" id="43_41a57"]
+[ext_resource type="Animation" uid="uid://o1clge65l4mu" path="res://assets/animations/characters/Lockpick.res" id="44_e6j4n"]
+[ext_resource type="Animation" uid="uid://d3wg11yayu7u5" path="res://assets/animations/characters/Lockpicking.res" id="45_s2s5m"]
+[ext_resource type="Animation" uid="uid://crx6q7gah6c3v" path="res://assets/animations/characters/Melee_1H_Attack_Chop.res" id="46_tkfvb"]
 [ext_resource type="Animation" uid="uid://0wrfc38w8vla" path="res://assets/animations/characters/Melee_1H_Attack_Jump_Chop.res" id="47_230i4"]
 [ext_resource type="Script" uid="uid://bhjrpixjg4h4r" path="res://src/actors/player/VissualEffectManager.gd" id="135_pu5r6"]
 [ext_resource type="Script" uid="uid://ds64ynt00si3k" path="res://src/actors/player/scripts/attribute_manager.gd" id="136_1vjq4"]
@@ -503,6 +554,8 @@ shader_parameter/glow_strength = 0.15
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_fpfku")
+footstep_sounds = Array[AudioStream]([ExtResource("2_mlbc3"), ExtResource("3_5ub7k"), ExtResource("4_oloty")])
+attack_sounds = Array[AudioStream]([ExtResource("9_ubrgq"), ExtResource("10_krq8h"), ExtResource("7_rq268")])
 
 [node name="ColorRect" type="ColorRect" parent="."]
 visible = false
@@ -517,11 +570,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00017166138, 0.9409027, 0.
 shape = SubResource("BoxShape3D_hf755")
 
 [node name="Hurtbox" type="Area3D" parent="." node_paths=PackedStringArray("health_component")]
-transform = Transform3D(-0.9971874, -0.07488908, -0.0029648202, -0.07494496, 0.9960294, 0.048049454, -0.0006453314, 0.04813652, -0.9988405, 0.043656733, -0.028139949, -0.032413106)
+transform = Transform3D(-0.9987775, -0.019501027, -0.045420628, -0.020387717, 0.99960893, 0.019140942, 0.0450296, 0.020043567, -0.9987844, 0.011361238, -0.013184488, -0.011931182)
 collision_layer = 2
 collision_mask = 2
 script = ExtResource("2_hpkk0")
-health_component = NodePath("../HealthComponent")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0099487305, 0.78861237, 0.009765625)
@@ -810,7 +862,6 @@ offset_right = 2008.0
 offset_bottom = 1131.0
 
 [node name="undeadMask" type="ColorRect" parent="."]
-visible = false
 material = SubResource("ShaderMaterial_oloty")
 offset_left = -56.0
 offset_top = -30.0
@@ -824,6 +875,13 @@ offset_left = -56.0
 offset_top = -30.0
 offset_right = 2008.0
 offset_bottom = 1131.0
+
+[node name="FootStep" type="AudioStreamPlayer3D" parent="."]
+
+[node name="WeaponAudio" type="AudioStreamPlayer3D" parent="."]
+
+[node name="DamageAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("5_ddy8x")
 
 [editable path="Ranger"]
 [editable path="HUD2"]
