@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=22 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://btbet8x5kodvd" path="res://UI_assets/star-trek.png" id="12_5d7l6"]
 [ext_resource type="Texture2D" uid="uid://djyq0cf5cybfu" path="res://UI_assets/diamante.png" id="15_wxjpw"]
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
+[ext_resource type="Texture2D" uid="uid://cao2fhyhavqds" path="res://assets/imagesGUI/container_minimap.png" id="17_tlkqj"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -335,6 +336,11 @@ offset_right = 5.0
 offset_bottom = 5.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="ContainerMinimap" type="Sprite2D" parent="GameUI/Radar"]
+position = Vector2(94, 93)
+scale = Vector2(0.605, 0.605)
+texture = ExtResource("17_tlkqj")
 
 [node name="RadialMenu" type="Control" parent="."]
 process_mode = 3
