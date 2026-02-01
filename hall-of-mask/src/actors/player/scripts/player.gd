@@ -532,15 +532,33 @@ func _update_health_icons(mask_name: String):
 	var icon_texture = null
 	if mask_name != "":
 		var icon_path = "res://assets/imagesGUI/" + mask_name + "_mask.png"
+		print("🔍 Player: Intentando cargar icono: ", icon_path)
 		if ResourceLoader.exists(icon_path):
 			icon_texture = load(icon_path)
+			print("✅ Player: Icono cargado exitosamente")
+		else:
+			print("❌ Player: No se encontró el icono en: ", icon_path)
 	
-	# Notificar al HUD (si tiene el método)
-	var hud = get_node_or_null("HUD")
-	if hud and hud.has_node("GameUI/StatsPanel"):
-		var stats_panel = hud.get_node("GameUI/StatsPanel")
-		if stats_panel.has_method("update_life_icons_texture"):
-			stats_panel.update_life_icons_texture(icon_texture)
+	# Buscar el HUD2 que es hijo del player (el HUD visible)
+	var hud = get_node_or_null("HUD2")
+	if not hud:
+		# Si no existe HUD2, buscar en el root como fallback
+		hud = get_tree().root.find_child("HUD", true, false)
+	
+	if hud:
+		print("✅ Player: HUD encontrado")
+		if hud.has_node("GameUI/StatsPanel"):
+			var stats_panel = hud.get_node("GameUI/StatsPanel")
+			print("✅ Player: StatsPanel encontrado")
+			if stats_panel.has_method("update_life_icons_texture"):
+				stats_panel.update_life_icons_texture(icon_texture)
+				print("🎭 Player: Iconos de vida actualizados para máscara: ", mask_name)
+			else:
+				print("❌ Player: StatsPanel no tiene método update_life_icons_texture")
+		else:
+			print("❌ Player: No se encontró GameUI/StatsPanel en HUD")
+	else:
+		print("❌ Player: No se encontró el HUD2 ni el HUD en la escena")
 
 func _play_attack_sound():
 	if attack_sounds.is_empty():

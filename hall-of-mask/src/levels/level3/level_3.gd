@@ -7,6 +7,7 @@ var total_enemies: int = 0
 var enemies_killed: int = 0
 var enemies_list: Array[Node] = []
 var ui_label: Label
+const LOBBY_SCENE := "res://src/levels/lobby/Lobby.tscn"
 
 func _ready() -> void:
 	audio.finished.connect(_on_audio_finished)
@@ -61,7 +62,7 @@ func _all_enemies_defeated():
 func _complete_level():
 	GameManager.complete_level("level3")
 	await get_tree().create_timer(2.0).timeout
-	get_tree().change_scene_to_file("res://src/levels/lobby/Lobby.tscn")
+	get_tree().change_scene_to_file(LOBBY_SCENE)
 
 func _create_enemy_counter_ui():
 	# Crear un CanvasLayer para el UI

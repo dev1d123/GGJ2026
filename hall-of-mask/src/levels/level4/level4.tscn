@@ -347,7 +347,7 @@ transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 
 transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 394.33438, 21.87588, 1.6044555)
 
 [node name="Player" parent="." instance=ExtResource("16_crcck")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 511.29852, 36.183758, 11.006392)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.832542, 36.183758, -6.3992596)
 collision_mask = 133
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]

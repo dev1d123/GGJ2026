@@ -2,6 +2,7 @@ extends Node3D
 
 @onready var audio: AudioStreamPlayer = $AudioStreamPlayer
 @onready var zone_boss: Area3D = $zoneBoss
+const LOBBY_SCENE := "res://src/levels/lobby/Lobby.tscn"
 
 func _ready() -> void:
 	audio.finished.connect(_on_audio_finished)
@@ -24,7 +25,7 @@ func _on_zone_boss_entered(body):
 func _complete_level():
 	GameManager.complete_level("level2")
 	await get_tree().create_timer(0.5).timeout
-	get_tree().change_scene_to_file("res://src/levels/lobby/Lobby.tscn")
+	get_tree().change_scene_to_file(LOBBY_SCENE)
 
 func _on_audio_finished() -> void:
 	audio.play()

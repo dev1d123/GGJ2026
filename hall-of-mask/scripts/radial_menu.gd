@@ -175,16 +175,14 @@ func _input(event):
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			var item = lista[sector_scroll_indices[current_sector_index]]
 			
-			# Si estamos en el sector de máscaras (0) y es la primera posición, quitar máscara
-			if current_sector_index == 0 and sector_scroll_indices[0] == 0:
-				# Señal especial para quitar máscara
+			# Si el item es la máscara "None", enviamos null para quitar
+			if item is MaskData and (item.mask_name == "None" or item.mask_name == "Ninguna"):
 				emit_signal("equip_item", "LEFT", null)
 				current_equipped_mask = null
 				_actualizar_resaltado()
 			else:
 				emit_signal("equip_item", "LEFT", item)
 				
-				# ¡AQUÍ ESTÁ EL CAMBIO! 
 				# Si equipamos una máscara, la guardamos como la "actual"
 				if item is MaskData:
 					current_equipped_mask = item
@@ -260,16 +258,14 @@ func _is_mask_unlocked_by_data(mask_data: MaskData) -> bool:
 	if not GameManager:
 		return true # Si no hay GameManager, desbloqueamos todo (modo debug)
 	
-	# Mapeo de nombres de máscaras en MaskData a nombres en GameManager
-	var mask_name_map = {
-		"Fighter": "figh,
-		"None": "none",  # Opción especial para quitar máscara
-		"Ninguna": "none"
-	}
-	
 	# Si es la opción de quitar máscara, siempre está disponible
 	if mask_data.mask_name == "None" or mask_data.mask_name == "Ninguna":
-		return true"Luchador": "fighter",
+		return true
+	
+	# Mapeo de nombres de máscaras en MaskData a nombres en GameManager
+	var mask_name_map = {
+		"Fighter": "fighter",
+		"Luchador": "fighter",
 		"Shooter": "shooter",
 		"Tirador": "shooter",
 		"Undead": "undead",
@@ -289,4 +285,3 @@ func _on_mask_unlocked(mask_name: String):
 	_escanear_carpeta(ruta_mascaras)
 	_actualizar_iconos_sectores(0)
 	sector_scroll_indices[0] = 0 # Reset scroll
-

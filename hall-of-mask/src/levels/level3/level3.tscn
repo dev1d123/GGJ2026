@@ -106,7 +106,7 @@ size = Vector3(137.10155, 1, 140.15771)
 script = ExtResource("1_710q4")
 
 [node name="Player" parent="." instance=ExtResource("2_xw760")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.659447, 3.1063814, 20.19009)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0280151, 3.1063814, -2.2291145)
 collision_mask = 133
 
 [node name="Terrain3D" type="Terrain3D" parent="."]
