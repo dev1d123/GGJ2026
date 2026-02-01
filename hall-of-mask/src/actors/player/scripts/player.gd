@@ -1,4 +1,9 @@
 extends CharacterBody3D
+@onready var footstep_audio: AudioStreamPlayer3D = $FootStep
+@export var footstep_sounds: Array[AudioStream] = []
+
+@onready var attack_audio: AudioStreamPlayer3D = $WeaponAudio
+@export var attack_sounds: Array[AudioStream] = []
 
 # ------------------------------------------------------------------------------
 # 1. CONFIGURACIÓN Y REFERENCIAS
@@ -131,15 +136,15 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"): 
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if event is InputEventMouseButton and event.pressed:
-		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			if event.button_index == MOUSE_BUTTON_RIGHT:
 				combat_manager.try_attack("right")
+				_play_attack_sound()
 			elif event.button_index == MOUSE_BUTTON_LEFT:
 				combat_manager.try_attack("left")
-	
+				_play_attack_sound()
+
+		
 	
 	#COMENTADO PRUEBA DE ARMAS EN BOTONES EN PLAYER
 	
@@ -160,7 +165,12 @@ func _input(event: InputEvent) -> void:
 # ------------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
 	if is_dead: return 
-
+	if is_on_floor() and (abs(velocity.x) > 0.1 or abs(velocity.z) > 0.1):
+		if not footstep_audio.playing and footstep_sounds.size() > 0:
+			footstep_audio.stream = footstep_sounds.pick_random()
+			footstep_audio.play()
+	else:
+		footstep_audio.stop()
 	# 0. Gravedad
 	if not is_on_floor():
 		velocity.y -= (gravity * gravity_multiplier) * delta
@@ -555,3 +565,11 @@ func usar_pocion(index):
 			emit_signal("vida_cambiada", health_component.current_health)
 			
 		emit_signal("pociones_cambiadas", index + 1, pociones_ui[index])
+
+func _play_attack_sound():
+	if attack_sounds.is_empty():
+		return
+
+	attack_audio.stream = attack_sounds.pick_random()
+	attack_audio.pitch_scale = randf_range(0.95, 1.05)
+	attack_audio.play()

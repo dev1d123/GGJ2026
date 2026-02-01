@@ -1,17 +1,24 @@
-[gd_scene load_steps=245 format=3 uid="uid://oprw0dsewh7i"]
+[gd_scene load_steps=252 format=3 uid="uid://oprw0dsewh7i"]
 
 [ext_resource type="PackedScene" uid="uid://c7qnseftm8dje" path="res://assets/models/characters/Ranger.glb" id="1_7u6rr"]
 [ext_resource type="Script" uid="uid://dr7maxxlou66f" path="res://src/actors/player/scripts/player.gd" id="1_fpfku"]
 [ext_resource type="Script" uid="uid://jcg751xxldjo" path="res://src/actors/player/scripts/Hurtbox.gd" id="2_hpkk0"]
+[ext_resource type="AudioStream" uid="uid://q0b7fy4r156t" path="res://assets/sfx/footstep_1.mp3" id="2_mlbc3"]
 [ext_resource type="Shader" uid="uid://dmw8amedbfn2g" path="res://src/actors/player/timeShader.gdshader" id="2_y6caj"]
+[ext_resource type="AudioStream" uid="uid://bsymqcedrgh4j" path="res://assets/sfx/footstep_3.mp3" id="3_5ub7k"]
 [ext_resource type="Animation" uid="uid://cjanhr82fsy44" path="res://assets/animations/characters/Cheering.res" id="3_pu5r6"]
 [ext_resource type="Animation" uid="uid://cbks7u23fro4r" path="res://assets/animations/characters/Chop.res" id="4_1vjq4"]
+[ext_resource type="AudioStream" uid="uid://xsrc7uvi33ic" path="res://assets/sfx/foot_step_2.mp3" id="4_oloty"]
+[ext_resource type="AudioStream" uid="uid://bd6y6hhxkgp7u" path="res://assets/sfx/axe_hit.mp3" id="5_ddy8x"]
 [ext_resource type="Animation" uid="uid://c5udvs20uglnn" path="res://assets/animations/characters/Chopping.res" id="5_quyfe"]
 [ext_resource type="Animation" uid="uid://dwnp57wfqvxn6" path="res://assets/animations/characters/Crawling.res" id="6_fpfku"]
 [ext_resource type="Animation" uid="uid://dpqkpucl2f2hk" path="res://assets/animations/characters/Crouching.res" id="7_120y8"]
+[ext_resource type="AudioStream" uid="uid://ciwhwbgcrr32v" path="res://assets/sfx/slice_3.mp3" id="7_rq268"]
 [ext_resource type="Animation" uid="uid://y05uj727ubfx" path="res://assets/animations/characters/Death_A.res" id="8_eca1l"]
 [ext_resource type="Animation" uid="uid://c0bq1uw5piyfu" path="res://assets/animations/characters/Death_A_Pose.res" id="9_gcuji"]
+[ext_resource type="AudioStream" uid="uid://b85vqlofsutan" path="res://assets/sfx/slice.mp3" id="9_ubrgq"]
 [ext_resource type="Animation" uid="uid://7qir887xnnit" path="res://assets/animations/characters/Death_B.res" id="10_hpkk0"]
+[ext_resource type="AudioStream" uid="uid://cs4x44k6cl204" path="res://assets/sfx/slice_2.mp3" id="10_krq8h"]
 [ext_resource type="Animation" uid="uid://domr1f0aw1l4d" path="res://assets/animations/characters/Death_B_Pose.res" id="11_rad4r"]
 [ext_resource type="Animation" uid="uid://be4rmh7p1x31b" path="res://assets/animations/characters/Dig.res" id="12_ro74b"]
 [ext_resource type="Animation" uid="uid://bdg6icdtcck5a" path="res://assets/animations/characters/Digging.res" id="13_xaflg"]
@@ -1089,6 +1096,8 @@ shader_parameter/glow_strength = 0.15
 collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_fpfku")
+footstep_sounds = Array[AudioStream]([ExtResource("2_mlbc3"), ExtResource("3_5ub7k"), ExtResource("4_oloty")])
+attack_sounds = Array[AudioStream]([ExtResource("9_ubrgq"), ExtResource("10_krq8h"), ExtResource("7_rq268")])
 
 [node name="ColorRect" type="ColorRect" parent="."]
 visible = false
@@ -1407,5 +1416,12 @@ offset_left = -56.0
 offset_top = -30.0
 offset_right = 2008.0
 offset_bottom = 1131.0
+
+[node name="FootStep" type="AudioStreamPlayer3D" parent="."]
+
+[node name="WeaponAudio" type="AudioStreamPlayer3D" parent="."]
+
+[node name="DamageAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("5_ddy8x")
 
 [editable path="Ranger"]

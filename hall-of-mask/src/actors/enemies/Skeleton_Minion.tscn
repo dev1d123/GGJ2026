@@ -1,4 +1,4 @@
-[gd_scene load_steps=244 format=4 uid="uid://bip75ya5ux6hv"]
+[gd_scene load_steps=245 format=4 uid="uid://bip75ya5ux6hv"]
 
 [ext_resource type="Script" uid="uid://cifw1rjprtpjm" path="res://src/actors/enemies/Enemy.gd" id="1_28vp1"]
 [ext_resource type="Material" uid="uid://32d74rck3sni" path="res://assets/materials/characters/skeleton.tres" id="1_ybmvs"]
@@ -146,6 +146,7 @@
 [ext_resource type="Script" uid="uid://bhv4u3i04oi7h" path="res://src/actors/player/scripts/combat_manager.gd" id="144_vijdf"]
 [ext_resource type="Resource" uid="uid://d2vcfhren1fkf" path="res://src/actors/weapons/Daga_Mano.tres" id="145_28vp1"]
 [ext_resource type="Script" uid="uid://6qh57tw338s" path="res://src/actors/player/scripts/MaskManager.gd" id="146_vijdf"]
+[ext_resource type="AudioStream" uid="uid://bd6y6hhxkgp7u" path="res://assets/sfx/axe_hit.mp3" id="147_abehn"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_i6nb8"]
 resource_name = "Skeleton_Minion_Skeleton_Minion_ArmLeft"
@@ -1610,3 +1611,6 @@ script = ExtResource("146_vijdf")
 player = NodePath("..")
 combat_manager = NodePath("../CombatManager")
 mask_attachment_point = NodePath("../Skeleton_Minion/Rig_Medium/Skeleton3D/Mask/MaskMount")
+
+[node name="DamageAudio" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("147_abehn")
