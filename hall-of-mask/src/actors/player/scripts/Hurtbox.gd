@@ -1,7 +1,7 @@
 extends Area3D
 class_name Hurtbox
 @onready var attack_audio: AudioStreamPlayer3D = get_node_or_null("../DamageAudio")
-@export var health_component: HealthComponent
+@onready var health_component: HealthComponent = $"../HealthComponent"
 
 func hit(damage_amount: float, dir: Vector3, knockback: float, jump: float):
 	# 1. VIDA

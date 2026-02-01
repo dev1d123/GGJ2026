@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3 uid="uid://cx40hy5xw718f"]
+
+[ext_resource type="Script" uid="uid://d4m10g6kseru0" path="res://src/actors/enemies/bosses/Timewizard/time_boss.gd" id="1_it681"]
+[ext_resource type="PackedScene" uid="uid://baaueg0mf8p1i" path="res://src/actors/enemies/bosses/Timewizard/time_wizard.tscn" id="1_qkjb0"]
+[ext_resource type="Script" uid="uid://b1ulnfh2lfyv0" path="res://src/actors/player/scripts/HealthComponent.gd" id="2_it681"]
+[ext_resource type="Script" uid="uid://jcg751xxldjo" path="res://src/actors/player/scripts/Hurtbox.gd" id="3_nuq2h"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7mapy"]
+size = Vector3(2.3388062, 3.9105148, 1.4047852)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ltxoe"]
+size = Vector3(2.7020416, 3.907, 1.9729702)
+
+[node name="Time_Boss" type="CharacterBody3D"]
+script = ExtResource("1_it681")
+
+[node name="time_wizard" parent="." instance=ExtResource("1_qkjb0")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.024810791, 1.959301, 0.064697266)
+shape = SubResource("BoxShape3D_7mapy")
+
+[node name="HealthComponent" type="Node3D" parent="."]
+script = ExtResource("2_it681")
+max_health = 250.0
+
+[node name="Hurtbox" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("3_nuq2h")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0029525757, 1.951, -0.01066573)
+shape = SubResource("BoxShape3D_ltxoe")
+debug_color = Color(0.86468506, 0.31135932, 0.46242207, 0.41960785)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+avoidance_enabled = true
+
+[node name="VisionManager" type="Node3D" parent="."]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
+
+[node name="Eyes" type="RayCast3D" parent="VisionManager"]
+transform = Transform3D(0.034672774, 0, -0.9993987, 0, 1, 0, 0.9993987, 0, 0.034672774, 1.4273, 3.8708224, 0.30473328)
+target_position = Vector3(0, -1, -10)
+collision_mask = 3
