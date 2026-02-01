@@ -8,9 +8,24 @@ extends CanvasLayer
 @onready var radial_menu = $RadialMenu
 @onready var mask_icon_grande = $GameUI/StatsPanel/MaskIcon
 
+@export var mask_overlay: ColorRect
 # Referencias iconos mano
 @onready var icon_hand_l = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_L
 @onready var icon_hand_r = $RadialMenu/WheelOrigin/RomboCentro/Icon_Hand_R
+
+# 1. MODO NORMAL (Más suave/sutil)
+# Bajamos la distorsión y el tinte para que no moleste al jugar normal.
+const BASE_DISTORTION = 0.015  # Antes 0.03 (Casi imperceptible, solo un toque en bordes)
+const BASE_ABERRATION = 0.2    # Antes 0.5 (Muy poco borroso)
+const BASE_TINT_AMOUNT = 0.15  # Antes 0.15 (Solo un ligero color, no tapa la visión)
+
+# 2. MODO ULTI (¡MUCHO MÁS FUERTE!)
+# Subimos todo para que se sienta poderoso y caótico.
+const ULTI_DISTORTION = 0.15   # Antes 0.08 (Efecto ojo de pez muy marcado)
+const ULTI_ABERRATION = 6.0    # Antes 3.0 (Los colores se separan muchísimo en los bordes)
+const ULTI_TINT_AMOUNT = 0.6   # Antes 0.4 (El color de la máscara inunda la pantalla)
+
+var tween_filtro: Tween
 
 func _ready():
 	# 1. Conexión Menú Radial
@@ -33,8 +48,16 @@ func _ready():
 		
 		if player.has_signal("mascara_cambiada"):
 			player.mascara_cambiada.connect(_on_mask_changed)
+			
+		if player.has_signal("mascara_cambiada"):
+			player.mascara_cambiada.connect(_on_mask_changed)
 	else:
 		print("HUD: ❌ ¡NO encuentro al Player! Asegúrate que el nodo se llame 'Player'")
+		
+	if mask_overlay:
+		mask_overlay.visible = false
+		if mask_overlay.material:
+			mask_overlay.material = mask_overlay.material.duplicate()
 
 func _on_mask_changed(mask_data):
 	# PROTECCIÓN: Si olvidamos poner el nodo en la escena
@@ -46,6 +69,8 @@ func _on_mask_changed(mask_data):
 		
 		# AVISAR A LOS ICONOS PEQUEÑOS (Vuelta a la normalidad)
 		stats_panel.update_life_icons_texture(null) 
+		
+		if mask_overlay: mask_overlay.visible = false
 		return
 
 	# CASO B: Hay máscara nueva
@@ -56,7 +81,22 @@ func _on_mask_changed(mask_data):
 		
 		# 2. Actualizar los Pequeños (¡NUEVO!) 🆕
 		stats_panel.update_life_icons_texture(mask_data.icon)
-
+		
+		# ENCENDER Y CONFIGURAR FILTRO
+		if mask_overlay and mask_overlay.material:
+			mask_overlay.visible = true
+			var mat = mask_overlay.material as ShaderMaterial
+			
+			# 1. Configurar Color
+			var color_final = Color(0, 1, 0) # Verde por defecto
+			if "screen_tint" in mask_data:
+				color_final = mask_data.screen_tint
+			
+			mat.set_shader_parameter("tint_color", color_final)
+			
+			# 2. Resetear valores a BASE (Suavemente)
+			_animar_filtro(BASE_DISTORTION, BASE_ABERRATION, BASE_TINT_AMOUNT, false)
+			
 func _input(event):
 	# --- YA NO MANEJAMOS POCIONES AQUÍ ---
 	# El Player.gd se encarga de detectar la tecla 1, 2, 3.
@@ -138,3 +178,50 @@ func _on_item_equipped(hand_side, item_data):
 			if other_icon.modulate.a < 0.9: 
 				other_icon.texture = null 
 				other_icon.modulate = Color(1, 1, 1, 1)
+
+# ------------------------------------------------------------------
+# EFECTO ULTI (Aquí está lo espectacular)
+# ------------------------------------------------------------------
+
+func _on_player_ulti_estado_cambiado(esta_activa: bool):
+	# CORRECCIÓN: Si activamos ulti, aseguramos que el overlay exista
+	if not mask_overlay: return
+	
+	var mat = mask_overlay.material as ShaderMaterial
+	if not mat: return
+	
+	# Si activamos la ulti y tenemos máscara, forzamos visibilidad
+	if esta_activa and mask_icon_grande.texture != null:
+		mask_overlay.visible = true
+
+	# Debug para confirmar que la señal llega
+	print("🔥 HUD: Cambio estado Ulti -> ", esta_activa) 
+	
+	if esta_activa:
+		# Valores EXTREMOS para probar si funciona
+		_animar_filtro(0.2, 8.0, 0.8, true) 
+	else:
+		_animar_filtro(BASE_DISTORTION, BASE_ABERRATION, BASE_TINT_AMOUNT, false)
+
+# Función auxiliar para animar todo junto con un solo Tween
+func _animar_filtro(dist: float, aberr: float, tint: float, pulsing: bool):
+	var mat = mask_overlay.material as ShaderMaterial
+	if tween_filtro: tween_filtro.kill()
+	tween_filtro = create_tween().set_parallel(true)
+	
+	var dur = 0.5 # Medio segundo de transición
+	
+	# Animar Distorsión
+	tween_filtro.tween_method(func(v): mat.set_shader_parameter("lens_distortion", v), 
+		mat.get_shader_parameter("lens_distortion"), dist, dur)
+		
+	# Animar Aberración Cromática
+	tween_filtro.tween_method(func(v): mat.set_shader_parameter("aberration_amount", v), 
+		mat.get_shader_parameter("aberration_amount"), aberr, dur)
+		
+	# Animar Cantidad de Tinte
+	tween_filtro.tween_method(func(v): mat.set_shader_parameter("tint_amount", v), 
+		mat.get_shader_parameter("tint_amount"), tint, dur)
+		
+	# Activar/Desactivar Pulsación (Inmediato)
+	mat.set_shader_parameter("is_pulsing", pulsing)

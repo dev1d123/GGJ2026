@@ -408,6 +408,7 @@ signal stamina_cambiada(nueva_stamina, max_stamina)
 signal pociones_cambiadas(slot_index, cantidad)
 signal ulti_cambiada(nueva_carga, max_carga)
 signal mascara_cambiada(mask_data) 
+signal ulti_estado_cambiado(esta_activa)
 
 var pociones_ui = [3, 1, 0] 
 
@@ -427,6 +428,12 @@ func _ready_ui_connections():
 	if mask_mgr:
 		mask_mgr.on_mask_changed.connect(func(mask): emit_signal("mascara_cambiada", mask))
 		mask_mgr.on_ult_charge_changed.connect(func(val): emit_signal("ulti_cambiada", val, 100.0))
+		
+		if mask_mgr.has_signal("on_ultimate_state"):
+			mask_mgr.on_ultimate_state.connect(func(is_active): 
+				emit_signal("ulti_estado_cambiado", is_active)
+			)
+			
 		emit_signal("mascara_cambiada", mask_mgr.current_mask)
 		emit_signal("ulti_cambiada", mask_mgr.current_ult_charge, 100.0)
 	emit_signal("pociones_cambiadas", 1, pociones_ui[0])
@@ -475,3 +482,33 @@ func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 
 	# 4. Feedback
 	add_camera_trauma(0.5) 
+
+func _unhandled_input(event):
+	# Evitar input si está muerto o en cinemática
+	if health_component.is_dead: return
+
+	# --- 1. PONERSE / QUITARSE MÁSCARA (Tecla G) ---
+	if event.is_action_pressed("toggle_mask"):
+		var mask_mgr = $MaskManager # O la ruta correcta a tu nodo
+		if mask_mgr:
+			if mask_mgr.current_mask:
+				mask_mgr.remove_mask() # Quitar si ya tiene
+			else:
+				# Aquí decides cuál equipar. Por ejemplo, la del slot 1 del inventario
+				if combat_manager and combat_manager.mask_slot_1:
+					mask_mgr.equip_mask(combat_manager.mask_slot_1)
+				else:
+					print("⚠️ Player: No tienes máscara equipada en el slot 1")
+
+	# --- 2. ACTIVAR / DESACTIVAR ULTI (Tecla R) ---
+	if event.is_action_pressed("use_ultimate"):
+		var mask_mgr = $MaskManager
+		if mask_mgr and mask_mgr.current_mask:
+			# Si ya está activa, ¿se puede desactivar manualmente?
+			if mask_mgr.is_ultimate_active:
+				# Opcional: Desactivar manual (si tu juego lo permite)
+				# mask_mgr.deactivate_ultimate() 
+				pass
+			else:
+				# Intentar activar (el manager chequeará si tiene carga suficiente)
+				mask_mgr.activate_ultimate()

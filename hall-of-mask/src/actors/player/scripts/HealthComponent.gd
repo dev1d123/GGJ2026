@@ -7,6 +7,12 @@ signal on_death
 @export var max_health: float = 100.0
 var current_health: float
 
+# 🟢 FIX: AÑADIMOS LA PROPIEDAD QUE FALTA
+# Esto permite que otros scripts pregunten "health_component.is_dead"
+var is_dead: bool:
+	get:
+		return current_health <= 0
+
 # --- MULTIPLICADOR DE DEFENSA ---
 # 1.0 = Daño normal
 # 2.0 = Mitad de daño recibido (Doble defensa)
@@ -16,7 +22,7 @@ func _ready():
 	current_health = max_health
 
 func take_damage(amount: float):
-	if current_health <= 0: return 
+	if is_dead: return # Usamos la nueva propiedad aquí también
 	
 	# FÓRMULA DE DEFENSA SIMPLE
 	# Daño Real = Daño Entrante / Multiplicador de Defensa

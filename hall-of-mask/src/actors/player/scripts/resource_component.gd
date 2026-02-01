@@ -1,53 +1,65 @@
-class_name ResourceComponent extends Node
+extends Node
+class_name ResourceComponent
 
-signal on_value_changed(current, max)
-signal on_empty
+# Señales para la UI
+signal on_value_changed(current, max_val)
+signal on_depleted
+signal on_full
 
+@export_category("Configuración de Recurso")
 @export var max_value: float = 100.0
-@export var regen_rate: float = 10.0
-@export var regen_delay: float = 3.0 
+@export var current_value: float = 100.0
 
-# --- MULTIPLICADORES (Modificados por Máscaras/Buffs) ---
-var cost_multiplier: float = 1.0    # 0.5 = Mitad de costo
-var regen_multiplier: float = 1.0   # 2.0 = Doble de velocidad de recarga
-var delay_multiplier: float = 1.0   # 0.5 = Espera la mitad de tiempo
+@export_group("Regeneración")
+@export var auto_regenerate: bool = true
+@export var regen_rate: float = 5.0       # Puntos por segundo
+@export var regen_delay: float = 1.5      # Segundos de espera tras gastar
 
-var current_value: float
-var can_regen: bool = true
-var timer_delay: Timer
+# Variables internas
+var _regen_timer: float = 0.0
 
 func _ready():
-	current_value = max_value
-	
-	timer_delay = Timer.new()
-	timer_delay.one_shot = true
-	# El tiempo se setea dinámicamente al usarse
-	timer_delay.timeout.connect(func(): can_regen = true)
-	add_child(timer_delay)
+	# Aseguramos que empiece lleno (o con el valor que pongas en el inspector)
+	current_value = clamp(current_value, 0, max_value)
+	emit_signal("on_value_changed", current_value, max_value)
 
 func _process(delta):
-	if can_regen and current_value < max_value:
-		# Aplicamos multiplicador de regeneración
-		var real_regen = regen_rate * regen_multiplier
-		current_value += real_regen * delta
-		current_value = min(current_value, max_value)
-		on_value_changed.emit(current_value, max_value)
-
-func try_consume(amount: float) -> bool:
-	# Aplicamos multiplicador de costo (Ej: Máscara reduce costo)
-	var real_cost = amount * cost_multiplier
+	if not auto_regenerate: return
 	
-	if current_value >= real_cost:
-		current_value -= real_cost
-		can_regen = false
+	# Si estamos llenos, no hacemos nada
+	if current_value >= max_value: return
+
+	# Gestión del Delay (Si gastaste hace poco, espera)
+	if _regen_timer > 0:
+		_regen_timer -= delta
+		return
+
+	# Lógica de Regeneración
+	var old_value = current_value
+	current_value = move_toward(current_value, max_value, regen_rate * delta)
+	
+	if current_value != old_value:
+		emit_signal("on_value_changed", current_value, max_value)
+		if current_value == max_value:
+			emit_signal("on_full")
+
+# Función para intentar gastar recurso
+# Retorna TRUE si se pudo gastar, FALSE si no alcanzaba
+func try_consume(amount: float) -> bool:
+	if current_value >= amount:
+		current_value -= amount
+		_regen_timer = regen_delay # Reiniciamos el tiempo de espera
 		
-		# Aplicamos multiplicador de delay (Ej: Máscara reduce espera)
-		var real_delay = regen_delay * delay_multiplier
-		timer_delay.start(real_delay) 
-		
-		on_value_changed.emit(current_value, max_value)
+		emit_signal("on_value_changed", current_value, max_value)
 		
 		if current_value <= 0:
-			on_empty.emit()
-		return true 
+			emit_signal("on_depleted")
+			
+		return true
+	
 	return false
+
+# Función para añadir recurso externamente (ej: Pociones)
+func add_value(amount: float):
+	current_value = min(current_value + amount, max_value)
+	emit_signal("on_value_changed", current_value, max_value)

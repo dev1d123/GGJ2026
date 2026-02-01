@@ -1,9 +1,10 @@
-[gd_scene load_steps=22 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=24 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
 [ext_resource type="Texture2D" uid="uid://cdgedffnin6fh" path="res://icon.svg" id="2_64pwb"]
 [ext_resource type="Script" uid="uid://bu8rp0160gddv" path="res://scripts/components/stats_panel.gd" id="2_pom5v"]
+[ext_resource type="Shader" uid="uid://cd1x3leisibnf" path="res://src/actors/player/scripts/VisorEffect.gdshader" id="2_urddi"]
 [ext_resource type="Script" uid="uid://ckh233cdm87p" path="res://scripts/radar.gd" id="3_wxbmk"]
 [ext_resource type="Script" uid="uid://db1ighsdalgaj" path="res://scripts/components/consumables_panel.gd" id="4_pfnlp"]
 [ext_resource type="Texture2D" uid="uid://bd6htxwevjmqf" path="res://UI_assets/77564.jpg" id="4_tvtyy"]
@@ -17,6 +18,20 @@
 [ext_resource type="Texture2D" uid="uid://djyq0cf5cybfu" path="res://UI_assets/diamante.png" id="15_wxjpw"]
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
 [ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="17_tlkqj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ioimr"]
+shader = ExtResource("2_urddi")
+shader_parameter/tint_color = Color(0, 1, 0, 1)
+shader_parameter/tint_amount = 0.1
+shader_parameter/brightness = 1.0
+shader_parameter/lens_distortion = 0.05
+shader_parameter/aberration_amount = 1.0
+shader_parameter/vignette_intensity = 0.4
+shader_parameter/vignette_softness = 0.5
+shader_parameter/scanline_alpha = 0.05
+shader_parameter/scanline_count = 100.0
+shader_parameter/is_pulsing = false
+shader_parameter/pulse_speed = 5.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -38,8 +53,30 @@ font_size = 35
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" node_paths=PackedStringArray("mask_overlay")]
 script = ExtResource("1_oqdbm")
+mask_overlay = NodePath("Filters/MaskFilter")
+
+[node name="Filters" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MaskFilter" type="ColorRect" parent="Filters"]
+material = SubResource("ShaderMaterial_ioimr")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1883.0
+offset_bottom = 1046.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
 
 [node name="GameUI" type="Control" parent="."]
 layout_mode = 3
