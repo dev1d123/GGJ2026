@@ -2,14 +2,31 @@ extends Node3D
 
 @onready var audio: AudioStreamPlayer = $AudioStreamPlayer
 @onready var enemy_container = $"."
+@onready var player: Node = $Player
 
 var total_enemies: int = 0
 var enemies_killed: int = 0
 var enemies_list: Array[Node] = []
 var ui_label: Label
+
+# Sonidos de victoria y derrota
+var victory_sound: AudioStream = preload("res://assets/sounds/win.wav")
+var defeat_sound: AudioStream = preload("res://assets/sounds/lose.wav")
+@onready var sfx_player: AudioStreamPlayer = AudioStreamPlayer.new()
+
 const LOBBY_SCENE := "res://src/levels/lobby/Lobby.tscn"
 
 func _ready() -> void:
+	# Agregar AudioStreamPlayer para SFX
+	add_child(sfx_player)
+	sfx_player.bus = "Master"
+	
+	# Conectar muerte del jugador
+	if player and player.has_node("HealthComponent"):
+		var health = player.get_node("HealthComponent")
+		if health.has_signal("on_death"):
+			health.on_death.connect(_on_player_died)
+	
 	audio.finished.connect(_on_audio_finished)
 	audio.play()
 	
@@ -60,9 +77,21 @@ func _all_enemies_defeated():
 	_complete_level()
 
 func _complete_level():
+	# Reproducir sonido de victoria
+	audio.stop()
+	sfx_player.stream = victory_sound
+	sfx_player.play()
+	
 	GameManager.complete_level("level3")
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(3.0).timeout
 	get_tree().change_scene_to_file(LOBBY_SCENE)
+
+func _on_player_died():
+	# Reproducir sonido de derrota
+	audio.stop()
+	sfx_player.stream = defeat_sound
+	sfx_player.play()
+	print("💀 Level 3: Jugador ha muerto")
 
 func _create_enemy_counter_ui():
 	# Crear un CanvasLayer para el UI
