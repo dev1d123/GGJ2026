@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_ktn8c"]
 [ext_resource type="PackedScene" uid="uid://cx7jdaye55ayx" path="res://src/actors/masks/Mask_Combatiente.glb" id="1_lur1r"]
-
 [ext_resource type="Texture2D" uid="uid://cadydt58x26be" path="res://src/actors/masks/WhatsApp_Image_2026-01-30_at_11.46.29_AM__1_-removebg-preview-convertido-a-128x128.jpeg" id="2_8u5a1"]
 
 [resource]
