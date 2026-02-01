@@ -2,9 +2,9 @@ extends CharacterBody3D
 class_name BossWizard
 signal boss_died
 
-const MagicProjectileScene = preload("res://src/actors/enemies/bosses/Timewizard/MagicProjectile.gd")
-const LaserRainProjectileScene = preload("res://src/actors/enemies/bosses/Timewizard/LaserRainProjectile.gd")
-const HomingMagicOrbScene = preload("res://src/actors/enemies/bosses/Timewizard/HomingMagicOrb.gd")
+const MagicProjectileScene = preload("res://src/actors/enemies/bosses/Timewizard/MagicProjectile.tscn")
+const LaserRainProjectileScene = preload("res://src/actors/enemies/bosses/Timewizard/LaserRainProjectile.tscn")
+const HomingMagicOrbScene = preload("res://src/actors/enemies/bosses/Timewizard/HomingMagicOrb.tscn")
 
 # ----------------------------------------------------------------
 # CONFIGURACIÓN
@@ -363,7 +363,7 @@ func _shoot_magic():
 	if dir.length_squared() <= 0.0001:
 		dir = -global_transform.basis.z.normalized()
 	
-	var proj = MagicProjectileScene.new()
+	var proj = MagicProjectileScene.instantiate()
 	proj.direction = dir
 	proj.speed = projectile_speed
 	proj.damage = projectile_damage
@@ -392,7 +392,7 @@ func _cast_rain_lasers():
 		var radius = randf_range(0.0, rain_radius)
 		var offset = Vector3(cos(angle), 0.0, sin(angle)) * radius
 		var spawn_pos = global_position + offset + Vector3.UP * rain_spawn_height
-		var laser = LaserRainProjectileScene.new()
+		var laser = LaserRainProjectileScene.instantiate()
 		laser.direction = Vector3.DOWN
 		laser.speed = rain_speed
 		laser.damage = rain_damage
@@ -411,7 +411,7 @@ func _shoot_homing_orb():
 		return
 
 	var spawn_pos = global_position + Vector3.UP * projectile_spawn_height
-	var orb = HomingMagicOrbScene.new()
+	var orb = HomingMagicOrbScene.instantiate()
 	orb.target = player_ref
 	orb.speed = homing_speed
 	orb.damage = homing_damage

@@ -2,7 +2,10 @@ extends Node3D
 
 # ---------------- AUDIO ----------------
 @onready var audio: AudioStreamPlayer = $AudioStreamPlayer
+@onready var audio_zone: AudioStreamPlayer = $AudioStreamPlayer2
 @onready var boss: BossWizard = $Time_Boss
+@onready var zone: Area3D = $zoneBoss
+@onready var player: Node = $Player
 
 # ---------------- PLATFORMS ----------------
 @onready var platforms: Array[Node3D] = [
@@ -29,7 +32,7 @@ const BRASS_ROT_SPEED := 1.5 # radianes por segundo
 
 # ---------------- READY ----------------
 func _ready() -> void:
-	# audio en loop
+	# audio normal en loop
 	audio.finished.connect(_on_audio_finished)
 	audio.play()
 
@@ -41,8 +44,37 @@ func _ready() -> void:
 	for i in platforms.size():
 		start_platform_loop(platforms[i], i * OFFSET_TIME)
 
+	# conectar zona del jefe
+	zone.body_entered.connect(_on_zone_entered)
+	zone.body_exited.connect(_on_zone_exited)
+
+	# audio_zone en loop
+	audio_zone.finished.connect(_on_audio_zone_finished)
+
 # ---------------- AUDIO LOOP ----------------
 func _on_audio_finished() -> void:
+	if not audio.playing:
+		audio.play()
+
+func _on_audio_zone_finished() -> void:
+	if not audio_zone.playing:
+		audio_zone.play()
+
+# ---------------- ZONE AUDIO ----------------
+func _on_zone_entered(body: Node) -> void:
+	if body != player:
+		return
+	# cambiar a música de zona
+	if audio.playing:
+		audio.stop()
+	audio_zone.play()
+
+func _on_zone_exited(body: Node) -> void:
+	if body != player:
+		return
+	# volver a música normal
+	if audio_zone.playing:
+		audio_zone.stop()
 	audio.play()
 
 # ---------------- PLATFORM MOVEMENT ----------------
@@ -79,6 +111,16 @@ func start_platform_loop(platform: Node3D, offset: float) -> void:
 func _process(delta: float) -> void:
 	for brass in brass_parts:
 		brass.rotate_y(BRASS_ROT_SPEED * delta)
+	
+	# Atajo para completar nivel con tecla M
+	if Input.is_key_pressed(KEY_M):
+		_complete_level()
 
+# ---------------- BOSS DIED ----------------
 func _on_boss_died(_boss) -> void:
+	_complete_level()
+
+func _complete_level():
+	GameManager.complete_level("level4")
+	await get_tree().create_timer(2.0).timeout
 	get_tree().change_scene_to_file(LOBBY_SCENE)

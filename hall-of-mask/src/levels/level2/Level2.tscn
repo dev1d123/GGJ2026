@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://deomqtukglycp"]
+[gd_scene load_steps=31 format=3 uid="uid://deomqtukglycp"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_cp82e"]
 [ext_resource type="Script" uid="uid://gwxmmwihf4uo" path="res://src/levels/level2/level_2.gd" id="1_dqyqn"]
@@ -98,6 +98,9 @@ polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1), PackedInt32Arr
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_43bsa"]
 size = Vector3(11.4140625, 1, 15.012207)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r5i3b"]
+size = Vector3(112.47139, 45.061584, 49.62683)
 
 [node name="Level2" type="Node3D"]
 script = ExtResource("1_dqyqn")
@@ -312,3 +315,13 @@ collision_mask = 135
 [node name="Skeleton_Minion9" parent="." instance=ExtResource("18_weda2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.45187, -125.879875, 5.8886824)
 collision_mask = 135
+
+[node name="zoneBoss" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 3.6760314, 544.8447, -308.47906, -8.224014)
+collision_layer = 255
+collision_mask = 255
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="zoneBoss"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -532.5853, 102.15637, -7.2690125)
+shape = SubResource("BoxShape3D_r5i3b")
+debug_color = Color(0.8401974, 0.0001807791, 0.73116165, 0.41960785)

@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://fksjx8ipsuuj"]
+
+[ext_resource type="Script" path="res://src/actors/enemies/bosses/Timewizard/HomingMagicOrb.gd" id="1_homing"]
+
+[node name="HomingMagicOrb" type="Area3D"]
+script = ExtResource("1_homing")
+collision_layer = 8
+collision_mask = 2

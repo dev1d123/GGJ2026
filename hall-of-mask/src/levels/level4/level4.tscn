@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://c70g6tvonr2yl"]
+[gd_scene load_steps=35 format=3 uid="uid://c70g6tvonr2yl"]
 
 [ext_resource type="Texture2D" uid="uid://c2fhhbhuwbv52" path="res://assets/textures/level4/metal.dds" id="1_14d6y"]
 [ext_resource type="Script" uid="uid://dvwq56eark3gj" path="res://src/levels/level4/level_4.gd" id="1_crcck"]
@@ -21,6 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://5y3h1r2k7nhq" path="res://src/actors/enemies/Skeleton_Warrior.tscn" id="18_om8jg"]
 [ext_resource type="PackedScene" uid="uid://550j3hb7qwen" path="res://src/actors/enemies/Skeleton_Rogue.tscn" id="19_om8jg"]
 [ext_resource type="PackedScene" uid="uid://fjmfpedjk6b" path="res://src/actors/enemies/Skeleton_Mage.tscn" id="20_8rk31"]
+[ext_resource type="AudioStream" uid="uid://c5rtrvjoycrxt" path="res://assets/sounds/HardFighter.wav" id="22_8rk31"]
 
 [sub_resource type="Gradient" id="Gradient_vdpo8"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -100,6 +101,9 @@ size = Vector3(67.350525, 1, 99.19705)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_j2ljt"]
 size = Vector3(12.109001, 1, 5.842782)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_18x0k"]
+size = Vector3(74.6879, 45.061584, 24.6875)
 
 [node name="Level4" type="Node3D"]
 script = ExtResource("1_crcck")
@@ -343,7 +347,7 @@ transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 
 transform = Transform3D(-2.185516e-07, -4.999878, 0.0349063, 5, -2.1855695e-07, 2.220446e-16, 1.5258027e-09, 0.0349063, 4.999878, 394.33438, 21.87588, 1.6044555)
 
 [node name="Player" parent="." instance=ExtResource("16_crcck")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215.5586, 36.183758, 11.006392)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 511.29852, 36.183758, 11.006392)
 collision_mask = 133
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
@@ -426,3 +430,17 @@ collision_mask = 135
 [node name="Skeleton_Minion8" parent="." instance=ExtResource("19_om8jg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 407.08316, 25.563356, 3.9139707)
 collision_mask = 135
+
+[node name="zoneBoss" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 3.6760314, 544.8447, 20.615, -8.224014)
+collision_layer = 255
+collision_mask = 255
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="zoneBoss"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.55133, -18.456692, 2.2128944)
+shape = SubResource("BoxShape3D_18x0k")
+debug_color = Color(0.8401974, 0.0001807791, 0.73116165, 0.41960785)
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("22_8rk31")
+volume_db = -10.13

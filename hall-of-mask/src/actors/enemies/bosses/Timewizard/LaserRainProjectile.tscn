@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8xm3y4q1apla"]
+
+[ext_resource type="Script" path="res://src/actors/enemies/bosses/Timewizard/LaserRainProjectile.gd" id="1_laser"]
+
+[node name="LaserRainProjectile" type="Area3D"]
+script = ExtResource("1_laser")
+collision_layer = 8
+collision_mask = 2
