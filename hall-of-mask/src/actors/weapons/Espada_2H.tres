@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3 uid="uid://c8xdxdvj5sge3"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_rdymq"]
+[ext_resource type="PackedScene" uid="uid://dfmrg4q8f7nrg" path="res://src/actors/weapons/Espada_2H.tscn" id="2_wclpv"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vhbhf"]
+load_path = "res://.godot/imported/sword_2h.png-eb3d9b357310cd6a815e59943bcb83f4.ctex"
+
+[resource]
+script = ExtResource("1_rdymq")
+weapon_scene = ExtResource("2_wclpv")
+icon = SubResource("CompressedTexture2D_vhbhf")
+anim_attack = "Sword_2H_Attack"
+active_time = 0.5
+total_animation_time = 1.1
+cooldown = 0.4
+is_two_handed = true
+damage = 25.0
+knockback_force = 6.0
+stamina_cost = 20.0

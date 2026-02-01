@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://bdc7pdgdr2t13"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_u6fuv"]
+[ext_resource type="PackedScene" uid="uid://dqcyf6a73iifc" path="res://src/actors/weapons/Hacha_2H.tscn" id="2_0qk2g"]
+
+[resource]
+script = ExtResource("1_u6fuv")
+weapon_scene = ExtResource("2_0qk2g")
+anim_attack = "Axe_2H_Attack"
+windup_time = 0.7
+active_time = 0.7
+total_animation_time = 2.4
+cooldown = 0.4
+stop_movement = true
+is_two_handed = true
+damage = 29.0
+knockback_force = 8.5
+stamina_cost = 25.0

@@ -12,6 +12,8 @@ extends CharacterBody3D
 @onready var stamina: Node = $StaminaComponent
 @onready var health_component: HealthComponent = $HealthComponent 
 @onready var combat_manager: CombatManager = $CombatManager 
+@onready var mask_manager: MaskManager = $MaskManager
+
 @onready var distortion: ColorRect = $ColorRect
 @onready var distortion_mat: ShaderMaterial = distortion.material
 var transitioning := false
@@ -512,6 +514,13 @@ func _enter_tree():
 
 # --- INPUTS DE UI (ADICIONALES) ---
 func _unhandled_input(event):
+	if event.is_action_pressed("ultimate_ability"):
+		# Usamos la referencia segura si la creaste arriba, 
+		# o la buscamos si prefieres mantener su estilo:
+		var mgr = mask_manager if "mask_manager" in self else get_node_or_null("MaskManager")
+		if mgr:
+			mgr.activate_ultimate()
+			
 	# Usamos _unhandled_input para que no pelee con su _input
 	if event.is_action_pressed("usar_pocion_1"): usar_pocion(0)
 	elif event.is_action_pressed("usar_pocion_2"): usar_pocion(1)
