@@ -1,23 +1,25 @@
 extends Area3D
-class_name MagicProjectile
+class_name LaserRainProjectile
 
-@export var speed: float = 10.0
-@export var damage: float = 10.0
-@export var lifetime: float = 3.0
-@export var color: Color = Color(0.4, 0.7, 1.0, 1.0)
+@export var speed: float = 14.0
+@export var damage: float = 8.0
+@export var lifetime: float = 2.5
+@export var color: Color = Color(0.8, 0.2, 1.0, 1.0)
+@export var thickness: float = 0.08
+@export var length: float = 2.5
 
-var direction: Vector3 = Vector3.FORWARD
+var direction: Vector3 = Vector3.DOWN
 var _life_timer: float = 0.0
 
 func _ready():
 	_life_timer = lifetime
-	direction = direction.normalized()
 	if direction.length_squared() <= 0.0001:
-		direction = -global_transform.basis.z.normalized()
-	# Visibilidad y colisión
+		direction = Vector3.DOWN
+	else:
+		direction = direction.normalized()
+	_build_visuals()
 	collision_layer = 4
 	collision_mask = 2
-	_build_visuals()
 	monitoring = true
 	monitorable = true
 	body_entered.connect(_on_body_entered)
@@ -31,12 +33,12 @@ func _physics_process(delta):
 
 func _build_visuals():
 	var mesh_instance = MeshInstance3D.new()
-	# Asegura que el proyectil se renderice con el cull_mask de la cámara
 	mesh_instance.layers = 1 << 2
-	var sphere = SphereMesh.new()
-	sphere.radius = 0.18
-	sphere.height = 0.36
-	mesh_instance.mesh = sphere
+	var cylinder = CylinderMesh.new()
+	cylinder.height = length
+	cylinder.top_radius = thickness
+	cylinder.bottom_radius = thickness
+	mesh_instance.mesh = cylinder
 	
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = color
@@ -46,8 +48,9 @@ func _build_visuals():
 	add_child(mesh_instance)
 	
 	var collision = CollisionShape3D.new()
-	var shape = SphereShape3D.new()
-	shape.radius = 0.2
+	var shape = CylinderShape3D.new()
+	shape.height = length
+	shape.radius = thickness * 1.2
 	collision.shape = shape
 	add_child(collision)
 

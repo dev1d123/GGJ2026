@@ -1111,12 +1111,11 @@ offset_bottom = 1131.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00017166138, 0.9409027, 0.046691895)
 shape = SubResource("BoxShape3D_hf755")
 
-[node name="Hurtbox" type="Area3D" parent="." node_paths=PackedStringArray("health_component")]
+[node name="Hurtbox" type="Area3D" parent="."]
 transform = Transform3D(-0.9987775, -0.019501027, -0.045420628, -0.020387717, 0.99960893, 0.019140942, 0.0450296, 0.020043567, -0.9987844, 0.011361238, -0.013184488, -0.011931182)
 collision_layer = 2
 collision_mask = 2
 script = ExtResource("2_hpkk0")
-health_component = NodePath("../HealthComponent")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hurtbox"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0099487305, 0.78861237, 0.009765625)
@@ -1402,7 +1401,6 @@ offset_right = 2008.0
 offset_bottom = 1131.0
 
 [node name="undeadMask" type="ColorRect" parent="."]
-visible = false
 material = SubResource("ShaderMaterial_oloty")
 offset_left = -56.0
 offset_top = -30.0
