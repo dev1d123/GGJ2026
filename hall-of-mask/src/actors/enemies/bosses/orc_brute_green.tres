@@ -216,13 +216,13 @@ start_offset = 0.0
 loop_mode = 0
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0ttn4"]
-animation = &"animations/2H_Melee_Attack_Chop"
+animation = &"animations/Dualwield_Melee_Attack_Chop"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ot3u1"]
-animation = &"animations/2H_Melee_Attack_Stab"
+animation = &"animations/Dualwield_Melee_Attack_Stab"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ixdoq"]
-animation = &"animations/2H_Melee_Attack_Spin"
+animation = &"animations/Dualwield_Melee_Attack_Slice"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_r1rbw"]
 animation = &"Player/Sneaking_Idle"
@@ -377,7 +377,7 @@ transitions = ["Start", "Standing", SubResource("AnimationNodeStateMachineTransi
 graph_offset = Vector2(-256.0782, -47.866245)
 
 [resource]
-graph_offset = Vector2(-381.05768, -125.81978)
+graph_offset = Vector2(-252.88222, -48.907963)
 nodes/output/position = Vector2(-20, -40)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_786ps")
 nodes/StateMachine/position = Vector2(-300, 100)
