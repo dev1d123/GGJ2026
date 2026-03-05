@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=26 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -15,11 +15,12 @@
 [ext_resource type="Texture2D" uid="uid://bsoq7it838k6r" path="res://UI_assets/bala.png" id="10_cjw2x"]
 [ext_resource type="Texture2D" uid="uid://btbet8x5kodvd" path="res://UI_assets/star-trek.png" id="12_5d7l6"]
 [ext_resource type="Texture2D" uid="uid://djyq0cf5cybfu" path="res://UI_assets/diamante.png" id="15_wxjpw"]
+[ext_resource type="Texture2D" uid="uid://d3eeaesdcld4q" path="res://UI_assets/mochila.png" id="16_5d7l6"]
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
 [ext_resource type="Texture2D" uid="uid://cao2fhyhavqds" path="res://assets/imagesGUI/container_minimap.png" id="17_tlkqj"]
 [ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="18_reticle"]
-[ext_resource type="Script" path="res://scripts/components/mask_selection_panel.gd" id="19_mask_panel"]
-[ext_resource type="Script" path="res://scripts/components/notification_ui.gd" id="20_notification"]
+[ext_resource type="Script" uid="uid://cjdptnroc6hkg" path="res://scripts/components/mask_selection_panel.gd" id="19_mask_panel"]
+[ext_resource type="Script" uid="uid://dk8fnukfj5xdj" path="res://scripts/components/notification_ui.gd" id="20_notification"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -248,46 +249,6 @@ grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("5_3q2by")
 
-[node name="MaskSelectionPanel" type="PanelContainer" parent="GameUI"]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 20.0
-offset_top = -160.0
-offset_right = 110.0
-offset_bottom = 160.0
-grow_vertical = 2
-script = ExtResource("19_mask_panel")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/MaskSelectionPanel"]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="FighterSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
-custom_minimum_size = Vector2(70, 70)
-layout_mode = 2
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="ShooterSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
-custom_minimum_size = Vector2(70, 70)
-layout_mode = 2
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="UndeadSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
-custom_minimum_size = Vector2(70, 70)
-layout_mode = 2
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="TimeSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
-custom_minimum_size = Vector2(70, 70)
-layout_mode = 2
-ignore_texture_size = true
-stretch_mode = 5
-
 [node name="SkillQ" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
 visible = false
 layout_mode = 0
@@ -344,6 +305,46 @@ label_settings = SubResource("LabelSettings_pfnlp")
 horizontal_alignment = 2
 vertical_alignment = 2
 
+[node name="MaskSelectionPanel" type="PanelContainer" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -160.0
+offset_right = 110.0
+offset_bottom = 160.0
+grow_vertical = 2
+script = ExtResource("19_mask_panel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GameUI/MaskSelectionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="FighterSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="ShooterSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="UndeadSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="TimeSlot" type="TextureButton" parent="GameUI/MaskSelectionPanel/VBoxContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+ignore_texture_size = true
+stretch_mode = 5
+
 [node name="Radar" type="Control" parent="GameUI"]
 layout_mode = 1
 anchors_preset = 2
@@ -384,6 +385,46 @@ grow_vertical = 2
 position = Vector2(94, 93)
 scale = Vector2(0.605, 0.605)
 texture = ExtResource("17_tlkqj")
+
+[node name="InventoryPrompt" type="HBoxContainer" parent="GameUI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -97.0
+offset_right = -151.0
+offset_bottom = -18.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 8
+
+[node name="BagIcon" type="TextureRect" parent="GameUI/InventoryPrompt"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+texture = ExtResource("16_5d7l6")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="TabLabel" type="Label" parent="GameUI/InventoryPrompt/BagIcon"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_top = -50.0
+offset_right = 28.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "TAB"
+label_settings = SubResource("LabelSettings_pfnlp")
+horizontal_alignment = 2
+vertical_alignment = 2
 
 [node name="RadialMenu" type="Control" parent="."]
 process_mode = 3
@@ -614,4 +655,3 @@ theme_override_font_sizes/font_size = 28
 text = "🎭 ¡NUEVA MÁSCARA DESBLOQUEADA!"
 horizontal_alignment = 1
 vertical_alignment = 1
-
