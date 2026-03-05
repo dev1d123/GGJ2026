@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://cvogmipdh16f6"]
+[gd_scene load_steps=43 format=3 uid="uid://cvogmipdh16f6"]
 
 [ext_resource type="Script" uid="uid://fbt1pwffdsvr" path="res://src/levels/lobby/lobby.gd" id="1_h8r75"]
 [ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="2_fgap4"]
@@ -25,6 +25,7 @@
 [ext_resource type="PackedScene" uid="uid://cdyglwgplotai" path="res://src/actors/enemies/bosses/orc_brute_blue.tscn" id="23_fgap4"]
 [ext_resource type="PackedScene" uid="uid://bqd2ekgnl5bvl" path="res://src/actors/enemies/bosses/monstrosity.tscn" id="24_embxt"]
 [ext_resource type="PackedScene" uid="uid://u6ejpuv2gfn0" path="res://src/actors/enemies/bosses/skull_knight.tscn" id="25_517sc"]
+[ext_resource type="PackedScene" uid="uid://p54djcq7e4qo" path="res://src/actors/enemies/bosses/frost_golem.tscn" id="26_5r7jn"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_r5xvh"]
 vertices = PackedVector3Array(-249.5, 0.2779607, -249.46419, -249.5, 0.2779607, 249.53581, 249.5, 0.2779607, 249.53581, 249.5, 0.2779607, -249.46419)
@@ -270,7 +271,10 @@ transform = Transform3D(-0.25881904, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, -0.25
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.117023, 0.004065764, 2.9465065)
 
 [node name="Monstrosity" parent="." instance=ExtResource("24_embxt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5058622, 0.0120628, -58.292316)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5058622, 0.0120628, -94.659836)
 
 [node name="BlackKnight" parent="." instance=ExtResource("25_517sc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 0, -71)
+
+[node name="FrostGolem" parent="." instance=ExtResource("26_5r7jn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.72867, 0.0039596558, -42.62384)
