@@ -140,12 +140,19 @@ func _input(event):
 			_actualizar_resaltado()
 		return
 
+	# --- MATEMÁTICAS CORREGIDAS ---
 	var deg = rad_to_deg(direction.angle())
 	if deg < 0: deg += 360
-	deg = fmod(deg + 90, 360.0) # Rotar 90deg para que 0 esté arriba
 	
+	# Rotamos 90 para que arriba sea 0.
+	# LUEGO sumamos la MITAD de un sector para que el ícono quede centrado en su zona.
 	var sector_size = 360.0 / num_sectors
+	var half_sector = sector_size / 2.0
+	
+	deg = fmod(deg + 90 + half_sector, 360.0) 
+	
 	var new_index = int(deg / sector_size)
+	# ------------------------------
 	
 	if new_index != current_sector_index:
 		current_sector_index = new_index
