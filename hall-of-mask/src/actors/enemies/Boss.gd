@@ -219,6 +219,14 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	is_doing_boss_attack = true
 	current_state = State.ATTACKING 
 	
+	# Sobreescribir el temporizador padre para no entrar en conflicto con la lógica manual del Boss
+	safety_attack_timer = 0.0
+	
+	# Reiniciar cualquier ataque erróneo atrapado en el CombatManager proveniente del Enemy.gd
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false 
+	
 	var vel_original = current_speed
 	current_speed = 0.0 
 	

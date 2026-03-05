@@ -343,7 +343,8 @@ func _buscar_jugador():
 func _animar_movimiento(delta):
 	if not anim_tree: return
 	var spd = Vector2(velocity.x, velocity.z).length()
-	var blend = clamp(spd / base_speed, 0.0, 1.0)
+	# Permitir que el blend pase de 1.0 (para llegar a estado correr = 2.0)
+	var blend = clamp(spd / base_speed, 0.0, 3.0)
 	anim_tree.set(P_MOVIMIENTO, anim_tree.get(P_MOVIMIENTO).lerp(Vector2(0, blend), delta * 5.0))
 
 # --- KNOCKBACK Y DAÑO ---

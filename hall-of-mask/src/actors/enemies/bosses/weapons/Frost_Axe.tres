@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://0kk12l8ia1hd"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_psxu1"]
+[ext_resource type="PackedScene" uid="uid://78gqvpcra5yr" path="res://src/actors/enemies/bosses/weapons/Orc_Axe.tscn" id="2_ihxtb"]
+
+[resource]
+script = ExtResource("1_psxu1")
+weapon_scene = ExtResource("2_ihxtb")
+windup_time = 0.4
+cooldown = 0.5
+stop_movement = true
+damage = 20.0
