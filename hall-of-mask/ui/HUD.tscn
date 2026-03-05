@@ -38,7 +38,7 @@ outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_pfnlp"]
-font_size = 35
+font_size = 25
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
@@ -609,6 +609,29 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(64, 64)
 texture = ExtResource("16_l08fo")
+
+[node name="ColorRectGuia" type="ColorRect" parent="RadialMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -179.0
+offset_top = 260.0
+offset_right = 185.0
+offset_bottom = 337.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.39215687)
+
+[node name="TabLabel" type="Label" parent="RadialMenu/ColorRectGuia"]
+layout_mode = 1
+offset_right = 66.0
+offset_bottom = 49.0
+text = " Click Izq. : Equipar mano Izq.
+ Click Der.: Equipar mano der."
+label_settings = SubResource("LabelSettings_pfnlp")
 
 [node name="ReticleUI" parent="." instance=ExtResource("18_reticle")]
 offset_left = 0.0
