@@ -620,17 +620,18 @@ anchor_bottom = 0.5
 offset_left = -179.0
 offset_top = 260.0
 offset_right = 185.0
-offset_bottom = 337.0
+offset_bottom = 376.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.39215687)
 
-[node name="TabLabel" type="Label" parent="RadialMenu/ColorRectGuia"]
+[node name="GuiaLabel" type="Label" parent="RadialMenu/ColorRectGuia"]
 layout_mode = 1
 offset_right = 66.0
 offset_bottom = 49.0
 text = " Click Izq. : Equipar mano Izq.
- Click Der.: Equipar mano der."
+ Click Der.: Equipar mano Der.
+ Scroll (rueda): Variar equipo."
 label_settings = SubResource("LabelSettings_pfnlp")
 
 [node name="ReticleUI" parent="." instance=ExtResource("18_reticle")]
