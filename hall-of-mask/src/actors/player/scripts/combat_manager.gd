@@ -571,6 +571,25 @@ func _buscar_hitbox(parent):
 		return weapon.find_child("Hitbox")
 	return null
 
+# ------------------------------------------------------------------
+# ULTIMATE ANIMATION (llamado desde player.gd u otras máscaras)
+# ------------------------------------------------------------------
+func ejecutar_animacion_ulti(anim_name: String, duration: float) -> void:
+	if is_attacking_r or is_attacking_l: return
+	is_attacking_r = true
+	is_attacking_l = true
+	is_movement_locked = true
+	if anim_player_node: anim_player_node.speed_scale = 1.0
+	_safe_set_tween(BLEND_2H, 1.0, 0.05)
+	if animation_tree and animation_tree.get(PLAYBACK_2H) != null:
+		animation_tree[PLAYBACK_2H].start(anim_name)
+	await get_tree().create_timer(duration).timeout
+	_safe_set_tween(BLEND_2H, 0.0, 0.3)
+	if anim_player_node: anim_player_node.speed_scale = 1.0
+	is_attacking_r = false
+	is_attacking_l = false
+	is_movement_locked = false
+
 func manual_hitbox_activation(damage_mult_override: float, duration: float, knockback_force: float, hand_node: Node3D):
 	var hitbox = _buscar_hitbox(hand_node)
 	if hitbox:

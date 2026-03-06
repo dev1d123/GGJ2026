@@ -157,9 +157,16 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ultimate_ability"):
 		var mgr = mask_manager if "mask_manager" in self else get_node_or_null("MaskManager")
 		if mgr: mgr.activate_ultimate()
+	if event.is_action_pressed("ulti"):
+		var tipo = mask_manager.current_mask.mask_name if mask_manager and mask_manager.current_mask else "Sin máscara"
+		print(tipo + " activo ulti")
+		_intentar_activar_ulti()
 	if event.is_action_pressed("usar_pocion_1"): usar_pocion(0)
 	elif event.is_action_pressed("usar_pocion_2"): usar_pocion(1)
 	elif event.is_action_pressed("usar_pocion_3"): usar_pocion(2)
+	# DEBUG: Tecla N = +25 carga de ulti
+	if event is InputEventKey and event.pressed and event.keycode == KEY_N:
+		if mask_manager: mask_manager.add_charge(25.0)
 
 # ------------------------------------------------------------------------------
 # 3. FÍSICAS Y LÓGICA
@@ -395,6 +402,83 @@ func rotar_columna_hacia_camara():
 		var m = Quaternion(Vector3.RIGHT, -_cam_pitch)
 		var r = skeleton_3d.get_bone_rest(spine_bone_id).basis.get_rotation_quaternion()
 		skeleton_3d.set_bone_pose_rotation(spine_bone_id, r * m)
+
+func _intentar_activar_ulti() -> void:
+	if not mask_manager or not mask_manager.current_mask: return
+	if mask_manager.current_ult_charge < mask_manager.max_ult_charge: return
+	var mask_name_lower = mask_manager.current_mask.mask_name.to_lower()
+	mask_manager.activate_ultimate()
+	if mask_name_lower.contains("fighter"):
+		combat_manager.ejecutar_animacion_ulti("Melee_2H_Attack_Spin", 2.0)
+		_mostrar_area_fighter_ulti(2.0)
+		_aplicar_dano_area_fighter_ulti()
+
+func _aplicar_dano_area_fighter_ulti() -> void:
+	# Pequeño windup antes del golpe (mitad de la animación)
+	await get_tree().create_timer(0.35).timeout
+
+	var radio := 6.0
+	var damage_ulti := 50.0
+	if combat_manager and combat_manager.weapon_r:
+		damage_ulti = combat_manager.weapon_r.damage * 2.5 * combat_manager.damage_multiplier
+
+	var space := get_world_3d().direct_space_state
+	var sphere := SphereShape3D.new()
+	sphere.radius = radio
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape = sphere
+	params.transform = global_transform
+	params.exclude = [get_rid()]
+
+	var hits := space.intersect_shape(params, 32)
+	for hit in hits:
+		var body = hit.get("collider")
+		if not body or body == self: continue
+
+		# Daño
+		if body.has_method("take_damage"):
+			body.take_damage(damage_ulti)
+		elif body.has_node("HealthComponent"):
+			body.get_node("HealthComponent").take_damage(damage_ulti)
+
+		# Expulsión hacia afuera del centro
+		if body.has_method("apply_knockback"):
+			var dir: Vector3 = (body.global_position - global_position)
+			dir.y = 0.0
+			dir = dir.normalized()
+			body.apply_knockback(dir, 20.0, 7.0)
+
+func _mostrar_area_fighter_ulti(duracion: float) -> void:
+	var mesh_inst := MeshInstance3D.new()
+	var cylinder := CylinderMesh.new()
+	cylinder.top_radius     = 6.0
+	cylinder.bottom_radius  = 6.0
+	cylinder.height         = 0.04
+	cylinder.radial_segments = 96
+	mesh_inst.mesh = cylinder
+
+	var shader : Shader = load("res://src/actors/player/fighter_ulti_area.gdshader")
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	mesh_inst.material_override = mat
+
+	add_child(mesh_inst)
+	mesh_inst.position = Vector3(0.0, 0.05, 0.0)
+
+	# Fade in via scale (el shader es aditivo, escalamos el nodo)
+	mesh_inst.scale = Vector3.ZERO
+	var t_in := create_tween()
+	t_in.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t_in.tween_property(mesh_inst, "scale", Vector3.ONE, 0.2)
+
+	await get_tree().create_timer(duracion - 0.4).timeout
+
+	# Fade out via scale
+	var t_out := create_tween()
+	t_out.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t_out.tween_property(mesh_inst, "scale", Vector3.ZERO, 0.4)
+	await t_out.finished
+	mesh_inst.queue_free()
 
 func take_damage(amount: float):
 	if health_component: health_component.take_damage(amount)
