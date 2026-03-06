@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://cvogmipdh16f6"]
+[gd_scene load_steps=46 format=3 uid="uid://cvogmipdh16f6"]
 
 [ext_resource type="Script" uid="uid://fbt1pwffdsvr" path="res://src/levels/lobby/lobby.gd" id="1_h8r75"]
 [ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="2_fgap4"]
@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" uid="uid://p54djcq7e4qo" path="res://src/actors/enemies/bosses/frost_golem.tscn" id="26_5r7jn"]
 [ext_resource type="PackedScene" uid="uid://cyngv5u2uva1p" path="res://src/actors/enemies/Demon_Red.tscn" id="27_fi7gg"]
 [ext_resource type="PackedScene" uid="uid://eupffqfwx45" path="res://src/actors/enemies/Demon_Blue.tscn" id="28_180rk"]
+[ext_resource type="Resource" uid="uid://c8xdxdvj5sge3" path="res://src/actors/weapons/Espada_2H.tres" id="29_xn7sa"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_r5xvh"]
 vertices = PackedVector3Array(-249.5, 0.2779607, -249.46419, -249.5, 0.2779607, 249.53581, 249.5, 0.2779607, 249.53581, 249.5, 0.2779607, -249.46419)
@@ -289,3 +290,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.42265, 0.003961563, 3.2711
 
 [node name="Skeleton_Minion5" parent="." instance=ExtResource("28_180rk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.408817, 0.003961563, -28.235971)
+loadout_weapon_r = ExtResource("29_xn7sa")

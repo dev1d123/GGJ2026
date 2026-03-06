@@ -15,6 +15,7 @@ transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("2_rjagr")
+trail_color = Color(0.79640514, 0, 0.24121666, 0.98039216)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.009480476, 0.71149194, -0.010328323)
