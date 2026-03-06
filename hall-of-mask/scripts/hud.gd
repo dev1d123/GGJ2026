@@ -151,6 +151,10 @@ func _equip_mask_from_radial(mask_data: MaskData):
 		player.equip_mask_visual(mask_key)
 		print("🎭 HUD: Equipando máscara desde menú radial: ", mask_data.mask_name, " -> ", mask_key)
 	
+	# Notificar al MaskManager para que registre la máscara activa
+	if player.has_node("MaskManager"):
+		player.get_node("MaskManager").equip_mask(mask_data)
+	
 	# Sincronizar el panel de selección para resaltar la máscara equipada
 	if mask_selection_panel and mask_selection_panel.has_method("sync_equipped_mask"):
 		mask_selection_panel.sync_equipped_mask(mask_key)
@@ -160,6 +164,9 @@ func _remove_mask():
 	if player and player.has_method("equip_mask_visual"):
 		player.equip_mask_visual("")  # String vacío para quitar
 		print("🎭 HUD: Quitando máscara")
+	
+	if player and player.has_node("MaskManager"):
+		player.get_node("MaskManager").remove_mask()
 	
 	# Resetear el panel de selección
 	if mask_selection_panel and mask_selection_panel.has_method("sync_equipped_mask"):

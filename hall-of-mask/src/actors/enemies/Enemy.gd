@@ -365,7 +365,7 @@ func _on_damage_received(a, c):
 
 func _morir():
 	if player_ref and player_ref.has_node("MaskManager"):
-		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
+		player_ref.get_node("MaskManager").add_charge(25.0)
 	set_physics_process(false)
 	queue_free()
 

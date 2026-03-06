@@ -1,6 +1,14 @@
 extends Node
 class_name MaskManager
 
+# Referencias a los iconos de progreso de la ultimate en el HUD
+# (Se resuelven diferidos porque HUD2 es una escena instanciada externa)
+var _ult_label = null
+var _ulti1 = null
+var _ulti2 = null
+var _ulti3 = null
+var _ulti4 = null
+var _ulti5 = null
 # ------------------------------------------------------------------------------
 # 1. CONFIGURACIÓN
 # ------------------------------------------------------------------------------
@@ -40,6 +48,34 @@ var current_mask_visual_node: Node3D = null
 func _ready():
 	# Inicializar carga en 0
 	current_ult_charge = 0.0
+	# HUD2 es una escena instanciada externa: sus hijos no están listos aún.
+	# Diferimos la búsqueda de nodos para el siguiente frame.
+	call_deferred("_init_hud_refs")
+
+func _init_hud_refs():
+	# Estrategia 1: usar el export 'player' si apunta al Player real (tiene HUD2 como hijo)
+	# Estrategia 2: buscar HUD2 como hermano de este MaskManager (../HUD2)
+	# Estrategia 3: no hay HUD -> enemigo, saltar silenciosamente
+	var hud_root: Node = null
+
+	if player and player.has_node("HUD2"):
+		hud_root = player.get_node("HUD2")
+		print("[MaskManager] _init_hud_refs | HUD2 encontrado via 'player' export (", player.name, ")")
+	elif has_node("../HUD2"):
+		hud_root = get_node("../HUD2")
+		print("[MaskManager] _init_hud_refs | HUD2 encontrado via path relativo ../HUD2")
+	else:
+		print("[MaskManager] _init_hud_refs | Sin HUD2 (soy enemigo: ", get_parent().name, ") -> skip")
+		return
+
+	_ult_label = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/Label")
+	_ulti1     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti1")
+	_ulti2     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti2")
+	_ulti3     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti3")
+	_ulti4     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti4")
+	_ulti5     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti5")
+	print("[MaskManager] _init_hud_refs | ulti1=", _ulti1, " ulti2=", _ulti2, " ulti3=", _ulti3, " ulti4=", _ulti4, " ulti5=", _ulti5, " label=", _ult_label)
+	_update_ult_icons()
 
 func _process(delta):
 	# Lógica de duración de la Ulti
@@ -163,9 +199,12 @@ func _reset_stats_to_default():
 # 6. SISTEMA DE ULTIMATE
 # ------------------------------------------------------------------------------
 func add_charge(amount: float):
-	if is_ultimate_active or not current_mask: return
+	if is_ultimate_active or not current_mask:
+		return
 	current_ult_charge = min(current_ult_charge + amount, max_ult_charge)
+	print("[MaskManager] Carga actualizada: ", current_ult_charge, "/", max_ult_charge)
 	emit_signal("on_ult_charge_changed", current_ult_charge, max_ult_charge)
+	_update_ult_icons()
 
 func activate_ultimate():
 	if not current_mask or current_ult_charge < max_ult_charge: 
@@ -179,6 +218,7 @@ func activate_ultimate():
 	current_ult_charge = 0.0 # Consumir carga
 	emit_signal("on_ult_charge_changed", 0.0, max_ult_charge)
 	emit_signal("on_ultimate_state", true)
+	_update_ult_icons()
 	
 	apply_stats(true) # Aplicar stats OP
 
@@ -227,3 +267,19 @@ func _remove_visual_model():
 	if current_mask_visual_node:
 		current_mask_visual_node.queue_free()
 		current_mask_visual_node = null
+
+# ------------------------------------------------------------------------------
+# 8. PROGRESO DE ULTIMATE EN HUD
+# ------------------------------------------------------------------------------
+func _update_ult_icons():
+	# ulti1 = siempre visible (0+)
+	# ulti2 = >= 25
+	# ulti3 = >= 50
+	# ulti4 = >= 75
+	# ulti5 + label = 100 (carga completa)
+	if _ulti1: _ulti1.visible = true
+	if _ulti2: _ulti2.visible = current_ult_charge >= 25.0
+	if _ulti3: _ulti3.visible = current_ult_charge >= 50.0
+	if _ulti4: _ulti4.visible = current_ult_charge >= 75.0
+	if _ulti5: _ulti5.visible = current_ult_charge >= 100.0
+	if _ult_label: _ult_label.visible = current_ult_charge >= max_ult_charge
