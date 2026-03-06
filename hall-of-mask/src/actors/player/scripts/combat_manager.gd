@@ -5,36 +5,53 @@ class_name CombatManager
 # 1. DEPENDENCIAS
 # ------------------------------------------------------------------------------
 @export_category("Referencias Obligatorias")
+## Nodo de AnimationTree para controlar las transiciones de ataque.
 @export var animation_tree: AnimationTree
+## Nodo posicional donde se adjuntarán las armas de la mano derecha.
 @export var right_hand_bone: Node3D 
+## Nodo posicional donde se adjuntarán las armas de la mano izquierda.
 @export var left_hand_bone: Node3D  
 
 @export_category("Control de Input")
+## Si es verdadero, escucha clics de ratón. Si es falso, es controlado por IA.
 @export var is_player_controlled: bool = false 
 
 @export_category("Componentes Opcionales")
+## Referencia al nodo de Estamina para consumir energía al atacar.
 @export var stamina_component: Node 
+## Referencia al nodo de Maná para consumir magia al castear hechizos.
 @export var mana_component: Node 
+## Gestor de Atributos para escalar el daño con las estadísticas base.
 @export var attribute_manager: Node 
+## Gestor de Máscaras para aplicar los efectos de las pasivas.
 @export var mask_manager: MaskManager 
 
 # ------------------------------------------------------------------------------
 # 2. CONFIGURACIÓN
 # ------------------------------------------------------------------------------
 @export_category("Reglas de Combate")
+## Las capas de físicas (Physics Layers) a las que las armas pueden hacer daño (Generalmente: Enemies o Player).
 @export_flags_3d_physics var attack_layer_mask: int = 1 
+## Multiplicador global de todo el daño infligido.
 @export var damage_multiplier: float = 1.0 
+## Cantidad base de carga de Ultimate que ganas por cada impacto exitoso.
 @export var ult_charge_reward: float = 10.0
 
 # ------------------------------------------------------------------------------
 # 3. INVENTARIO
 # ------------------------------------------------------------------------------
 @export_category("Inventario Armas")
+## Arma secundaria equipada actualmente (Escudo, espada corta, pistola).
 @export var slot_1_left: WeaponData
+## Arma primaria equipada actualmente (Espada principal, hacha, rifle).
 @export var slot_1_right: WeaponData
+## (Opcional) Guardado rápido de arma 2.
 @export var slot_2: WeaponData 
+## (Opcional) Guardado rápido de arma 3.
 @export var slot_3: WeaponData 
+## (Opcional) Guardado rápido de arma 4.
 @export var slot_4: WeaponData 
+## Máscara actualmente llevada en el inventario.
 @export var mask_slot_1: MaskData
 
 signal on_weapon_changed(hand, weapon_data)

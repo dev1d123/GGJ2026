@@ -3,6 +3,7 @@ extends CharacterBody3D
 @export var footstep_sounds: Array[AudioStream] = []
 
 @onready var attack_audio: AudioStreamPlayer3D = $WeaponAudio
+## Array de sonidos para asignar a los ataques.
 @export var attack_sounds: Array[AudioStream] = []
 
 # ------------------------------------------------------------------------------
@@ -25,13 +26,21 @@ var transitioning := false
 
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
-@export var speed_walk: float = 500.0
+## Velocidad base del jugador al caminar de frente.
+@export var speed_walk: float = 5.0
+## Multiplicador de velocidad al correr hacia adelante. (Correr hacia atrás usa la mitad).
+@export var speed_sprint_mult: float = 1.6
+## Fuerza vertical del salto.
 @export var jump_force: float = 15.0 
+## Multiplicador artificial de la gravedad para hacer el salto menos "flotante".
 @export var gravity_multiplier: float = 2.0 
 
 @export_category("Evasión (Dodge & Dive)")
+## Fuerza horizontal impulsada al hacer Dodge (Rodar).
 @export var dodge_power: float = 15.0 
+## Costo de Estamina para realizar un Dodge.
 @export var dodge_cost: float = 15.0
+## Fricción aplicada al finalizar el Dive (Lanzarse al piso).
 @export var dive_sprint_damp: float = 0.8
 
 # --- CONFIGURACIÓN DE MOMENTO ---
@@ -122,6 +131,9 @@ func _ready():
 		if "max_health" in health_component:
 			max_health = health_component.max_health
 			current_health = health_component.current_health
+	
+	if attributes:
+		attributes.base_stats["move_speed"] = speed_walk
 			
 	emit_signal("on_state_changed", "NORMAL")
 
@@ -240,7 +252,10 @@ func procesar_movimiento_normal(delta, input_dir):
 	
 	var final_speed = base_spd * mask_speed_mult * current_speed_mult
 	match current_state:
-		State.SPRINT: final_speed *= 1.6
+		State.SPRINT: 
+			final_speed *= speed_sprint_mult
+			if input_dir.y > 0: # Corriendo hacia atrás (+Y en Vector2 del joystick/teclado)
+				final_speed *= 0.5 
 		State.CROUCH: final_speed *= 0.5
 		State.PRONE: final_speed *= 0.3
 	
@@ -274,7 +289,7 @@ func controlar_inputs_postura(delta, moving_back):
 	var is_moving = velocity.x != 0 or velocity.z != 0
 	var aiming_block = combat_manager.is_aiming
 	
-	if Input.is_action_pressed("sprint") and is_on_floor() and not moving_back and current_state == State.NORMAL and is_moving and not aiming_block:
+	if Input.is_action_pressed("sprint") and is_on_floor() and current_state == State.NORMAL and is_moving and not aiming_block:
 		cambiar_estado(State.SPRINT)
 	
 	if current_state == State.SPRINT:

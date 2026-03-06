@@ -225,8 +225,12 @@ func _spawn_mask_visual(data: MaskData):
 	
 	# Validaciones
 	if not mask_attachment_point:
-		# Si no hay punto asignado, no hacemos nada (falla silenciosamente)
-		return
+		# Auto-buscar si se olvidó asignar en el Inspector
+		if get_parent():
+			var found = get_parent().find_child("MaskMount", true, false)
+			if found is Node3D: mask_attachment_point = found
+			
+		if not mask_attachment_point: return # Falla silenciosa si no existe en la escena
 		
 	# ¡OJO! Asegúrate de haber agregado 'mask_visual_scene' a tu MaskData.gd
 	if not "mask_visual_scene" in data or not data.mask_visual_scene:

@@ -5,12 +5,16 @@ class_name Enemy
 # CONFIGURACIÓN
 # ------------------------------------------------------------------------------
 @export_group("Loadout Inicial")
+## Arma que el enemigo llevará en la mano derecha.
 @export var loadout_weapon_r: WeaponData 
+## Arma que el enemigo llevará en la mano izquierda.
 @export var loadout_weapon_l: WeaponData 
+## Máscara que el enemigo tendrá configurada.
 @export var loadout_mask: MaskData       
 
 @export_group("Equipamiento de Máscara")
 enum MaskHandling { EQUIP_ON_SPAWN, EN_INVENTARIO, SIN_MASCARA }
+## Define cómo el enemigo maneja su máscara inicial (Aparecer con ella, guardarla o ignorarla).
 @export var mask_handling: MaskHandling = MaskHandling.EQUIP_ON_SPAWN
 
 enum MaskEquipCondition { 
@@ -23,6 +27,7 @@ enum MaskEquipCondition {
 	ON_PROXIMITY,           # Si el jugador se le acerca demasiado (Melee range)
 	AFTER_TIME_IN_COMBAT    # Si la pelea dura mucho tiempo activo
 }
+## Condición bajo la cual el enemigo se equipará la máscara si la tiene en inventario.
 @export var mask_equip_condition: MaskEquipCondition = MaskEquipCondition.NONE
 
 # --- COMPONENTES ---
@@ -34,7 +39,9 @@ enum MaskEquipCondition {
 
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var eyes: RayCast3D = $VisionManager/Eyes
+## El nodo 3D visual principal del enemigo.
 @export var visual_mesh: Node3D 
+## Controlador de animaciones (AnimationTree).
 @export var anim_tree: AnimationTree
 
 const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
@@ -43,24 +50,34 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 # VARIABLES IA
 # ------------------------------------------------------------------------------
 @export_category("Personalidad IA")
+## Distancia en metros a la que el enemigo puede detectar al jugador.
 @export var vision_range: float = 20.0
-@export var aim_speed: float = 8.0  # ⚡ AUMENTADO: Giran más rápido para no fallar
-@export var base_speed: float = 3.5 # ⚡ AUMENTADO: Un poco más rápidos
+## Qué tan rápido el enemigo rota para encarar al jugador.
+@export var aim_speed: float = 8.0  
+## Velocidad base de movimiento (Patrullar = Mitad. Combate = Normal).
+@export var base_speed: float = 3.5 
 
 @export_group("Capacidades de Movimiento")
-@export var can_walk: bool = true
+## Si está activo, el enemigo puede esprintar al atacar o perseguir.
 @export var can_sprint: bool = false
+## Si está activo, el enemigo puede saltar obstáculos.
 @export var can_jump: bool = false
 
 @export_group("Parámetros de Movimiento")
-@export var walk_speed: float = 2.0
-@export var sprint_speed: float = 5.0
+## Multiplicador de la base_speed cuando el enemigo esprinta.
+@export var sprint_speed_mult: float = 1.6
+## Multiplicador de la base_speed mientras el enemigo realiza una animación de ataque (1 = normal, 0.25 = cámara lenta).
+@export var attack_movement_mult: float = 1
+## Fuerza vertical aplicada al saltar.
 @export var jump_force: float = 8.0
 
 @export_group("Puntería Inteligente (Ranged)")
+## Segundos de retraso al apuntar (0 = Aimbot instantáneo).
 @export var aim_delay_seconds: float = 0.3
-@export var aim_inaccuracy_bloom: float = 0.7
+## Frecuencia con la que cambia el margen de error del bloom.
 @export var aim_bloom_update_rate: float = 0.2
+## Radio máximo de imprecisión al apuntar (escala con la distancia).
+@export var aim_inaccuracy_bloom: float = 1.52
 
 enum Archetype { MELEE_1H, MELEE_2H, RANGED_PROJECTILE, RANGED_BEAM }
 var current_archetype: Archetype = Archetype.MELEE_1H
@@ -248,8 +265,7 @@ func _comportamiento_patrulla(delta):
 			_buscar_punto_patrulla()
 			patrol_timer = 4.0
 	else:
-		var speed_to_use = walk_speed if can_walk else base_speed
-		_mover_hacia(nav_agent.get_next_path_position(), delta, speed_to_use)
+		_mover_hacia(nav_agent.get_next_path_position(), delta, base_speed * 0.5)
 
 func _comportamiento_persecucion(delta: float):
 	if not is_instance_valid(player_ref): return
@@ -264,9 +280,7 @@ func _comportamiento_persecucion(delta: float):
 		nav_agent.target_position = player_ref.global_position
 		
 		# Decidir qué velocidad usar
-		var speed_to_use = base_speed
-		if can_sprint: speed_to_use = sprint_speed
-		elif can_walk: speed_to_use = walk_speed
+		var speed_to_use = base_speed * sprint_speed_mult if can_sprint else base_speed
 		
 		_mover_hacia(nav_agent.get_next_path_position(), delta, speed_to_use)
 		_mirar_hacia(player_ref.global_position, delta * 8.0)
@@ -312,9 +326,7 @@ func _comportamiento_combate(delta: float):
 	else:
 		# ESTÁ CERCA PERO NO SUFICIENTE: ACERCARSE SIN CAMBIAR ESTADO
 		var dir = (player_ref.global_position - global_position).normalized()
-		var speed_to_use = base_speed
-		if can_sprint: speed_to_use = sprint_speed
-		elif can_walk: speed_to_use = walk_speed
+		var speed_to_use = base_speed * sprint_speed_mult if can_sprint else base_speed
 		
 		velocity.x = dir.x * speed_to_use
 		velocity.z = dir.z * speed_to_use
@@ -359,6 +371,16 @@ func _iniciar_ataque_rayo():
 	safety_attack_timer = 0.5
 
 func _procesar_ataque_en_curso(delta):
+	# Moverse lentamente hacia el jugador durante el ataque
+	if is_instance_valid(player_ref):
+		var dir = (player_ref.global_position - global_position).normalized()
+		var speed_to_use = base_speed * attack_movement_mult
+		velocity.x = dir.x * speed_to_use
+		velocity.z = dir.z * speed_to_use
+	else:
+		velocity.x = move_toward(velocity.x, 0, base_speed * delta)
+		velocity.z = move_toward(velocity.z, 0, base_speed * delta)
+
 	# Si el ataque apenas empezó, obligamos a esperar un poco
 	if safety_attack_timer > 0:
 		safety_attack_timer -= delta
@@ -380,9 +402,10 @@ func _finalizar_ataque_hold():
 
 func _maniobra_alejarse(delta):
 	var dir = (global_position - player_ref.global_position).normalized()
-	velocity.x = dir.x * 3.5; velocity.z = dir.z * 3.5
+	var retreat_speed = base_speed * sprint_speed_mult if can_sprint else base_speed
+	velocity.x = dir.x * retreat_speed; velocity.z = dir.z * retreat_speed
 	_mirar_hacia(player_ref.global_position, delta * 8.0)
-	move_and_slide()
+	
 	if global_position.distance_to(player_ref.global_position) > 7.0:
 		current_state = State.COMBAT_MANEUVER
 
@@ -395,8 +418,8 @@ func _comportamiento_cooldown(delta):
 	
 	# Strafe lateral rápido
 	var side = transform.basis.x * strafe_dir
-	velocity.x = side.x * 2.5; velocity.z = side.z * 2.5
-	move_and_slide()
+	var strafe_speed = base_speed
+	velocity.x = side.x * strafe_speed; velocity.z = side.z * strafe_speed
 	
 	if ai_cooldown_timer <= 0:
 		strafe_dir *= -1
@@ -459,10 +482,23 @@ func _buscar_jugador():
 
 func _animar_movimiento(delta):
 	if not anim_tree: return
-	var spd = Vector2(velocity.x, velocity.z).length()
-	# Permitir que el blend pase de 1.0 (para llegar a estado correr = 2.0)
-	var blend = clamp(spd / base_speed, 0.0, 3.0)
-	anim_tree.set(P_MOVIMIENTO, anim_tree.get(P_MOVIMIENTO).lerp(Vector2(0, blend), delta * 5.0))
+	
+	var cur_blend = anim_tree.get(P_MOVIMIENTO)
+	var target_blend = Vector2.ZERO
+	
+	if velocity.length() > 0.1:
+		# Convertimos la velocidad global a local (relativa a donde mira el enemigo)
+		var local_vel = global_transform.basis.inverse() * velocity
+		
+		# En Godot 3D, adelante es -Z (Y en el blendspace), derecha es +X (X en el blendspace)
+		target_blend = Vector2(local_vel.x, -local_vel.z) / base_speed
+		
+		# Limitamos visualmente para no romper la animación si va a súper velocidad
+		var max_len = sprint_speed_mult if can_sprint else 1.0
+		if target_blend.length() > max_len:
+			target_blend = target_blend.normalized() * max_len
+			
+	anim_tree.set(P_MOVIMIENTO, cur_blend.lerp(target_blend, delta * 5.0))
 
 # --- KNOCKBACK Y DAÑO ---
 func apply_knockback(direction: Vector3, force: float, vertical_force: float):

@@ -6,21 +6,31 @@ signal boss_died
 # CONFIGURACIÓN DE COMBATE
 # ----------------------------------------------------------------
 @export_group("Mecánica de Carga (Sprint)")
+## Tiempo mínimo en segundos para volver a realizar un ataque de sprint/carga.
 @export var min_sprint_time: float = 5.0
+## Tiempo máximo en segundos para volver a realizar un ataque de sprint/carga.
 @export var max_sprint_time: float = 60.0
-@export var sprint_speed_mult: float = 2.2 
 
 @export_group("Tiempos de Ataque Base")
+## Segundos de preparación antes del golpe Atk1.
 @export var atk1_windup: float = 0.6
+## Segundos que dura el daño del golpe Atk1.
 @export var atk1_active: float = 0.2
+## Multiplicador de daño del Atk1.
 @export var atk1_dmg: float = 1.0      
 
+## Segundos de preparación antes del golpe Atk2.
 @export var atk2_windup: float = 0.4
+## Segundos que dura el daño del golpe Atk2.
 @export var atk2_active: float = 0.3
+## Multiplicador de daño del Atk2.
 @export var atk2_dmg: float = 0.8
 
+## Segundos de preparación antes del golpe Atk3.
 @export var atk3_windup: float = 0.8
+## Segundos que dura el daño del golpe Atk3.
 @export var atk3_active: float = 0.4
+## Multiplicador de daño del Atk3.
 @export var atk3_dmg: float = 1.5
 
 # Estado interno
@@ -96,8 +106,6 @@ func _physics_process(delta):
 			if sprint_timer <= 0 and not is_sprinting:
 				_iniciar_carga()
 
-func _procesar_ataque_en_curso(delta):
-	pass 
 
 # ----------------------------------------------------------------
 # 3. LÓGICA DE MOVIMIENTO AVANZADO
@@ -194,9 +202,12 @@ func _comportamiento_combate(delta: float):
 	var dist = global_position.distance_to(player_ref.global_position)
 	if dist > preferred_range + 0.5:
 		var dir = (player_ref.global_position - global_position).normalized()
-		velocity.x = dir.x * current_speed
-		velocity.z = dir.z * current_speed
-		return 
+		var speed_to_use = base_speed
+		if is_sprinting: speed_to_use = base_speed * sprint_speed_mult
+		
+		velocity.x = dir.x * speed_to_use
+		velocity.z = dir.z * speed_to_use
+		return
 
 	var roll = randf()
 	if roll < 0.4: _realizar_ataque_1_chop()
@@ -247,8 +258,6 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	while timer < track_time:
 		var dt = get_physics_process_delta_time()
 		if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, dt * 5.0)
-		velocity.x = 0
-		velocity.z = 0
 		timer += dt
 		await get_tree().process_frame 
 	
