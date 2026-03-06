@@ -63,6 +63,7 @@ var shake_decay: float = 1.5
 @onready var undead_overlay: ColorRect = $undeadMask
 @onready var time_overlay: ColorRect = $timeMask
 var current_mask_visual: String = "" # "fighter", "shooter", "undead", "time", o ""
+var _time_ulti_active: bool = false
 
 # --- VARIABLES INTERNAS ---
 var max_health: float = 100.0
@@ -172,10 +173,13 @@ func _input(event: InputEvent) -> void:
 # 3. FÍSICAS Y LÓGICA
 # ------------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
-	if is_dead: return 
-	
-	_apply_shake(delta)
-	_procesar_modificadores_combate(delta)
+	if is_dead: return
+	# ed = delta real compensado: cuando el ulti de tiempo está activo el player
+	# usa delta sin escalar para moverse a velocidad normal.
+	var ed: float = delta / Engine.time_scale if _time_ulti_active else delta
+
+	_apply_shake(ed)
+	_procesar_modificadores_combate(ed)
 
 	if is_on_floor() and (abs(velocity.x) > 0.1 or abs(velocity.z) > 0.1):
 		if not footstep_audio.playing and footstep_sounds.size() > 0:
@@ -185,7 +189,7 @@ func _physics_process(delta: float) -> void:
 		footstep_audio.stop()
 	# Gravedad
 	if not is_on_floor():
-		velocity.y -= (gravity * gravity_multiplier) * delta
+		velocity.y -= (gravity * gravity_multiplier) * ed
 		was_in_air = true
 	elif was_in_air:
 		was_in_air = false
@@ -193,36 +197,36 @@ func _physics_process(delta: float) -> void:
 
 	# Knockback
 	if knockback_velocity.length() > 0.5:
-		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * delta)
+		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * ed)
 		velocity.x = knockback_velocity.x
 		velocity.z = knockback_velocity.z
-		move_and_slide()
-		return 
+		_cms()
+		return
 
 	# Estados Bloqueantes
-	if current_state == State.DODGING: procesar_dodge(delta); return
-	if current_state == State.DIVING: procesar_dive(delta); return
-	
+	if current_state == State.DODGING: procesar_dodge(ed); return
+	if current_state == State.DIVING: procesar_dive(ed); return
+
 	if combat_manager.is_movement_locked:
-		velocity.x = move_toward(velocity.x, 0, 20.0 * delta)
-		velocity.z = move_toward(velocity.z, 0, 20.0 * delta)
-		move_and_slide()
-		actualizar_blendspaces(Vector2.ZERO, delta)
-		return 
-	
+		velocity.x = move_toward(velocity.x, 0, 20.0 * ed)
+		velocity.z = move_toward(velocity.z, 0, 20.0 * ed)
+		_cms()
+		actualizar_blendspaces(Vector2.ZERO, ed)
+		return
+
 	# Movimiento
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	controlar_inputs_postura(delta, input_dir.y > 0)
-	
-	if current_state == State.DODGING or current_state == State.DIVING: return 
-	
+	controlar_inputs_postura(ed, input_dir.y > 0)
+
+	if current_state == State.DODGING or current_state == State.DIVING: return
+
 	if current_state == State.SPRINT:
-		sprint_timer = min(sprint_timer + delta, MAX_MOMENTUM_TIME)
+		sprint_timer = min(sprint_timer + ed, MAX_MOMENTUM_TIME)
 	else:
 		sprint_timer = 0.0
 
-	procesar_movimiento_normal(delta, input_dir)
-	actualizar_blendspaces(input_dir, delta)
+	procesar_movimiento_normal(ed, input_dir)
+	actualizar_blendspaces(input_dir, ed)
 
 # ------------------------------------------------------------------------------
 # FOV y VELOCIDAD
@@ -258,7 +262,7 @@ func procesar_movimiento_normal(delta, input_dir):
 	else:
 		velocity.x = move_toward(velocity.x, 0, final_speed)
 		velocity.z = move_toward(velocity.z, 0, final_speed)
-	move_and_slide()
+	_cms()
 
 # ------------------------------------------------------------------------------
 # ESTADOS
@@ -310,6 +314,15 @@ func controlar_inputs_postura(delta, moving_back):
 # ------------------------------------------------------------------------------
 func add_camera_trauma(amount: float):
 	trauma = min(trauma + amount, 1.0)
+
+# Compensa Engine.time_scale en move_and_slide para que el player no se ralentice
+# durante el ulti de tiempo. Infla velocity antes y la restaura después.
+func _cms() -> void:
+	if _time_ulti_active:
+		velocity /= Engine.time_scale
+	move_and_slide()
+	if _time_ulti_active:
+		velocity *= Engine.time_scale
 	
 func _apply_shake(delta):
 	if trauma > 0:
@@ -336,7 +349,7 @@ func iniciar_dodge():
 func procesar_dodge(delta):
 	velocity.x = move_toward(velocity.x, 0, 40.0 * delta)
 	velocity.z = move_toward(velocity.z, 0, 40.0 * delta)
-	move_and_slide()
+	_cms()
 	if str(state_machine.get_current_node()) != "Dodge": 
 		current_state = State.NORMAL
 		emit_signal("on_state_changed", "NORMAL")
@@ -367,7 +380,7 @@ func procesar_dive(delta):
 	if not is_on_floor(): velocity.y -= (gravity * gravity_multiplier) * delta
 	velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
 	velocity.z = move_toward(velocity.z, 0, 5.0 * delta)
-	move_and_slide()
+	_cms()
 	dive_timer += delta
 	if is_on_floor() and dive_timer > 0.3: cambiar_estado(State.PRONE)
 
@@ -412,6 +425,172 @@ func _intentar_activar_ulti() -> void:
 		combat_manager.ejecutar_animacion_ulti("Melee_2H_Attack_Spin", 2.0)
 		_mostrar_area_fighter_ulti(2.0)
 		_aplicar_dano_area_fighter_ulti()
+	if mask_name_lower.contains("time") or mask_name_lower.contains("tiempo"):
+		_activar_ulti_tiempo(5.0)
+	if mask_name_lower.contains("undead") or mask_name_lower.contains("muerto"):
+		_activar_ulti_undead()
+
+func _activar_ulti_undead() -> void:
+	const NUM_SKELETONS  := 5
+	const SUMMON_RADIUS  := 3.5
+	const SKELETON_SCENE := "res://src/actors/enemies/Skeleton_Minion.tscn"
+
+	# ── 1. Círculo de invocación ──────────────────────────────────────
+	var ring := MeshInstance3D.new()
+	var cyl  := CylinderMesh.new()
+	cyl.top_radius     = SUMMON_RADIUS
+	cyl.bottom_radius  = SUMMON_RADIUS
+	cyl.height         = 0.04
+	cyl.radial_segments = 80
+	ring.mesh = cyl
+	var ring_mat := StandardMaterial3D.new()
+	ring_mat.albedo_color   = Color(0.5, 0.0, 0.9, 0.55)
+	ring_mat.emission_enabled = true
+	ring_mat.emission       = Color(0.55, 0.0, 1.0)
+	ring_mat.emission_energy = 3.0
+	ring_mat.transparency   = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ring_mat.shading_mode   = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ring_mat.cull_mode      = BaseMaterial3D.CULL_DISABLED
+	ring.material_override  = ring_mat
+	ring.scale = Vector3.ZERO
+	add_child(ring)
+	ring.position = Vector3(0.0, 0.05, 0.0)
+
+	# Escalar hacia afuera rápido
+	var t_ring := create_tween()
+	t_ring.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t_ring.tween_property(ring, "scale", Vector3.ONE, 0.35)
+
+	await get_tree().create_timer(0.4).timeout
+
+	# ── 2. Invocar esqueletos en círculo ─────────────────────────────
+	var scene: PackedScene = load(SKELETON_SCENE)
+	if not scene:
+		push_warning("AlliedSkeleton: no se encontró la escena en " + SKELETON_SCENE)
+		ring.queue_free()
+		return
+
+	for i in NUM_SKELETONS:
+		var angle: float = (TAU / NUM_SKELETONS) * i
+		var offset := Vector3(cos(angle), 0.0, sin(angle)) * SUMMON_RADIUS
+
+		var ally: Node = scene.instantiate()
+		# Reemplaza el script Enemy por AlliedSkeleton
+		ally.set_script(load("res://src/actors/enemies/AlliedSkeleton.gd"))
+		get_tree().current_scene.add_child(ally)
+		ally.global_position = global_position + offset
+		ally.global_position.y = global_position.y
+
+		# Asignar referencia al jugador para que no nos ataque
+		if "player_ref" in ally:
+			ally.player_ref = self
+
+		# Invulnerabilidad al player: cambiamos capas DESPUÉS del _ready
+		ally.collision_layer = 64
+		ally.collision_mask  = 4
+
+		# Tiempo de vida: cuando acabe el ulti se auto-destruyen
+		if "lifetime" in ally:
+			ally.lifetime = mask_manager.current_mask.ultimate_duration
+
+		# Partícula de aparición sencilla (flash morado)
+		var flash := OmniLight3D.new()
+		flash.light_color = Color(0.6, 0.0, 1.0)
+		flash.light_energy = 8.0
+		flash.omni_range = 3.0
+		ally.add_child(flash)
+		var t_flash := create_tween()
+		t_flash.tween_property(flash, "light_energy", 0.0, 0.5)
+		t_flash.tween_callback(flash.queue_free)
+
+		# Pequeño stagger de spawn para que no aparezcan todos a la vez
+		await get_tree().create_timer(0.08).timeout
+
+	# ── 3. Disolver el círculo ────────────────────────────────────────
+	var t_out := create_tween()
+	t_out.tween_property(ring_mat, "albedo_color:a", 0.0, 0.5)
+	await t_out.finished
+	ring.queue_free()
+
+func _activar_ulti_tiempo(duracion: float) -> void:
+	const SLOW := 0.12
+	_time_ulti_active = true
+	Engine.time_scale = SLOW
+	# NOTA: NO se cambia process_mode → el menú radial puede pausar normalmente
+
+	# ── UI ────────────────────────────────────────────────────────────
+	var canvas := CanvasLayer.new()
+	canvas.layer = 10
+	add_child(canvas)
+
+	var overlay := ColorRect.new()
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shader : Shader = load("res://src/actors/player/time_ulti_overlay.gdshader")
+	var smat := ShaderMaterial.new()
+	smat.shader = shader
+	smat.set_shader_parameter("strength", 0.0)
+	overlay.material = smat
+	canvas.add_child(overlay)
+
+	var bar_container := VBoxContainer.new()
+	bar_container.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	bar_container.offset_top    = -72.0
+	bar_container.offset_bottom = -16.0
+	bar_container.offset_left   = 220.0
+	bar_container.offset_right  = -220.0
+	bar_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	canvas.add_child(bar_container)
+
+	var lbl := Label.new()
+	lbl.text = "⏳ TIEMPO DETENIDO"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.modulate = Color(0.3, 0.9, 1.0, 1.0)
+	bar_container.add_child(lbl)
+
+	var bar := ProgressBar.new()
+	bar.min_value = 0.0
+	bar.max_value = 1.0
+	bar.value = 1.0
+	bar.custom_minimum_size = Vector2(0.0, 14.0)
+	bar.modulate = Color(0.1, 0.7, 1.0, 0.9)
+	bar_container.add_child(bar)
+
+	var t_in := create_tween()
+	t_in.tween_method(func(v: float): smat.set_shader_parameter("strength", v), 0.0, 1.0, 0.05)
+
+	# ── Cuenta atrás con tiempo REAL de pared ────────────────────────
+	# Time.get_ticks_msec() es inmune a Engine.time_scale.
+	# Cap de 100ms por frame evita saltos al cerrar el menú radial.
+	# Si el menú está abierto (paused) la barra se congela.
+	var elapsed_ms: int = 0
+	var last_ms: int = Time.get_ticks_msec()
+	var duration_ms: int = int(duracion * 1000.0)
+
+	while elapsed_ms < duration_ms:
+		await get_tree().process_frame
+		var now: int = Time.get_ticks_msec()
+		var frame_ms: int = mini(now - last_ms, 100)
+		last_ms = now
+		if not get_tree().paused:
+			elapsed_ms += frame_ms
+		var ratio: float = 1.0 - clamp(float(elapsed_ms) / float(duration_ms), 0.0, 1.0)
+		bar.value = ratio
+		if elapsed_ms > duration_ms - 1000:
+			var blink: float = sin(float(elapsed_ms) * 0.02) * 0.5 + 0.5
+			bar.modulate = Color(1.0, blink * 0.3 + 0.1, 0.1, 0.9)
+			lbl.text = "⚡ TIEMPO REGRESANDO..."
+			lbl.modulate = Color(1.0, 0.5 + blink * 0.5, 0.1, 1.0)
+
+	# ── Restaurar ─────────────────────────────────────────────────────
+	_time_ulti_active = false
+	Engine.time_scale = 1.0
+
+	var t_out := create_tween()
+	t_out.tween_method(func(v: float): smat.set_shader_parameter("strength", v), 1.0, 0.0, 0.35)
+	await t_out.finished
+	canvas.queue_free()
 
 func _aplicar_dano_area_fighter_ulti() -> void:
 	# Pequeño windup antes del golpe (mitad de la animación)
