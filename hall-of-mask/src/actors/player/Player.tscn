@@ -520,7 +520,6 @@ script = ExtResource("1_fpfku")
 footstep_sounds = Array[AudioStream]([ExtResource("2_mlbc3"), ExtResource("3_5ub7k"), ExtResource("4_oloty")])
 attack_sounds = Array[AudioStream]([ExtResource("9_ubrgq"), ExtResource("10_krq8h"), ExtResource("7_rq268")])
 speed_sprint_mult = 2.0
-gravity_multiplier = 3.0
 dodge_power = 25.0
 
 [node name="ColorRect" type="ColorRect" parent="."]

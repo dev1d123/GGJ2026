@@ -33,7 +33,7 @@ var transitioning := false
 ## Fuerza vertical del salto.
 @export var jump_force: float = 15.0 
 ## Multiplicador artificial de la gravedad para hacer el salto menos "flotante".
-@export var gravity_multiplier: float = 2.0 
+@export var gravity_multiplier: float = 3.0
 
 @export_category("Evasión (Dodge & Dive)")
 ## Fuerza horizontal impulsada al hacer Dodge (Rodar).

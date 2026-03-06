@@ -211,7 +211,6 @@ frame_progress = 0.0
 
 [node name="Skeleton_Minion5" parent="Node" instance=ExtResource("15_tyv8a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.901915, 0, 0)
-mask_handling = 1
 mask_equip_condition = 6
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
@@ -265,20 +264,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 6)
 [node name="Skeleton_Minion3" parent="." instance=ExtResource("22_4r8hd")]
 transform = Transform3D(-0.25881904, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, -0.25881904, -11, 0, -14)
 loadout_mask = ExtResource("17_fi7gg")
-mask_handling = 0
 
 [node name="Orc_Brute_Green" parent="." instance=ExtResource("19_5gnw2")]
 transform = Transform3D(1.0000001, 0, 0, 0, 1, 0, 0, 0, 1.0000001, -81.386635, 0.8229659, 13.788742)
 loadout_weapon_r = null
 loadout_mask = null
-sprint_speed_mult = 1.6
+sprint_speed_mult = 1.5
 
 [node name="Orc_Brute_Blue" parent="." instance=ExtResource("23_fgap4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84.88298, 0.004065764, 2.9465065)
 
 [node name="Monstrosity" parent="." instance=ExtResource("24_embxt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.494137, 0.0120628, -94.659836)
-sprint_speed_mult = 1.6
+sprint_speed_mult = 1.5
 
 [node name="BlackKnight" parent="." instance=ExtResource("25_517sc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51, 0, -71)

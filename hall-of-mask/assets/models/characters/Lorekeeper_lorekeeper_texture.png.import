@@ -2,17 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xfdijnsb0bbc"
-path.s3tc="res://.godot/imported/monstrosity_texture_A.png-6e33a4da2e94f7c4c7a090b1fe9da7f3.s3tc.ctex"
+uid="uid://byy7b2lsw3p6"
+path.s3tc="res://.godot/imported/Lorekeeper_lorekeeper_texture.png-1fc6ee33669ea0607fc873760c76087b.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
+generator_parameters={
+"md5": "d45ad38c6345b12823309ec81f73e548"
+}
 
 [deps]
 
-source_file="res://assets/models/bosses/monstrosity_texture_A.png"
-dest_files=["res://.godot/imported/monstrosity_texture_A.png-6e33a4da2e94f7c4c7a090b1fe9da7f3.s3tc.ctex"]
+source_file="res://assets/models/characters/Lorekeeper_lorekeeper_texture.png"
+dest_files=["res://.godot/imported/Lorekeeper_lorekeeper_texture.png-1fc6ee33669ea0607fc873760c76087b.s3tc.ctex"]
 
 [params]
 

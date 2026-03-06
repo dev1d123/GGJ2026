@@ -15,7 +15,7 @@ class_name Enemy
 @export_group("Equipamiento de Máscara")
 enum MaskHandling { EQUIP_ON_SPAWN, EN_INVENTARIO, SIN_MASCARA }
 ## Define cómo el enemigo maneja su máscara inicial (Aparecer con ella, guardarla o ignorarla).
-@export var mask_handling: MaskHandling = MaskHandling.EQUIP_ON_SPAWN
+@export var mask_handling: MaskHandling = MaskHandling.EN_INVENTARIO
 
 enum MaskEquipCondition { 
 	NONE, 
@@ -65,11 +65,13 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 
 @export_group("Parámetros de Movimiento")
 ## Multiplicador de la base_speed cuando el enemigo esprinta.
-@export var sprint_speed_mult: float = 1.6
+@export var sprint_speed_mult: float = 1.5
 ## Multiplicador de la base_speed mientras el enemigo realiza una animación de ataque (1 = normal, 0.25 = cámara lenta).
 @export var attack_movement_mult: float = 1
 ## Fuerza vertical aplicada al saltar.
-@export var jump_force: float = 8.0
+@export var jump_force: float = 10
+## Multiplicador artificial de la gravedad para hacer el salto menos "flotante" (Unificado con: player.gd)
+@export var gravity_multiplier: float = 3.0
 
 @export_group("Capacidades de Evasión")
 ## Si está activo, el enemigo puede esquivar ataques del jugador.
@@ -80,6 +82,12 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 @export var dodge_reaction_time: float = 0.15
 ## Multiplicador de la velocidad de evasión (impulso al rodar).
 @export var dodge_power: float = 12.0
+
+@export_group("Dinámicas Avanzadas (Melee)")
+## Probabilidad por CABADA ATAQUE de realizar un salto-ataque sorpresivo (0.5 = 50% de saltar).
+@export var jump_attack_chance: float = 0.2
+## Probabilidad por CADA ATAQUE de rodar ofensivamente hacia ti (0.5 = 50% de esquivar).
+@export var dodge_attack_chance: float = 0.99
 
 @export_group("Puntería Inteligente (Ranged)")
 ## Segundos de retraso al apuntar (0 = Aimbot instantáneo).
@@ -136,6 +144,7 @@ var _target_bloom_offset: Vector3 = Vector3.ZERO
 var _bloom_change_timer: float = 0.0
 
 var _time_in_combat_timer: float = 0.0
+var _next_combat_maneuver: String = ""
 
 # --- VARIABLES DE EVASIÓN ---
 var evade_cooldown: float = 0.0
@@ -172,6 +181,7 @@ func _ready():
 		if loadout_weapon_l: combat_manager.equip_weapon(loadout_weapon_l, "left")
 		
 		_definir_arquetipo()
+		_decidir_proxima_maniobra()
 
 		mask_manager.on_mask_changed.connect(_on_mask_changed_event)
 		
@@ -207,7 +217,7 @@ func _definir_arquetipo():
 # FÍSICA
 # ------------------------------------------------------------------------------
 func _physics_process(delta: float):
-	if not is_on_floor(): velocity.y -= gravity * delta
+	if not is_on_floor(): velocity.y -= (gravity * gravity_multiplier) * delta
 
 	# Procesamiento de subsistemas
 	_process_aim_history(delta)
@@ -227,22 +237,44 @@ func _physics_process(delta: float):
 		if current_state != State.PATROL:
 			_mirar_hacia(player_ref.global_position, delta * aim_speed)
 
-	match current_state:
-		State.PATROL:
-			_comportamiento_patrulla(delta)
-			_buscar_jugador()
-		State.CHASE:
-			_comportamiento_persecucion(delta)
-		State.COMBAT_MANEUVER:
-			_comportamiento_combate(delta)
-		State.ATTACKING:
-			_procesar_ataque_en_curso(delta)
-		State.COOLDOWN:
-			_comportamiento_cooldown(delta)
-		State.PRE_DODGE:
-			_procesar_pre_dodge(delta)
-		State.DODGING:
-			_procesar_dodging(delta)
+	# Si el enemigo está en el aire por un salto-ataque, bloqueamos que los estados
+	# modifiquen su inercia horizontal abruptamente, pero permitimos un "homing aéreo" suave.
+	var is_airborne_attacking = not is_on_floor() and current_state == State.ATTACKING
+	
+	if is_airborne_attacking:
+		if is_instance_valid(player_ref):
+			# Extraemos la velocidad actual (su empuje) para no aumentarlo o disminuirlo
+			var current_xz_speed = Vector2(velocity.x, velocity.z).length()
+			if current_xz_speed > 0:
+				var dir_to_player = (player_ref.global_position - global_position).normalized()
+				var target_dir_2d = Vector2(dir_to_player.x, dir_to_player.z).normalized()
+				var current_dir_2d = Vector2(velocity.x, velocity.z).normalized()
+				
+				# Lerp direccional suave (dobla la trayectoria en el aire como si fuera slerp)
+				var new_dir_2d = current_dir_2d.lerp(target_dir_2d, delta * 2.5).normalized() 
+				
+				velocity.x = new_dir_2d.x * current_xz_speed
+				velocity.z = new_dir_2d.y * current_xz_speed
+			
+			# Hacemos que siga mirando al jugador visualmente
+			_mirar_hacia(player_ref.global_position, delta * aim_speed)
+	else:
+		match current_state:
+			State.PATROL:
+				_comportamiento_patrulla(delta)
+				_buscar_jugador()
+			State.CHASE:
+				_comportamiento_persecucion(delta)
+			State.COMBAT_MANEUVER:
+				_comportamiento_combate(delta)
+			State.ATTACKING:
+				_procesar_ataque_en_curso(delta)
+			State.COOLDOWN:
+				_comportamiento_cooldown(delta)
+			State.PRE_DODGE:
+				_procesar_pre_dodge(delta)
+			State.DODGING:
+				_procesar_dodging(delta)
 			
 	if current_state != State.DODGING:
 		move_and_slide()
@@ -330,14 +362,9 @@ func _intentar_esquivar(is_ranged: bool):
 		_dodge_timer = dodge_reaction_time
 		_dodge_is_aggressive = false
 		
-		# Decidir dirección (-1, 0, 1). Atrás, Izquierda o Derecha. NUNCA adelante al peligro.
+		# Decidir dirección (-1, 0, 1). Atrás, Izquierda o Derecha. ESTRICTAMENTE DEFENSIVO.
 		var options = [Vector2(-1, 0), Vector2(1, 0), Vector2(0, 1)] # (-X, +X, +Y para BlendSpace)
 		_dodge_direction = options[randi() % options.size()]
-		
-		# Si NO es ataque a distancia y nos sentimos agresivos, 30% chance de rodar EXCLUSIVAMENTE hacia adelante
-		if not is_ranged and can_dodge and randf() <= 0.3:
-			_dodge_direction = Vector2(0, -1) # Hacia adelante! (Agresivo)
-			_dodge_is_aggressive = true
 
 func _procesar_pre_dodge(delta: float):
 	_dodge_timer -= delta
@@ -366,14 +393,15 @@ func _ejecutar_dodging():
 	velocity.x = dir_3d.x * (dodge_power * multiplicador_potencia)
 	velocity.z = dir_3d.z * (dodge_power * multiplicador_potencia)
 	
-	print("[IA ENEMIGO] Vector Dodge Final. Dirección 2D (BlendSpace): ", _dodge_direction, " Potencia: ", (dodge_power * multiplicador_potencia))
+	var prefijo = "[IA ENEMIGO] DEFENSIVE-DODGE" if not _dodge_is_aggressive else "[IA ENEMIGO] OFFENSIVE-DODGE"
+	print(prefijo, " Fired. Dirección 2D (BlendSpace): ", _dodge_direction, " Potencia: ", (dodge_power * multiplicador_potencia))
 
 func _procesar_dodging(delta: float):
 	if is_instance_valid(player_ref):
 		_mirar_hacia(player_ref.global_position, delta * 12.0) # FIX: Snap-Back, mirar al jugador mientras evade
 
-	velocity.x = move_toward(velocity.x, 0, 25.0 * delta)
-	velocity.z = move_toward(velocity.z, 0, 25.0 * delta)
+	velocity.x = move_toward(velocity.x, 0, 40.0 * delta)
+	velocity.z = move_toward(velocity.z, 0, 40.0 * delta)
 	move_and_slide()
 	
 	var playback = anim_tree["parameters/StateMachine/playback"]
@@ -394,9 +422,8 @@ func _iniciar_esquive_ofensivo():
 	_dodge_timer = dodge_reaction_time * 0.5 # Reacción más rápida al ser ofensivo
 	_dodge_is_aggressive = true
 	
-	# Hacia adelante o diagonales adelante
-	var options = [Vector2(-0.8, -1), Vector2(0.8, -1), Vector2(0, -1)]
-	_dodge_direction = options[randi() % options.size()].normalized()
+	# OFENSIVO: ESTRICTAMENTE HACIA ADELANTE para acortar distancia y golpear
+	_dodge_direction = Vector2(0, -1)
 
 # ------------------------------------------------------------------------------
 # LÓGICA DE ESTADOS
@@ -458,24 +485,11 @@ func _comportamiento_persecucion(delta: float):
 	_mover_hacia(target_pos, delta, speed_to_use)
 	_mirar_hacia(player_ref.global_position, delta * 8.0)
 	
-	if can_jump and is_on_floor():
-		if velocity.length() < 0.5 and randf() < 0.05:
-			# Lógica simple de salto si está atascado
-			velocity.y = jump_force
-		elif dist <= 8.0 and dist >= 4.0 and randf() < 0.12 and (current_archetype == Archetype.MELEE_1H or current_archetype == Archetype.MELEE_2H):
-			# JUMP-ATTACK: Salta agresivamente hacia el jugador cortando distancia
-			print("[IA ENEMIGO] ¡Asalto Aéreo (Jump-Attack) Ejecutado! Distancia: ", round(dist))
-			velocity.y = jump_force
-			var dir_3d = (player_ref.global_position - global_position).normalized()
-			velocity.x = dir_3d.x * base_speed * 3.0
-			velocity.z = dir_3d.z * base_speed * 3.0
-			_iniciar_ataque_melee()
-			return # Corta la función para que no evalúe el esquive en el mismo frame
+	if can_jump and is_on_floor() and velocity.length() < 0.5 and randf() < 0.05:
+		velocity.y = jump_force # Lógica simple de salto si está atascado
 			
-	if can_dodge and dist <= 7.0 and dist >= 3.0 and randf() < 0.04 and (current_archetype == Archetype.MELEE_1H or current_archetype == Archetype.MELEE_2H):
-		# DODGE-ATTACK PROACTIVO: Rueda agresivamente hacia el jugador para acortar distancia y ataca al salir del giro
-		print("[IA ENEMIGO] ¡Evasión Ofensiva (Dodge-Attack) Iniciada! Distancia: ", round(dist))
-		_iniciar_esquive_ofensivo()
+	if _intentar_maniobra_ofensiva(dist, (player_ref.global_position - global_position).normalized(), "Persecución"):
+		return
 
 func _comportamiento_combate(delta: float):
 	if not is_instance_valid(player_ref): current_state = State.PATROL; return
@@ -516,9 +530,56 @@ func _comportamiento_combate(delta: float):
 		var dir = (player_ref.global_position - global_position).normalized()
 		var speed_to_use = base_speed * sprint_speed_mult if can_sprint else base_speed
 		
+		# Evaluar Dinámicas Ofensivas mientras intenta acortar distancia en combate
+		if _intentar_maniobra_ofensiva(dist, dir, "Combate"):
+			return
+		
 		velocity.x = dir.x * speed_to_use
 		velocity.z = dir.z * speed_to_use
 		# No cambiamos a STATE.CHASE, nos movemos manualmente en modo combate
+
+func _intentar_maniobra_ofensiva(dist: float, dir: Vector3, estado_origen: String) -> bool:
+	if can_jump and is_on_floor() and dist <= 5.5 and dist >= 3.5 and _next_combat_maneuver == "JUMP_ATTACK" and (current_archetype == Archetype.MELEE_1H or current_archetype == Archetype.MELEE_2H):
+		print("[IA ENEMIGO] OFFENSIVE-JUMP Ejecutado en ", estado_origen, "! Distancia: ", round(dist))
+		velocity.y = jump_force
+		velocity.x = dir.x * base_speed * 3.0
+		velocity.z = dir.z * base_speed * 3.0
+		_next_combat_maneuver = ""
+		
+		# 🟢 CÁLCULO DINÁMICO DE TIEMPO DE VUELO
+		var grav_real = gravity * gravity_multiplier
+		# t = 2 * v0 / g (tiempo total de vuelo parabólico hasta el suelo)
+		var tiempo_vuelo = (2.0 * jump_force) / grav_real
+		
+		# Restamos 0.15s para compensar la altura del jugador (el ataque debe chocar antes de tocar el suelo)
+		tiempo_vuelo -= 0.15 
+		
+		# En lugar de _iniciar_ataque_melee() genérico, programamos cada mano:
+		current_state = State.ATTACKING
+		safety_attack_timer = 0.2
+		
+		var ataco = false
+		if combat_manager.weapon_r:
+			var delay_r = max(0.0, tiempo_vuelo - combat_manager.weapon_r.windup_time)
+			_ataque_retrasado("right", delay_r)
+			ataco = true
+		if combat_manager.weapon_l:
+			var delay_l = max(0.0, tiempo_vuelo - combat_manager.weapon_l.windup_time)
+			_ataque_retrasado("left", delay_l)
+			ataco = true
+			
+		if not ataco:
+			_iniciar_ataque_melee() # Fallback si no hay armas
+			
+		return true
+
+	if can_dodge and dist <= 3.75 and dist >= 2.0 and _next_combat_maneuver == "DODGE_ATTACK" and (current_archetype == Archetype.MELEE_1H or current_archetype == Archetype.MELEE_2H):
+		print("[IA ENEMIGO] ¡Evasión Ofensiva (Dodge-Attack) Iniciada en ", estado_origen, "! Distancia: ", round(dist))
+		_next_combat_maneuver = ""
+		_iniciar_esquive_ofensivo()
+		return true
+
+	return false
 
 # --- API PUNTERÍA (Retraso) ---
 func get_aim_position() -> Vector3:
@@ -544,6 +605,19 @@ func _iniciar_ataque_melee():
 	
 	current_state = State.ATTACKING
 	safety_attack_timer = 0.2 
+
+func _ataque_retrasado(mano: String, delay: float):
+	if delay > 0:
+		await get_tree().create_timer(delay, false).timeout
+		# Validar que siga vivo y no paralizado ni esquivando tras la espera
+		if not is_inside_tree() or current_state == State.STUNNED or current_state == State.DODGING: return
+	
+	if mano == "right" and combat_manager.weapon_r:
+		combat_manager.handle_right_click(true)
+		combat_manager.handle_right_click(false)
+	elif mano == "left" and combat_manager.weapon_l:
+		combat_manager.handle_left_click(true)
+		combat_manager.handle_left_click(false)
 
 func _iniciar_ataque_rango_unico():
 	combat_manager.handle_left_click(true)
@@ -601,6 +675,15 @@ func _maniobra_alejarse(delta):
 func _entrar_cooldown(tiempo):
 	current_state = State.COOLDOWN
 	ai_cooldown_timer = tiempo
+	_decidir_proxima_maniobra()
+	
+func _decidir_proxima_maniobra():
+	_next_combat_maneuver = ""
+	if randf() < jump_attack_chance:
+		_next_combat_maneuver = "JUMP_ATTACK"
+	elif randf() < dodge_attack_chance:
+		_next_combat_maneuver = "DODGE_ATTACK"
+		
 func _comportamiento_cooldown(delta):
 	ai_cooldown_timer -= delta
 	if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, delta * 5.0)

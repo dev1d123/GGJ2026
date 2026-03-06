@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xfdijnsb0bbc"
-path.s3tc="res://.godot/imported/monstrosity_texture_A.png-6e33a4da2e94f7c4c7a090b1fe9da7f3.s3tc.ctex"
+uid="uid://2ns87h0ymol2"
+path.s3tc="res://.godot/imported/Cleric_B_cleric_texture.png-09d109ee3d2e8f116c01a6678f7d7275.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/models/bosses/monstrosity_texture_A.png"
-dest_files=["res://.godot/imported/monstrosity_texture_A.png-6e33a4da2e94f7c4c7a090b1fe9da7f3.s3tc.ctex"]
+source_file="res://assets/models/characters/Cleric_B_cleric_texture.png"
+dest_files=["res://.godot/imported/Cleric_B_cleric_texture.png-09d109ee3d2e8f116c01a6678f7d7275.s3tc.ctex"]
 
 [params]
 
