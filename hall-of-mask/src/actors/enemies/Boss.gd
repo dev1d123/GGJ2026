@@ -42,7 +42,6 @@ var has_triggered_ult_10: bool = false
 # Variables de IA Avanzada
 var sprint_timer: float = 0.0
 var is_sprinting: bool = false
-var zigzag_time: float = 0.0 
 
 # Variable de Velocidad de Animación
 var current_anim_scale: float = 0.6 
@@ -256,6 +255,7 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	var track_time = real_windup * 0.5 
 	
 	while timer < track_time:
+		if not is_inside_tree(): return
 		var dt = get_physics_process_delta_time()
 		if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, dt * 5.0)
 		timer += dt

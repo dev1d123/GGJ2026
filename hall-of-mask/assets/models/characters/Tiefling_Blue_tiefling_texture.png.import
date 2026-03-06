@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bugvto40uffu"
-path.s3tc="res://.godot/imported/Tiefling_tiefling_texture.png-4a7eece585c7b8c7da7eabbf18f8e6f7.s3tc.ctex"
+uid="uid://c0mxx82q3lv4j"
+path.s3tc="res://.godot/imported/Tiefling_Blue_tiefling_texture.png-c0240f73ac225039d0d59b3d51b69808.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/characters/Tiefling_tiefling_texture.png"
-dest_files=["res://.godot/imported/Tiefling_tiefling_texture.png-4a7eece585c7b8c7da7eabbf18f8e6f7.s3tc.ctex"]
+source_file="res://assets/models/characters/Tiefling_Blue_tiefling_texture.png"
+dest_files=["res://.godot/imported/Tiefling_Blue_tiefling_texture.png-c0240f73ac225039d0d59b3d51b69808.s3tc.ctex"]
 
 [params]
 

@@ -71,6 +71,16 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 ## Fuerza vertical aplicada al saltar.
 @export var jump_force: float = 8.0
 
+@export_group("Capacidades de Evasión")
+## Si está activo, el enemigo puede esquivar ataques del jugador.
+@export var can_dodge: bool = false
+## Probabilidad base (0.0 a 1.0) de esquivar un ataque cuando tiene la vida llena.
+@export var dodge_chance_base: float = 0.3
+## Tiempo de reacción en segundos antes de ejecutar el esquive (hacerlo instantáneo parece irreal).
+@export var dodge_reaction_time: float = 0.15
+## Multiplicador de la velocidad de evasión (impulso al rodar).
+@export var dodge_power: float = 12.0
+
 @export_group("Puntería Inteligente (Ranged)")
 ## Segundos de retraso al apuntar (0 = Aimbot instantáneo).
 @export var aim_delay_seconds: float = 0.3
@@ -90,7 +100,7 @@ var strafe_dir: int = 1
 # Variable para controlar la agresividad (1.0 normal, 2.0 frenético)
 var aggression: float = 1.2 
 
-enum State { IDLE, PATROL, CHASE, COMBAT_MANEUVER, ATTACKING, COOLDOWN, STUNNED }
+enum State { IDLE, PATROL, CHASE, COMBAT_MANEUVER, ATTACKING, COOLDOWN, STUNNED, DODGING, PRE_DODGE }
 var current_state = State.PATROL
 var player_ref: Node3D = null
 
@@ -104,6 +114,12 @@ var safety_attack_timer: float = 0.0
 
 var is_holding_attack: bool = false
 var hold_attack_timer: float = 0.0
+
+# Variables de IA Avanzada
+var zigzag_time: float = 0.0
+var _zigzag_amp: float = 2.5
+var _zigzag_freq: float = 6.0
+var _dodge_is_aggressive: bool = false
 
 var gravity = 9.8
 var knockback_velocity: Vector3 = Vector3.ZERO
@@ -120,6 +136,11 @@ var _target_bloom_offset: Vector3 = Vector3.ZERO
 var _bloom_change_timer: float = 0.0
 
 var _time_in_combat_timer: float = 0.0
+
+# --- VARIABLES DE EVASIÓN ---
+var evade_cooldown: float = 0.0
+var _dodge_direction: Vector2 = Vector2.ZERO
+var _dodge_timer: float = 0.0
 
 # ------------------------------------------------------------------------------
 # INICIO
@@ -191,6 +212,7 @@ func _physics_process(delta: float):
 	# Procesamiento de subsistemas
 	_process_aim_history(delta)
 	_process_mask_triggers(delta)
+	if can_dodge: _process_evasion_logic(delta)
 
 	# Físicas de knockback
 	if knockback_velocity.length() > 0.5:
@@ -217,8 +239,14 @@ func _physics_process(delta: float):
 			_procesar_ataque_en_curso(delta)
 		State.COOLDOWN:
 			_comportamiento_cooldown(delta)
-
-	move_and_slide()
+		State.PRE_DODGE:
+			_procesar_pre_dodge(delta)
+		State.DODGING:
+			_procesar_dodging(delta)
+			
+	if current_state != State.DODGING:
+		move_and_slide()
+		
 	_animar_movimiento(delta)
 
 # ------------------------------------------------------------------------------
@@ -255,6 +283,121 @@ func _process_mask_triggers(delta: float):
 	if global_position.distance_to(player_ref.global_position) <= 6.5:
 		_check_mask_condition(MaskEquipCondition.ON_PROXIMITY)
 
+func _process_evasion_logic(delta: float):
+	if evade_cooldown > 0.0: evade_cooldown -= delta
+	if evade_cooldown > 0.0 or not is_instance_valid(player_ref): return
+	if current_state == State.DODGING or current_state == State.PRE_DODGE or current_state == State.STUNNED: return
+
+	var p_combat = player_ref.get_node_or_null("CombatManager")
+	if not p_combat: return
+	
+	if p_combat.is_attacking_r or p_combat.is_attacking_l:
+		# Mirar si el arma es a distancia
+		var w_r = p_combat.slot_1_right
+		var w_l = p_combat.slot_1_left
+		var is_ranged_attack = false
+		if (p_combat.is_attacking_r and w_r is RangedWeaponData) or (p_combat.is_attacking_l and w_l is RangedWeaponData):
+			is_ranged_attack = true
+		
+		# Calcular distancia
+		var dist = global_position.distance_to(player_ref.global_position)
+		
+		# Si es cuerpo a cuerpo y está muy lejos, no esquivar
+		if not is_ranged_attack and dist > 4.0: return
+		
+		# Comprobar si me está mirando a MÍ (Dot product > 0.7 = Me está apuntando directamente a la cara)
+		var dir_to_me = (global_position - player_ref.global_position).normalized()
+		var player_forward = -player_ref.global_transform.basis.z.normalized()
+		if player_forward.dot(dir_to_me) > 0.7:
+			_intentar_esquivar(is_ranged_attack)
+
+func _intentar_esquivar(is_ranged: bool):
+	evade_cooldown = randf_range(2.0, 4.0) # Evitar spam
+	
+	var health_percent = 1.0
+	if health_component and health_component.max_health > 0:
+		health_percent = health_component.current_health / health_component.max_health
+	
+	# Probabilidad sube hasta un +50% extra si se está muriendo
+	var current_chance = dodge_chance_base + ((1.0 - health_percent) * 0.5)
+	
+	# Si es a distancia, 30% más de probabilidad de asustarse y esquivar
+	if is_ranged: current_chance += 0.3
+	
+	if randf() <= current_chance:
+		# ¡Va a esquivar! Entramos en PRE_DODGE (delay humano)
+		current_state = State.PRE_DODGE
+		_dodge_timer = dodge_reaction_time
+		_dodge_is_aggressive = false
+		
+		# Decidir dirección (-1, 0, 1). Atrás, Izquierda o Derecha. NUNCA adelante al peligro.
+		var options = [Vector2(-1, 0), Vector2(1, 0), Vector2(0, 1)] # (-X, +X, +Y para BlendSpace)
+		_dodge_direction = options[randi() % options.size()]
+		
+		# Si NO es ataque a distancia y nos sentimos agresivos, 30% chance de rodar EXCLUSIVAMENTE hacia adelante
+		if not is_ranged and can_dodge and randf() <= 0.3:
+			_dodge_direction = Vector2(0, -1) # Hacia adelante! (Agresivo)
+			_dodge_is_aggressive = true
+
+func _procesar_pre_dodge(delta: float):
+	_dodge_timer -= delta
+	# Frenado sutil antes de saltar
+	velocity.x = move_toward(velocity.x, 0, base_speed * 10.0 * delta)
+	velocity.z = move_toward(velocity.z, 0, base_speed * 10.0 * delta)
+	
+	if _dodge_timer <= 0:
+		_ejecutar_dodging()
+
+func _ejecutar_dodging():
+	current_state = State.DODGING
+	var playback = anim_tree["parameters/StateMachine/playback"]
+	
+	# El BlendSpace de un enemigo espera una posición 2D. 
+	# X = Izquierda/Derecha, Y = Adelante/Atrás (En Y invertido en Godot 3D, pero asumimos Y+ es atrás temporalmente)
+	anim_tree.set("parameters/StateMachine/Dodge/blend_position", _dodge_direction)
+	playback.travel("Dodge")
+	
+	# Transformar 2D Direction a 3D Global Direction basado en el ángulo del enemigo
+	var dir_3d = (global_transform.basis * Vector3(_dodge_direction.x, 0, _dodge_direction.y)).normalized()
+	
+	var multiplicador_potencia = 1.0
+	if _dodge_is_aggressive: multiplicador_potencia = 1.8 # ¡Que se note violentamente el esquive hacia adelante!
+	
+	velocity.x = dir_3d.x * (dodge_power * multiplicador_potencia)
+	velocity.z = dir_3d.z * (dodge_power * multiplicador_potencia)
+	
+	print("[IA ENEMIGO] Vector Dodge Final. Dirección 2D (BlendSpace): ", _dodge_direction, " Potencia: ", (dodge_power * multiplicador_potencia))
+
+func _procesar_dodging(delta: float):
+	if is_instance_valid(player_ref):
+		_mirar_hacia(player_ref.global_position, delta * 12.0) # FIX: Snap-Back, mirar al jugador mientras evade
+
+	velocity.x = move_toward(velocity.x, 0, 25.0 * delta)
+	velocity.z = move_toward(velocity.z, 0, 25.0 * delta)
+	move_and_slide()
+	
+	var playback = anim_tree["parameters/StateMachine/playback"]
+	var current_node = str(playback.get_current_node())
+	
+	# El playback tarda 1 frame en actualizar. Usaremos un umbral de velocidad baja
+	# para garantizar que no corta la animación a medio hacer.
+	if current_node != "Dodge" and velocity.length() < 2.0:
+		if _dodge_is_aggressive and is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) <= 4.0:
+			# Si esquivó agresivamente hacia adelante y está cerca, ¡ATACA INMEDIATAMENTE!
+			_iniciar_ataque_melee()
+		else:
+			current_state = State.CHASE 
+			_entrar_cooldown(0.5) # Pausa cortita post-esquive
+
+func _iniciar_esquive_ofensivo():
+	current_state = State.PRE_DODGE
+	_dodge_timer = dodge_reaction_time * 0.5 # Reacción más rápida al ser ofensivo
+	_dodge_is_aggressive = true
+	
+	# Hacia adelante o diagonales adelante
+	var options = [Vector2(-0.8, -1), Vector2(0.8, -1), Vector2(0, -1)]
+	_dodge_direction = options[randi() % options.size()].normalized()
+
 # ------------------------------------------------------------------------------
 # LÓGICA DE ESTADOS
 # ------------------------------------------------------------------------------
@@ -272,22 +415,67 @@ func _comportamiento_persecucion(delta: float):
 	var dist = global_position.distance_to(player_ref.global_position)
 	
 	# MEJORA: Entrar en combate un poco ANTES de llegar al límite
-	# Esto evita que se frenen en seco antes de decidir atacar
 	if dist <= preferred_range:
 		current_state = State.COMBAT_MANEUVER
 		ai_decision_timer = 0.0 # ⚡ CERO espera. ¡Ataca ya!
-	else:
-		nav_agent.target_position = player_ref.global_position
+		return
+
+	var target_pos = player_ref.global_position
+	
+	# --- LÓGICA DE ZIG-ZAG ANTI-RANGED ---
+	var aplicar_zigzag = false
+	var speed_to_use = base_speed
+	
+	if can_sprint: speed_to_use *= sprint_speed_mult
+	
+	if can_dodge and dist > 4.0:
+		var p_combat = player_ref.get_node_or_null("CombatManager")
+		if p_combat:
+			var w_r = p_combat.slot_1_right
+			var w_l = p_combat.slot_1_left
+			var is_ranged_equipped = (w_r is RangedWeaponData) or (w_l is RangedWeaponData)
+			
+			if is_ranged_equipped:
+				var dir_to_me = (global_position - player_ref.global_position).normalized()
+				var player_forward = -player_ref.global_transform.basis.z.normalized()
+				# Si el jugador con alcance tiene la cámara apuntando cerca al enemigo (+0.8 dot)
+				if player_forward.dot(dir_to_me) > 0.8:
+					aplicar_zigzag = true
+
+	if aplicar_zigzag:
+		var dir_to_player = (player_ref.global_position - global_position).normalized()
+		var right_vec = dir_to_player.cross(Vector3.UP)
+		zigzag_time += delta
 		
-		# Decidir qué velocidad usar
-		var speed_to_use = base_speed * sprint_speed_mult if can_sprint else base_speed
-		
-		_mover_hacia(nav_agent.get_next_path_position(), delta, speed_to_use)
-		_mirar_hacia(player_ref.global_position, delta * 8.0)
-		
-		# Lógica simple de salto si está atascado:
-		if can_jump and is_on_floor() and velocity.length() < 0.5 and randf() < 0.05:
+		# Cambiar impredeciblemente el zigzag
+		if randf() < 0.05:
+			_zigzag_amp = randf_range(1.5, 4.0)
+			_zigzag_freq = randf_range(4.0, 10.0)
+			
+		var offset = right_vec * sin(zigzag_time * _zigzag_freq) * _zigzag_amp
+		target_pos += offset
+
+	_mover_hacia(target_pos, delta, speed_to_use)
+	_mirar_hacia(player_ref.global_position, delta * 8.0)
+	
+	if can_jump and is_on_floor():
+		if velocity.length() < 0.5 and randf() < 0.05:
+			# Lógica simple de salto si está atascado
 			velocity.y = jump_force
+		elif dist <= 8.0 and dist >= 4.0 and randf() < 0.12 and (current_archetype == Archetype.MELEE_1H or current_archetype == Archetype.MELEE_2H):
+			# JUMP-ATTACK: Salta agresivamente hacia el jugador cortando distancia
+			print("[IA ENEMIGO] ¡Asalto Aéreo (Jump-Attack) Ejecutado! Distancia: ", round(dist))
+			velocity.y = jump_force
+			var dir_3d = (player_ref.global_position - global_position).normalized()
+			velocity.x = dir_3d.x * base_speed * 3.0
+			velocity.z = dir_3d.z * base_speed * 3.0
+			_iniciar_ataque_melee()
+			return # Corta la función para que no evalúe el esquive en el mismo frame
+			
+	if can_dodge and dist <= 7.0 and dist >= 3.0 and randf() < 0.04 and (current_archetype == Archetype.MELEE_1H or current_archetype == Archetype.MELEE_2H):
+		# DODGE-ATTACK PROACTIVO: Rueda agresivamente hacia el jugador para acortar distancia y ataca al salir del giro
+		print("[IA ENEMIGO] ¡Evasión Ofensiva (Dodge-Attack) Iniciada! Distancia: ", round(dist))
+		_iniciar_esquive_ofensivo()
 
 func _comportamiento_combate(delta: float):
 	if not is_instance_valid(player_ref): current_state = State.PATROL; return
@@ -371,15 +559,16 @@ func _iniciar_ataque_rayo():
 	safety_attack_timer = 0.5
 
 func _procesar_ataque_en_curso(delta):
-	# Moverse lentamente hacia el jugador durante el ataque
-	if is_instance_valid(player_ref):
-		var dir = (player_ref.global_position - global_position).normalized()
-		var speed_to_use = base_speed * attack_movement_mult
-		velocity.x = dir.x * speed_to_use
-		velocity.z = dir.z * speed_to_use
-	else:
-		velocity.x = move_toward(velocity.x, 0, base_speed * delta)
-		velocity.z = move_toward(velocity.z, 0, base_speed * delta)
+	# Moverse lentamente hacia el jugador durante el ataque (Solo si estamos en el suelo!)
+	if is_on_floor():
+		if is_instance_valid(player_ref):
+			var dir = (player_ref.global_position - global_position).normalized()
+			var speed_to_use = base_speed * attack_movement_mult
+			velocity.x = dir.x * speed_to_use
+			velocity.z = dir.z * speed_to_use
+		else:
+			velocity.x = move_toward(velocity.x, 0, base_speed * delta)
+			velocity.z = move_toward(velocity.z, 0, base_speed * delta)
 
 	# Si el ataque apenas empezó, obligamos a esperar un poco
 	if safety_attack_timer > 0:
@@ -528,6 +717,12 @@ func _check_mask_condition(trigger: MaskEquipCondition):
 func _on_damage_received(a, c):
 	flash_red()
 	if current_state == State.PATROL: current_state = State.CHASE
+	
+	# ON-HIT DODGE REACTIVO (Para armas a distancia)
+	if can_dodge and current_state != State.DODGING and current_state != State.PRE_DODGE:
+		# Si recibe daño repentino de lejos (más de 3 metros), asume proyectil e intenta esquivar sutilmente si es capaz.
+		if is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) > 3.0:
+			_intentar_esquivar(true)
 	
 	_check_mask_condition(MaskEquipCondition.FIRST_HIT_RECEIVED)
 	
