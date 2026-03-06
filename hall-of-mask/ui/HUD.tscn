@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=30 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -14,12 +14,17 @@
 [ext_resource type="Texture2D" uid="uid://cpvoc7hsob0ml" path="res://UI_assets/flecha-de-tiro-con-arco.png" id="9_ioimr"]
 [ext_resource type="Texture2D" uid="uid://bsoq7it838k6r" path="res://UI_assets/bala.png" id="10_cjw2x"]
 [ext_resource type="Texture2D" uid="uid://btbet8x5kodvd" path="res://UI_assets/star-trek.png" id="12_5d7l6"]
+[ext_resource type="Texture2D" uid="uid://c2reyso7juxhf" path="res://UI_assets/ulti1.png" id="13_1il8e"]
+[ext_resource type="Texture2D" uid="uid://dtevjrymrb1ku" path="res://UI_assets/ulti2.png" id="14_3tkt7"]
+[ext_resource type="Texture2D" uid="uid://bhnc3uae213pg" path="res://UI_assets/ulti3.png" id="15_t2xmg"]
 [ext_resource type="Texture2D" uid="uid://djyq0cf5cybfu" path="res://UI_assets/diamante.png" id="15_wxjpw"]
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
+[ext_resource type="Texture2D" uid="uid://djp7bxufjxbbx" path="res://UI_assets/ulti4.png" id="16_vn47m"]
+[ext_resource type="Texture2D" uid="uid://ds7bcb0l1u1op" path="res://UI_assets/ulti5.png" id="17_tb8nc"]
 [ext_resource type="Texture2D" uid="uid://cao2fhyhavqds" path="res://assets/imagesGUI/container_minimap.png" id="17_tlkqj"]
 [ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="18_reticle"]
-[ext_resource type="Script" path="res://scripts/components/mask_selection_panel.gd" id="19_mask_panel"]
-[ext_resource type="Script" path="res://scripts/components/notification_ui.gd" id="20_notification"]
+[ext_resource type="Script" uid="uid://cjdptnroc6hkg" path="res://scripts/components/mask_selection_panel.gd" id="19_mask_panel"]
+[ext_resource type="Script" uid="uid://dk8fnukfj5xdj" path="res://scripts/components/notification_ui.gd" id="20_notification"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
 font_size = 20
@@ -248,6 +253,124 @@ grow_horizontal = 0
 grow_vertical = 0
 script = ExtResource("5_3q2by")
 
+[node name="SkillQ" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
+visible = false
+layout_mode = 0
+offset_left = 132.0
+offset_right = 260.0
+offset_bottom = 128.0
+size_flags_horizontal = 8
+fill_mode = 3
+texture_under = ExtResource("2_64pwb")
+texture_progress = ExtResource("2_64pwb")
+tint_progress = Color(0, 1, 1, 1)
+
+[node name="Label" type="Label" parent="GameUI/SkillsPanel/SkillQ"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -28.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Q"
+label_settings = SubResource("LabelSettings_pfnlp")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="SkillR" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
+visible = false
+layout_mode = 0
+offset_left = 132.0
+offset_top = 132.0
+offset_right = 260.0
+offset_bottom = 260.0
+size_flags_horizontal = 8
+fill_mode = 3
+texture_under = ExtResource("12_5d7l6")
+texture_progress = ExtResource("12_5d7l6")
+tint_progress = Color(1, 0, 1, 1)
+
+[node name="Label" type="Label" parent="GameUI/SkillsPanel/SkillR"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -49.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "R"
+label_settings = SubResource("LabelSettings_pfnlp")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="UltiProgess" type="Control" parent="GameUI/SkillsPanel"]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="GameUI/SkillsPanel/UltiProgess"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -49.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "R"
+label_settings = SubResource("LabelSettings_pfnlp")
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[node name="ulti1" type="TextureRect" parent="GameUI/SkillsPanel/UltiProgess"]
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 200.0
+texture = ExtResource("13_1il8e")
+expand_mode = 1
+
+[node name="ulti2" type="TextureRect" parent="GameUI/SkillsPanel/UltiProgess"]
+visible = false
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 200.0
+texture = ExtResource("14_3tkt7")
+expand_mode = 1
+
+[node name="ulti3" type="TextureRect" parent="GameUI/SkillsPanel/UltiProgess"]
+visible = false
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 200.0
+texture = ExtResource("15_t2xmg")
+expand_mode = 1
+
+[node name="ulti4" type="TextureRect" parent="GameUI/SkillsPanel/UltiProgess"]
+visible = false
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 200.0
+texture = ExtResource("16_vn47m")
+expand_mode = 1
+
+[node name="ulti5" type="TextureRect" parent="GameUI/SkillsPanel/UltiProgess"]
+visible = false
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 200.0
+texture = ExtResource("17_tb8nc")
+expand_mode = 1
+
 [node name="MaskSelectionPanel" type="PanelContainer" parent="GameUI"]
 layout_mode = 1
 anchors_preset = 4
@@ -287,62 +410,6 @@ custom_minimum_size = Vector2(70, 70)
 layout_mode = 2
 ignore_texture_size = true
 stretch_mode = 5
-
-[node name="SkillQ" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
-visible = false
-layout_mode = 0
-offset_left = 132.0
-offset_right = 260.0
-offset_bottom = 128.0
-size_flags_horizontal = 8
-fill_mode = 3
-texture_under = ExtResource("2_64pwb")
-texture_progress = ExtResource("2_64pwb")
-tint_progress = Color(0, 1, 1, 1)
-
-[node name="Label" type="Label" parent="GameUI/SkillsPanel/SkillQ"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -28.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "Q"
-label_settings = SubResource("LabelSettings_pfnlp")
-horizontal_alignment = 2
-vertical_alignment = 2
-
-[node name="SkillR" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
-layout_mode = 0
-offset_left = 132.0
-offset_top = 132.0
-offset_right = 260.0
-offset_bottom = 260.0
-size_flags_horizontal = 8
-fill_mode = 3
-texture_under = ExtResource("12_5d7l6")
-texture_progress = ExtResource("12_5d7l6")
-tint_progress = Color(1, 0, 1, 1)
-
-[node name="Label" type="Label" parent="GameUI/SkillsPanel/SkillR"]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -28.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "R"
-label_settings = SubResource("LabelSettings_pfnlp")
-horizontal_alignment = 2
-vertical_alignment = 2
 
 [node name="Radar" type="Control" parent="GameUI"]
 layout_mode = 1
@@ -614,4 +681,3 @@ theme_override_font_sizes/font_size = 28
 text = "🎭 ¡NUEVA MÁSCARA DESBLOQUEADA!"
 horizontal_alignment = 1
 vertical_alignment = 1
-
