@@ -499,16 +499,16 @@ func _get_aim_target() -> Vector3:
 		return to 
 
 	# 2. LÓGICA PARA LA IA (ENEMIGOS) 🤖
-	elif ai_target:
-		# Apuntamos al pecho/cabeza del objetivo (offset vertical)
-		# Si no ponemos el Vector3(0, 1.2, 0), le dispararán a tus pies y fallarán mucho.
-		return ai_target.global_position + Vector3(0, 1.2, 0)
+	elif not is_player_controlled:
+		if is_instance_valid(owner_node) and owner_node.has_method("get_aim_position"):
+			return owner_node.get_aim_position()
+		elif is_instance_valid(ai_target):
+			return ai_target.global_position + Vector3(0, 1.2, 0)
 	
 	# 3. FALLBACK (Si no hay target, disparan hacia adelante)
-	else:
-		# Dispara hacia donde está mirando el modelo (Forward vector)
-		# Nota: En Godot -Z suele ser "Adelante"
-		return owner_node.global_position - (owner_node.global_transform.basis.z * 10.0)
+	# Dispara hacia donde está mirando el modelo (Forward vector)
+	# Nota: En Godot -Z suele ser "Adelante"
+	return owner_node.global_position - (owner_node.global_transform.basis.z * 10.0)
 
 func _apply_spread(target: Vector3, spread_deg: float, origin: Vector3) -> Vector3:
 	if spread_deg <= 0.01: return target

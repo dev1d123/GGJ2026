@@ -118,8 +118,8 @@ func _iniciar_carga():
 	current_speed = base_speed * sprint_speed_mult
 	current_state = State.CHASE
 
-func _comportamiento_persecucion(delta):
-	if not player_ref: return
+func _comportamiento_persecucion(delta: float):
+	if not is_instance_valid(player_ref): return
 	
 	var dist = global_position.distance_to(player_ref.global_position)
 	var target_pos = player_ref.global_position
@@ -170,7 +170,7 @@ func _on_boss_hit(amount, current_hp):
 	
 	if current_state == State.PATROL or current_state == State.COOLDOWN:
 		current_state = State.CHASE
-		if player_ref:
+		if is_instance_valid(player_ref):
 			var dist = global_position.distance_to(player_ref.global_position)
 			if dist > 10.0 and not is_sprinting:
 				_iniciar_carga()
@@ -178,8 +178,8 @@ func _on_boss_hit(amount, current_hp):
 # ----------------------------------------------------------------
 # 5. ESTRATEGIA DE COMBATE
 # ----------------------------------------------------------------
-func _comportamiento_combate(delta):
-	if not player_ref: 
+func _comportamiento_combate(delta: float):
+	if not is_instance_valid(player_ref): 
 		current_state = State.PATROL
 		return
 
@@ -246,7 +246,7 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	
 	while timer < track_time:
 		var dt = get_physics_process_delta_time()
-		if player_ref: _mirar_hacia(player_ref.global_position, dt * 5.0)
+		if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, dt * 5.0)
 		velocity.x = 0
 		velocity.z = 0
 		timer += dt

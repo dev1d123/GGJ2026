@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BossAttackPattern" load_steps=2 format=3 uid="uid://bk4ayhoyvu0ab"]
+
+[ext_resource type="Script" uid="uid://qm5jcyptpvwv" path="res://src/actors/enemies/ai/BossAttackPattern.gd" id="1_1cs5s"]
+
+[resource]
+script = ExtResource("1_1cs5s")
+anim_name = "Orc_Axe_2H_Attack"
+windup = 0.5
+active_time = 0.3

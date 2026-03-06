@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BossPhaseConfig" load_steps=2 format=3 uid="uid://bfrgjm4ikddur"]
+
+[ext_resource type="Script" uid="uid://bo02yjxm4mgfn" path="res://src/actors/enemies/ai/BossPhaseConfig.gd" id="1_qt1pl"]
+
+[resource]
+script = ExtResource("1_qt1pl")
+health_percent_trigger = 0.5
+phase_name = "Phase 2 (Enraged)"
+speed_multiplier = 1.3
+anim_speed_scale = 1.2
+sprint_enabled = true

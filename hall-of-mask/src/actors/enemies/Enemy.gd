@@ -9,6 +9,22 @@ class_name Enemy
 @export var loadout_weapon_l: WeaponData 
 @export var loadout_mask: MaskData       
 
+@export_group("Equipamiento de Máscara")
+enum MaskHandling { EQUIP_ON_SPAWN, EN_INVENTARIO, SIN_MASCARA }
+@export var mask_handling: MaskHandling = MaskHandling.EQUIP_ON_SPAWN
+
+enum MaskEquipCondition { 
+	NONE, 
+	HALF_HEALTH, 
+	FIRST_ATTACK, 
+	FIRST_HIT_RECEIVED, 
+	ANY,
+	LOW_HEALTH_DESPERATION, # Desespero: Vida menor al 25%
+	ON_PROXIMITY,           # Si el jugador se le acerca demasiado (Melee range)
+	AFTER_TIME_IN_COMBAT    # Si la pelea dura mucho tiempo activo
+}
+@export var mask_equip_condition: MaskEquipCondition = MaskEquipCondition.NONE
+
 # --- COMPONENTES ---
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var health_component: HealthComponent = $HealthComponent
@@ -30,6 +46,21 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 @export var vision_range: float = 20.0
 @export var aim_speed: float = 8.0  # ⚡ AUMENTADO: Giran más rápido para no fallar
 @export var base_speed: float = 3.5 # ⚡ AUMENTADO: Un poco más rápidos
+
+@export_group("Capacidades de Movimiento")
+@export var can_walk: bool = true
+@export var can_sprint: bool = false
+@export var can_jump: bool = false
+
+@export_group("Parámetros de Movimiento")
+@export var walk_speed: float = 2.0
+@export var sprint_speed: float = 5.0
+@export var jump_force: float = 8.0
+
+@export_group("Puntería Inteligente (Ranged)")
+@export var aim_delay_seconds: float = 0.3
+@export var aim_inaccuracy_bloom: float = 0.7
+@export var aim_bloom_update_rate: float = 0.2
 
 enum Archetype { MELEE_1H, MELEE_2H, RANGED_PROJECTILE, RANGED_BEAM }
 var current_archetype: Archetype = Archetype.MELEE_1H
@@ -63,6 +94,16 @@ var unique_materials: Array[StandardMaterial3D] = []
 var flash_tween: Tween
 var original_colors: Dictionary = {}
 
+# Variables para control de puntería con retraso
+var _position_history: Array[Vector3] = []
+var _position_timer: float = 0.0
+
+var _current_bloom_offset: Vector3 = Vector3.ZERO
+var _target_bloom_offset: Vector3 = Vector3.ZERO
+var _bloom_change_timer: float = 0.0
+
+var _time_in_combat_timer: float = 0.0
+
 # ------------------------------------------------------------------------------
 # INICIO
 # ------------------------------------------------------------------------------
@@ -95,8 +136,11 @@ func _ready():
 		_definir_arquetipo()
 
 	if mask_manager and loadout_mask:
-		mask_manager.equip_mask(loadout_mask)
-		_activar_aura_mascara()
+		if mask_handling == MaskHandling.EQUIP_ON_SPAWN:
+			mask_manager.equip_mask(loadout_mask)
+			_activar_aura_mascara()
+		elif mask_handling == MaskHandling.SIN_MASCARA:
+			loadout_mask = null # Ignorar la máscara asignada
 
 	if health_component:
 		health_component.on_death.connect(_morir)
@@ -123,18 +167,47 @@ func _definir_arquetipo():
 # ------------------------------------------------------------------------------
 # FÍSICA
 # ------------------------------------------------------------------------------
-func _physics_process(delta):
+func _physics_process(delta: float):
 	if not is_on_floor(): velocity.y -= gravity * delta
+
+	# Lógica para registrar las posiciones del jugador (Mecánica de retraso al apuntar)
+	if is_instance_valid(player_ref) and (current_archetype == Archetype.RANGED_PROJECTILE or current_archetype == Archetype.RANGED_BEAM):
+		_position_timer += delta
+		if _position_timer >= 0.05:
+			_position_timer = 0.0
+			_position_history.append(player_ref.global_position + Vector3(0, 1.2, 0))
+			var max_history_size = max(1, int(aim_delay_seconds / 0.05))
+			if _position_history.size() > max_history_size:
+				_position_history.pop_front()
+		
+		# Lógica para suavizar el error al apuntar (bloom smoothly lerped)
+		if aim_inaccuracy_bloom > 0.0:
+			_bloom_change_timer -= delta
+			if _bloom_change_timer <= 0:
+				_bloom_change_timer = aim_bloom_update_rate
+				var dist = global_position.distance_to(player_ref.global_position)
+				var b = aim_inaccuracy_bloom * (dist / 10.0)
+				_target_bloom_offset = Vector3(randf_range(-b, b), 0.0, randf_range(-b, b))
+			_current_bloom_offset = _current_bloom_offset.lerp(_target_bloom_offset, delta * 3.0)
 
 	if knockback_velocity.length() > 0.5:
 		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * delta)
 		velocity.x = knockback_velocity.x; velocity.z = knockback_velocity.z
 		move_and_slide(); return 
 
-	if player_ref: combat_manager.ai_target = player_ref
+	if is_instance_valid(player_ref): combat_manager.ai_target = player_ref
 	
 	if player_ref and current_state != State.PATROL:
 		_mirar_hacia(player_ref.global_position, delta * aim_speed)
+		
+		# Tracker de tiempo en combate para la máscara
+		_time_in_combat_timer += delta
+		if _time_in_combat_timer >= 8.0:
+			_check_mask_condition(MaskEquipCondition.AFTER_TIME_IN_COMBAT)
+			
+		# Tracker de proximidad para la máscara
+		if global_position.distance_to(player_ref.global_position) <= 3.5:
+			_check_mask_condition(MaskEquipCondition.ON_PROXIMITY)
 
 	match current_state:
 		State.PATROL:
@@ -162,10 +235,11 @@ func _comportamiento_patrulla(delta):
 			_buscar_punto_patrulla()
 			patrol_timer = 4.0
 	else:
-		_mover_hacia(nav_agent.get_next_path_position(), delta, 1.5)
+		var speed_to_use = walk_speed if can_walk else base_speed
+		_mover_hacia(nav_agent.get_next_path_position(), delta, speed_to_use)
 
-func _comportamiento_persecucion(delta):
-	if not player_ref: return
+func _comportamiento_persecucion(delta: float):
+	if not is_instance_valid(player_ref): return
 	var dist = global_position.distance_to(player_ref.global_position)
 	
 	# MEJORA: Entrar en combate un poco ANTES de llegar al límite
@@ -175,11 +249,21 @@ func _comportamiento_persecucion(delta):
 		ai_decision_timer = 0.0 # ⚡ CERO espera. ¡Ataca ya!
 	else:
 		nav_agent.target_position = player_ref.global_position
-		_mover_hacia(nav_agent.get_next_path_position(), delta, current_speed)
+		
+		# Decidir qué velocidad usar
+		var speed_to_use = base_speed
+		if can_sprint: speed_to_use = sprint_speed
+		elif can_walk: speed_to_use = walk_speed
+		
+		_mover_hacia(nav_agent.get_next_path_position(), delta, speed_to_use)
 		_mirar_hacia(player_ref.global_position, delta * 8.0)
+		
+		# Lógica simple de salto si está atascado:
+		if can_jump and is_on_floor() and velocity.length() < 0.5 and randf() < 0.05:
+			velocity.y = jump_force
 
-func _comportamiento_combate(delta):
-	if not player_ref: current_state = State.PATROL; return
+func _comportamiento_combate(delta: float):
+	if not is_instance_valid(player_ref): current_state = State.PATROL; return
 	_mirar_hacia(player_ref.global_position, delta * aim_speed)
 	
 	ai_decision_timer -= delta
@@ -202,6 +286,9 @@ func _comportamiento_combate(delta):
 			return 
 
 	if can_attack:
+		# Lógica de equipar máscara al atacar por primera vez
+		_check_mask_condition(MaskEquipCondition.FIRST_ATTACK)
+		
 		# ¡ATACAR!
 		if current_archetype == Archetype.MELEE_2H or current_archetype == Archetype.MELEE_1H:
 			_iniciar_ataque_melee()
@@ -211,11 +298,28 @@ func _comportamiento_combate(delta):
 			_iniciar_ataque_rango_unico()
 	else:
 		# ESTÁ CERCA PERO NO SUFICIENTE: ACERCARSE SIN CAMBIAR ESTADO
-		# Esto evita el loop de "Perseguir -> Frenar -> Pensar -> Perseguir"
 		var dir = (player_ref.global_position - global_position).normalized()
-		velocity.x = dir.x * current_speed
-		velocity.z = dir.z * current_speed
+		var speed_to_use = base_speed
+		if can_sprint: speed_to_use = sprint_speed
+		elif can_walk: speed_to_use = walk_speed
+		
+		velocity.x = dir.x * speed_to_use
+		velocity.z = dir.z * speed_to_use
 		# No cambiamos a STATE.CHASE, nos movemos manualmente en modo combate
+
+# --- API PUNTERÍA (Retraso) ---
+func get_aim_position() -> Vector3:
+	var pos_to_shoot = global_position # Fallback
+	
+	if _position_history.size() > 0:
+		pos_to_shoot = _position_history[0] # Usar la posición más vieja (retraso)
+	elif is_instance_valid(player_ref):
+		pos_to_shoot = player_ref.global_position + Vector3(0, 1.2, 0)
+		
+	if aim_inaccuracy_bloom > 0.0:
+		pos_to_shoot += _current_bloom_offset
+		
+	return pos_to_shoot
 
 func _iniciar_ataque_melee():
 	if combat_manager.weapon_r:
@@ -274,7 +378,7 @@ func _entrar_cooldown(tiempo):
 	ai_cooldown_timer = tiempo
 func _comportamiento_cooldown(delta):
 	ai_cooldown_timer -= delta
-	if player_ref: _mirar_hacia(player_ref.global_position, delta * 5.0)
+	if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, delta * 5.0)
 	
 	# Strafe lateral rápido
 	var side = transform.basis.x * strafe_dir
@@ -336,8 +440,8 @@ func _buscar_punto_patrulla():
 	nav_agent.target_position = global_position + Vector3(randf_range(-5,5), 0, randf_range(-5,5))
 
 func _buscar_jugador():
-	if not player_ref: player_ref = get_tree().get_first_node_in_group("Player")
-	if player_ref and global_position.distance_to(player_ref.global_position) < vision_range:
+	if not is_instance_valid(player_ref): player_ref = get_tree().get_first_node_in_group("Player") as Node3D
+	if is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) < vision_range:
 		current_state = State.CHASE
 
 func _animar_movimiento(delta):
@@ -360,12 +464,33 @@ func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 		ai_cooldown_timer = 0.4
 		flash_red()
 
+func equipar_mascara_guardada():
+	if mask_manager and loadout_mask and mask_handling == MaskHandling.EN_INVENTARIO:
+		mask_manager.equip_mask(loadout_mask)
+		_activar_aura_mascara()
+
+func _check_mask_condition(trigger: MaskEquipCondition):
+	if mask_handling != MaskHandling.EN_INVENTARIO: return
+	if mask_manager and mask_manager.current_mask: return # Ya equipada
+	if not loadout_mask: return # No tiene nada
+	
+	if mask_equip_condition == trigger or mask_equip_condition == MaskEquipCondition.ANY:
+		equipar_mascara_guardada()
+
 func _on_damage_received(a, c):
 	flash_red()
 	if current_state == State.PATROL: current_state = State.CHASE
+	
+	_check_mask_condition(MaskEquipCondition.FIRST_HIT_RECEIVED)
+	
+	if health_component:
+		if health_component.current_health <= health_component.max_health * 0.5:
+			_check_mask_condition(MaskEquipCondition.HALF_HEALTH)
+		if health_component.current_health <= health_component.max_health * 0.25:
+			_check_mask_condition(MaskEquipCondition.LOW_HEALTH_DESPERATION)
 
 func _morir():
-	if player_ref and player_ref.has_node("MaskManager"):
+	if is_instance_valid(player_ref) and player_ref.has_node("MaskManager"):
 		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
 	set_physics_process(false)
 	queue_free()
