@@ -135,12 +135,13 @@ func _ready():
 		
 		_definir_arquetipo()
 
-	if mask_manager and loadout_mask:
-		if mask_handling == MaskHandling.EQUIP_ON_SPAWN:
-			mask_manager.equip_mask(loadout_mask)
-			_activar_aura_mascara()
-		elif mask_handling == MaskHandling.SIN_MASCARA:
-			loadout_mask = null # Ignorar la máscara asignada
+		mask_manager.on_mask_changed.connect(_on_mask_changed_event)
+		
+		if loadout_mask:
+			if mask_handling == MaskHandling.EQUIP_ON_SPAWN:
+				mask_manager.equip_mask(loadout_mask, true) # true = instant spawn, no delay
+			elif mask_handling == MaskHandling.SIN_MASCARA:
+				loadout_mask = null # Ignorar la máscara asignada
 
 	if health_component:
 		health_component.on_death.connect(_morir)
@@ -170,44 +171,22 @@ func _definir_arquetipo():
 func _physics_process(delta: float):
 	if not is_on_floor(): velocity.y -= gravity * delta
 
-	# Lógica para registrar las posiciones del jugador (Mecánica de retraso al apuntar)
-	if is_instance_valid(player_ref) and (current_archetype == Archetype.RANGED_PROJECTILE or current_archetype == Archetype.RANGED_BEAM):
-		_position_timer += delta
-		if _position_timer >= 0.05:
-			_position_timer = 0.0
-			_position_history.append(player_ref.global_position + Vector3(0, 1.2, 0))
-			var max_history_size = max(1, int(aim_delay_seconds / 0.05))
-			if _position_history.size() > max_history_size:
-				_position_history.pop_front()
-		
-		# Lógica para suavizar el error al apuntar (bloom smoothly lerped)
-		if aim_inaccuracy_bloom > 0.0:
-			_bloom_change_timer -= delta
-			if _bloom_change_timer <= 0:
-				_bloom_change_timer = aim_bloom_update_rate
-				var dist = global_position.distance_to(player_ref.global_position)
-				var b = aim_inaccuracy_bloom * (dist / 10.0)
-				_target_bloom_offset = Vector3(randf_range(-b, b), 0.0, randf_range(-b, b))
-			_current_bloom_offset = _current_bloom_offset.lerp(_target_bloom_offset, delta * 3.0)
+	# Procesamiento de subsistemas
+	_process_aim_history(delta)
+	_process_mask_triggers(delta)
 
+	# Físicas de knockback
 	if knockback_velocity.length() > 0.5:
 		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * delta)
-		velocity.x = knockback_velocity.x; velocity.z = knockback_velocity.z
-		move_and_slide(); return 
+		velocity.x = knockback_velocity.x
+		velocity.z = knockback_velocity.z
+		move_and_slide()
+		return 
 
-	if is_instance_valid(player_ref): combat_manager.ai_target = player_ref
-	
-	if player_ref and current_state != State.PATROL:
-		_mirar_hacia(player_ref.global_position, delta * aim_speed)
-		
-		# Tracker de tiempo en combate para la máscara
-		_time_in_combat_timer += delta
-		if _time_in_combat_timer >= 8.0:
-			_check_mask_condition(MaskEquipCondition.AFTER_TIME_IN_COMBAT)
-			
-		# Tracker de proximidad para la máscara
-		if global_position.distance_to(player_ref.global_position) <= 3.5:
-			_check_mask_condition(MaskEquipCondition.ON_PROXIMITY)
+	if is_instance_valid(player_ref): 
+		combat_manager.ai_target = player_ref
+		if current_state != State.PATROL:
+			_mirar_hacia(player_ref.global_position, delta * aim_speed)
 
 	match current_state:
 		State.PATROL:
@@ -226,7 +205,41 @@ func _physics_process(delta: float):
 	_animar_movimiento(delta)
 
 # ------------------------------------------------------------------------------
-# LÓGICA IA MEJORADA (AGRESIVA)
+# SUBSISTEMAS DE IA
+# ------------------------------------------------------------------------------
+func _process_aim_history(delta: float):
+	if not is_instance_valid(player_ref): return
+	if current_archetype != Archetype.RANGED_PROJECTILE and current_archetype != Archetype.RANGED_BEAM: return
+	
+	_position_timer += delta
+	if _position_timer >= 0.05:
+		_position_timer = 0.0
+		_position_history.append(player_ref.global_position + Vector3(0, 1.2, 0))
+		var max_history_size = max(1, int(aim_delay_seconds / 0.05))
+		if _position_history.size() > max_history_size:
+			_position_history.pop_front()
+	
+	if aim_inaccuracy_bloom > 0.0:
+		_bloom_change_timer -= delta
+		if _bloom_change_timer <= 0:
+			_bloom_change_timer = aim_bloom_update_rate
+			var dist = global_position.distance_to(player_ref.global_position)
+			var b = aim_inaccuracy_bloom * (dist / 10.0)
+			_target_bloom_offset = Vector3(randf_range(-b, b), 0.0, randf_range(-b, b))
+		_current_bloom_offset = _current_bloom_offset.lerp(_target_bloom_offset, delta * 3.0)
+
+func _process_mask_triggers(delta: float):
+	if not is_instance_valid(player_ref) or current_state == State.PATROL: return
+	
+	_time_in_combat_timer += delta
+	if _time_in_combat_timer >= 8.0:
+		_check_mask_condition(MaskEquipCondition.AFTER_TIME_IN_COMBAT)
+		
+	if global_position.distance_to(player_ref.global_position) <= 6.5:
+		_check_mask_condition(MaskEquipCondition.ON_PROXIMITY)
+
+# ------------------------------------------------------------------------------
+# LÓGICA DE ESTADOS
 # ------------------------------------------------------------------------------
 func _comportamiento_patrulla(delta):
 	if nav_agent.is_navigation_finished():
@@ -466,8 +479,7 @@ func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 
 func equipar_mascara_guardada():
 	if mask_manager and loadout_mask and mask_handling == MaskHandling.EN_INVENTARIO:
-		mask_manager.equip_mask(loadout_mask)
-		_activar_aura_mascara()
+		mask_manager.equip_mask(loadout_mask, false) # false = animate spawn
 
 func _check_mask_condition(trigger: MaskEquipCondition):
 	if mask_handling != MaskHandling.EN_INVENTARIO: return
@@ -526,5 +538,11 @@ func _activar_aura_mascara():
 	mat.albedo_color = c; mat.emission = c; mat.emission_enabled = true; mat.emission_energy = 2.0
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; mat.cull_mode = BaseMaterial3D.CULL_FRONT; mat.grow = true; mat.grow_amount = 0.03
 	for m in unique_materials: m.next_pass = mat
+
+func _on_mask_changed_event(data: MaskData):
+	if data != null:
+		_activar_aura_mascara()
+	else:
+		for m in unique_materials: m.next_pass = null
 
 func _on_ultimate_visuals(a): pass

@@ -302,8 +302,7 @@ func _evento_equipar_mascara():
 	current_state = State.COOLDOWN 
 	ai_cooldown_timer = 1.0
 	
-	mask_manager.equip_mask(loadout_mask)
-	_activar_aura_mascara()
+	mask_manager.equip_mask(loadout_mask, false) # false = usar animacion de spawn
 	mask_manager.current_ult_charge = mask_manager.max_ult_charge
 
 func _evento_activar_ulti(motivo):

@@ -23,6 +23,9 @@ signal on_ult_charge_changed(current, max)
 @export var max_ult_charge: float = 100.0
 @export var charge_decay_rate: float = 0.0 # Si quieres que baje sola con el tiempo
 
+@export_group("Animaciones y Tiempos")
+@export var mask_equip_delay: float = 0.3
+
 # ------------------------------------------------------------------------------
 # 2. VARIABLES INTERNAS
 # ------------------------------------------------------------------------------
@@ -63,26 +66,45 @@ func _process(delta):
 # ------------------------------------------------------------------------------
 # 4. GESTIÓN DE MÁSCARA (EQUIPAR / QUITAR)
 # ------------------------------------------------------------------------------
-func equip_mask(data: MaskData):
+func equip_mask(data: MaskData, instant_spawn: bool = false):
 	if not data: return
 	
 	# Si ya teníamos una, la quitamos primero visualmente
 	if current_mask_visual_node: _remove_visual_model()
 	
 	current_mask = data
-	emit_signal("on_mask_changed", data)
 	print("🎭 Manager: Equipando ", data.mask_name)
 	
-	# 1. Aplicar Stats Base
+	# 1. GENERAR MODELO VISUAL INMEDIATAMENTE PARA ANIMARLO
+	_spawn_mask_visual(data)
+	
+	# Si es instantáneo (ej. al spawnear) o no hay delay configurado
+	if instant_spawn or mask_equip_delay <= 0.01:
+		_finalize_equip_mask(data)
+	else:
+		# ANIMACIÓN DE APARICIÓN (Scala de 0 a 1 tipo pop-in)
+		if current_mask_visual_node:
+			current_mask_visual_node.scale = Vector3.ZERO
+			var tween = create_tween()
+			tween.tween_property(current_mask_visual_node, "scale", Vector3.ONE, mask_equip_delay)\
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				
+		await get_tree().create_timer(mask_equip_delay).timeout
+		
+		# Validar que no se haya quitado la máscara mientras esperábamos
+		if current_mask == data:
+			_finalize_equip_mask(data)
+
+func _finalize_equip_mask(data: MaskData):
+	emit_signal("on_mask_changed", data)
+	
+	# 2. Aplicar Stats Base
 	apply_stats(false)
 	
-	# 2. Tintar pantalla (Solo Player)
+	# 3. Tintar pantalla (Solo Player)
 	if screen_overlay:
 		screen_overlay.visible = true
 		screen_overlay.color = data.screen_tint
-	
-	# 3. GENERAR MODELO VISUAL (NUEVO)
-	_spawn_mask_visual(data)
 
 func remove_mask():
 	print("🎭 Manager: Removiendo máscara")

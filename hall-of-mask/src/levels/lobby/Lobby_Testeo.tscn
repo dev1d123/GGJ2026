@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://cvogmipdh16f6"]
+[gd_scene load_steps=42 format=3 uid="uid://cvogmipdh16f6"]
 
 [ext_resource type="Script" uid="uid://fbt1pwffdsvr" path="res://src/levels/lobby/lobby.gd" id="1_h8r75"]
 [ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="2_fgap4"]
@@ -16,7 +16,6 @@
 [ext_resource type="PackedScene" uid="uid://bixbj0hnb21ih" path="res://assets/models/door/undeadPortal.fbx" id="14_4hn2x"]
 [ext_resource type="PackedScene" uid="uid://bip75ya5ux6hv" path="res://src/actors/enemies/Skeleton_Minion.tscn" id="15_tyv8a"]
 [ext_resource type="AudioStream" uid="uid://cutld3r46w6bv" path="res://assets/sounds/MainTheme.wav" id="17_7puea"]
-[ext_resource type="Resource" uid="uid://bidblay1hqrnw" path="res://src/actors/masks/Mask_Combatiente.tres" id="17_fi7gg"]
 [ext_resource type="Shape3D" uid="uid://pefqrhvi126t" path="res://src/levels/lobby/GateArea.tres" id="18_005x1"]
 [ext_resource type="PackedScene" uid="uid://dfyjjpvk4cxdm" path="res://src/actors/enemies/bosses/orc_brute_green.tscn" id="19_5gnw2"]
 [ext_resource type="PackedScene" uid="uid://fjmfpedjk6b" path="res://src/actors/enemies/Skeleton_Mage.tscn" id="20_46nnt"]
@@ -209,9 +208,8 @@ frame_progress = 0.0
 
 [node name="Skeleton_Minion5" parent="Node" instance=ExtResource("15_tyv8a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.901915, 0, 0)
-loadout_mask = ExtResource("17_fi7gg")
 mask_handling = 1
-equip_mask_on_half_health = true
+mask_equip_condition = 6
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("17_7puea")
