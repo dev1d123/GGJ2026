@@ -4,52 +4,70 @@ class_name AlliedSkeleton
 # ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
 @export var speed: float = 4.0
 @export var attack_range: float = 2.0
-@export var damage: float = 18.0
-@export var lifetime: float = 30.0          # segundos antes de desaparecer
+@export var damage: float = 10.0
+@export var lifetime: float = 30.0
 @export var attack_cooldown: float = 1.6
 
-# ─── REFERENCIAS ──────────────────────────────────────────────────────────────
-@onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
-@onready var anim_tree: AnimationTree      = $AnimationTree
-@onready var hitbox_area: Area3D           = $HitboxArea   # Area3D esfera pequeña
+# ─── REFERENCIAS (resueltas manualmente en _ready para evitar errores @onready) ──
+var nav_agent: NavigationAgent3D = null
+var anim_tree: AnimationTree     = null
 
-var player_ref: Node3D = null  # se asigna desde fuera
+var player_ref: Node3D = null
 var _target: Node3D    = null
 var _cd_timer: float   = 0.0
 var _life_timer: float = 0.0
 var _gravity: float    = 9.8
 var _unique_mats: Array[StandardMaterial3D] = []
+# NavigationAgent3D en Godot 4 tarda al menos un frame en registrarse con
+# el servidor de navegación. Hasta entonces get_next_path_position() devuelve
+# la posición actual → dir = ZERO → sin movimiento.
+var _nav_ready: bool = false
 
-const AURA_COLOR := Color(0.45, 0.0, 0.75, 1.0)   # Morado oscuro
+const AURA_COLOR := Color(0.45, 0.0, 0.75, 1.0)
 
 # ─── INICIO ───────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	# Capa de colisión propia: capa 8 (0b10000000 = 128) – no pertenece a la
-	# capa del Player (1) ni de los Enemigos (2), así el player la ignora.
-	collision_layer = 64   # capa 7 – "aliado"
-	collision_mask  = 4    # solo choca con geometría del mundo (capa 3)
+	add_to_group("allied_skeleton")
 
-	if hitbox_area:
-		hitbox_area.collision_layer = 0
-		hitbox_area.collision_mask  = 2  # detecta solo enemigos (capa 2)
-		hitbox_area.monitoring = false
+	collision_layer = 64   # capa 7 – aliado (no colisiona con player ni enemigos)
+	collision_mask  = 4    # solo geometría del mundo
+
+	# Resolución segura de nodos opcionales
+	nav_agent = get_node_or_null("NavigationAgent3D")
+	anim_tree = _buscar_animation_tree(self)
 
 	call_deferred("_apply_purple_aura")
-	call_deferred("_find_first_target")
+	# Esperamos 2 frames: 1 para que nav se registre, 1 para que el target esté disponible
+	call_deferred("_init_deferred")
+
+func _init_deferred() -> void:
+	await get_tree().physics_frame
+	_nav_ready = true
+	_find_first_target()
+
+func _buscar_animation_tree(nodo: Node) -> AnimationTree:
+	if nodo is AnimationTree:
+		return nodo as AnimationTree
+	for child in nodo.get_children():
+		var found := _buscar_animation_tree(child)
+		if found:
+			return found
+	return null
 
 # ─── FÍSICA / LOOP PRINCIPAL ──────────────────────────────────────────────────
 func _physics_process(delta: float) -> void:
-	# Gravedad
-	if not is_on_floor(): velocity.y -= _gravity * delta
+	if not is_on_floor():
+		velocity.y -= _gravity * delta
 
 	_life_timer += delta
 	if _life_timer >= lifetime:
 		_dissolve_and_free()
 		return
 
-	if _cd_timer > 0.0: _cd_timer -= delta
+	if _cd_timer > 0.0:
+		_cd_timer -= delta
 
-	# Refrescar objetivo periódicamente
+	# Refrescar objetivo si perdemos el actual
 	if _target == null or not is_instance_valid(_target):
 		_find_first_target()
 
@@ -58,11 +76,7 @@ func _physics_process(delta: float) -> void:
 		if dist <= attack_range:
 			_try_attack()
 		else:
-			nav_agent.target_position = _target.global_position
-			var next := nav_agent.get_next_path_position()
-			var dir := (next - global_position)
-			dir.y = 0.0
-			dir = dir.normalized()
+			var dir := _calcular_direccion()
 			velocity.x = dir.x * speed
 			velocity.z = dir.z * speed
 			_look_at_smooth(_target.global_position, delta)
@@ -72,28 +86,57 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+# Calcula dirección hacia el objetivo: usa NavigationAgent3D si está listo,
+# y cae a movimiento directo si el nav no da un vector útil.
+func _calcular_direccion() -> Vector3:
+	if nav_agent and _nav_ready:
+		nav_agent.target_position = _target.global_position
+		var next := nav_agent.get_next_path_position()
+		var to_next := (next - global_position)
+		to_next.y = 0.0
+		if to_next.length() > 0.4:
+			return to_next.normalized()
+
+	# Fallback: movimiento directo (siempre funciona)
+	var to_target := (_target.global_position - global_position)
+	to_target.y = 0.0
+	if to_target.length() > 0.01:
+		return to_target.normalized()
+	return Vector3.ZERO
+
 # ─── COMBATE ─────────────────────────────────────────────────────────────────
 func _try_attack() -> void:
 	if _cd_timer > 0.0: return
 	_cd_timer = attack_cooldown
 	velocity.x = 0.0; velocity.z = 0.0
 
-	# Animación de ataque 1H simple
-	if anim_tree and anim_tree.get("parameters/Combat_R/playback") != null:
-		anim_tree.set("parameters/Mezcla_R/blend_amount", 1.0)
-		anim_tree["parameters/Combat_R/playback"].start("Melee_1H_Attack_Stab")
+	# Animación (opcional, falla en silencio si el árbol no coincide)
+	if anim_tree:
+		var pb = anim_tree.get("parameters/Combat_R/playback")
+		if pb != null:
+			anim_tree.set("parameters/Mezcla_R/blend_amount", 1.0)
+			pb.start("Melee_1H_Attack_Stab")
 
-	# Activar hitbox durante la ventana de golpe
-	_activate_hitbox()
+	# Daño directo: no depende de hitbox ni Area3D
+	_aplicar_dano_en_rango()
 
-func _activate_hitbox() -> void:
-	if not hitbox_area: return
-	hitbox_area.monitoring = true
-	# Infligir daño a todo lo que esté en rango en este momento
-	for body in hitbox_area.get_overlapping_bodies():
+func _aplicar_dano_en_rango() -> void:
+	# Pequeño windup visual
+	await get_tree().create_timer(0.2).timeout
+	if not is_instance_valid(self): return
+
+	# Golpea todo lo que esté dentro del radio de ataque
+	var space := get_world_3d().direct_space_state
+	var sphere := SphereShape3D.new()
+	sphere.radius = attack_range
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape     = sphere
+	params.transform = global_transform
+	params.exclude   = [get_rid()]
+	var hits := space.intersect_shape(params, 16)
+	for hit in hits:
+		var body = hit.get("collider")
 		_hit_enemy(body)
-	await get_tree().create_timer(0.25).timeout
-	if is_instance_valid(self): hitbox_area.monitoring = false
 
 func _hit_enemy(body: Node) -> void:
 	if body == self: return
@@ -111,21 +154,42 @@ func _hit_enemy(body: Node) -> void:
 func _find_first_target() -> void:
 	_target = null
 	var best_dist := INF
-	# Busca enemies en el grupo "Enemy" – asegúrate de add_to_group("Enemy") en tus escenas
-	for e in get_tree().get_nodes_in_group("Enemy"):
-		if not is_instance_valid(e): continue
-		var d := global_position.distance_to(e.global_position)
-		if d < best_dist:
-			best_dist = d
-			_target = e
-	# Fallback: cualquier CharacterBody3D que no sea aliado ni player
-	if _target == null:
-		for body in get_tree().get_nodes_in_group("enemy"):
-			if not is_instance_valid(body): continue
-			var d := global_position.distance_to(body.global_position)
+
+	# Paso 1: buscar por grupos estándar de enemigos
+	for grupo in ["Enemies", "Enemy", "enemy"]:
+		for e in get_tree().get_nodes_in_group(grupo):
+			if not is_instance_valid(e) or e == self: continue
+			if e.is_in_group("allied_skeleton"): continue
+			if e.is_in_group("Player"): continue
+			if player_ref and e == player_ref: continue
+			var d := global_position.distance_to(e.global_position)
 			if d < best_dist:
 				best_dist = d
-				_target = body
+				_target = e
+		if _target != null:
+			return
+
+	# Paso 2: escaneo físico de esfera grande — encuentra cualquier nodo
+	# que tenga HealthComponent o take_damage() y no sea aliado/jugador.
+	var space := get_world_3d().direct_space_state
+	var sphere := SphereShape3D.new()
+	sphere.radius = 60.0
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape     = sphere
+	params.transform = global_transform
+	params.exclude   = [get_rid()]
+	var hits := space.intersect_shape(params, 32)
+	for hit in hits:
+		var body = hit.get("collider")
+		if not body or body == self: continue
+		if body.is_in_group("allied_skeleton"): continue
+		if body.is_in_group("Player"): continue
+		if player_ref and body == player_ref: continue
+		if not (body.has_method("take_damage") or body.has_node("HealthComponent")): continue
+		var d := global_position.distance_to(body.global_position)
+		if d < best_dist:
+			best_dist = d
+			_target = body
 
 # ─── AURA MORADA ─────────────────────────────────────────────────────────────
 func _apply_purple_aura() -> void:
