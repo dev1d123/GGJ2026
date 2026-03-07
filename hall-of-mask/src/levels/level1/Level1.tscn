@@ -192,6 +192,12 @@ metadata/_edit_lock_ = true
 [node name="Player" parent="." instance=ExtResource("3_ix4db")]
 transform = Transform3D(0.9999672, 0, -0.008098239, 0, 1, 0, 0.008098239, 0, 0.9999672, -0.20882416, 0.428442, 3.786831)
 collision_mask = 133
+speed_walk = null
+jump_force = null
+gravity_multiplier = null
+dodge_power = null
+dodge_cost = null
+dive_sprint_damp = null
 
 [node name="Environment" parent="." instance=ExtResource("2_xe8i4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15611267, 0, 3.5905392)
