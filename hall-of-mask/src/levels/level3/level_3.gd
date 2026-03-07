@@ -20,6 +20,9 @@ func _ready() -> void:
 	# Agregar AudioStreamPlayer para SFX
 	add_child(sfx_player)
 	sfx_player.bus = "Master"
+	sfx_player.volume_db = 6.0
+	# Música ligeramente más baja
+	audio.volume_db -= 6.0
 	
 	# Conectar muerte del jugador
 	if player and player.has_node("HealthComponent"):
