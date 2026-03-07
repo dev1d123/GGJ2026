@@ -15,6 +15,7 @@ var defeat_sound: AudioStream = preload("res://assets/sounds/lose.wav")
 @onready var sfx_player: AudioStreamPlayer = AudioStreamPlayer.new()
 
 const LOBBY_SCENE := "res://src/levels/lobby/Lobby.tscn"
+const LEVEL_ID    := "level_3"
 
 func _ready() -> void:
 	# Agregar AudioStreamPlayer para SFX
@@ -41,6 +42,23 @@ func _ready() -> void:
 	
 	# Conectar señales de muerte de enemigos
 	_connect_enemy_signals()
+
+	_show_entry_dialog()
+
+func _show_entry_dialog() -> void:
+	if not GameData.is_first_visit(LEVEL_ID):
+		return
+	GameData.mark_level_visited(LEVEL_ID)
+	var char_id: String = GameData.selected_character
+	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
+		return
+	ToastNotification.show_toast(char_id, GameData.DIALOGS[char_id][LEVEL_ID]["entry"])
+
+func _show_exit_dialog() -> void:
+	var char_id: String = GameData.selected_character
+	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
+		return
+	ToastNotification.show_toast(char_id, GameData.DIALOGS[char_id][LEVEL_ID]["exit"])
 
 func _process(delta):
 	# Atajo para completar nivel con tecla M
@@ -84,9 +102,10 @@ func _complete_level():
 	audio.stop()
 	sfx_player.stream = victory_sound
 	sfx_player.play()
+	_show_exit_dialog()
 	
 	GameManager.complete_level("level3")
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(4.0).timeout
 	get_tree().change_scene_to_file(LOBBY_SCENE)
 
 func _on_player_died():
