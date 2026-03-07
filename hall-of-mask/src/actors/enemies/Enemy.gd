@@ -73,6 +73,16 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 ## Multiplicador artificial de la gravedad para hacer el salto menos "flotante" (Unificado con: player.gd)
 @export var gravity_multiplier: float = 3.0
 
+@export_group("Anti-Stuck sobre Player")
+## Evita que el enemigo/jefe se quede encima del jugador tras saltos ofensivos.
+@export var anti_stack_enabled: bool = true
+## Diferencia mínima en Y para considerar que está "encima" del jugador.
+@export var anti_stack_max_vertical_delta: float = 1.0
+## Distancia horizontal máxima para activar la separación.
+@export var anti_stack_horizontal_radius: float = 1.1
+## Velocidad extra al separarse del jugador.
+@export var anti_stack_escape_speed_mult: float = 1.15
+
 @export_group("Capacidades de Evasión")
 ## Si está activo, el enemigo puede esquivar ataques del jugador.
 @export var can_dodge: bool = false
@@ -278,9 +288,46 @@ func _physics_process(delta: float):
 				_procesar_dodging(delta)
 			
 	if current_state != State.DODGING:
+		_resolver_superposicion_con_player()
 		move_and_slide()
 		
 	_animar_movimiento(delta)
+
+func _resolver_superposicion_con_player():
+	if not anti_stack_enabled:
+		return
+	if not is_instance_valid(player_ref):
+		return
+
+	var vertical_delta: float = global_position.y - player_ref.global_position.y
+	if vertical_delta <= anti_stack_max_vertical_delta:
+		return
+
+	var to_player: Vector3 = player_ref.global_position - global_position
+	var horizontal_delta: Vector2 = Vector2(to_player.x, to_player.z)
+	var horizontal_dist: float = horizontal_delta.length()
+	if horizontal_dist > anti_stack_horizontal_radius:
+		return
+
+	var escape_dir_2d: Vector2
+	if horizontal_dist > 0.05:
+		escape_dir_2d = (-horizontal_delta).normalized()
+	else:
+		var fallback_2d: Vector2 = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
+		if fallback_2d.length() < 0.01:
+			fallback_2d = Vector2(1, 0)
+		escape_dir_2d = fallback_2d.normalized() * (1.0 if strafe_dir >= 0 else -1.0)
+
+	var escape_speed: float = base_speed * maxf(anti_stack_escape_speed_mult, 0.1)
+	if can_sprint:
+		escape_speed *= 1.1
+
+	velocity.x = escape_dir_2d.x * escape_speed
+	velocity.z = escape_dir_2d.y * escape_speed
+
+	# Pequeño impulso para descolgarse del cuerpo del player sin romper ataques.
+	if is_on_floor() and current_state != State.DODGING and current_state != State.PRE_DODGE:
+		velocity.y = maxf(velocity.y, jump_force * 0.35)
 
 # ------------------------------------------------------------------------------
 # SUBSISTEMAS DE IA
@@ -564,11 +611,17 @@ func _intentar_maniobra_ofensiva(dist: float, dir: Vector3, estado_origen: Strin
 		
 		var ataco = false
 		if combat_manager.weapon_r:
-			var delay_r = max(0.0, tiempo_vuelo - combat_manager.weapon_r.windup_time)
+			var effective_windup_r: float = combat_manager.weapon_r.windup_time
+			if combat_manager.has_method("get_effective_windup_time"):
+				effective_windup_r = combat_manager.get_effective_windup_time(combat_manager.weapon_r.windup_time, combat_manager.attack_speed_multiplier)
+			var delay_r = max(0.0, tiempo_vuelo - effective_windup_r)
 			_ataque_retrasado("right", delay_r)
 			ataco = true
 		if combat_manager.weapon_l:
-			var delay_l = max(0.0, tiempo_vuelo - combat_manager.weapon_l.windup_time)
+			var effective_windup_l: float = combat_manager.weapon_l.windup_time
+			if combat_manager.has_method("get_effective_windup_time"):
+				effective_windup_l = combat_manager.get_effective_windup_time(combat_manager.weapon_l.windup_time, combat_manager.attack_speed_multiplier)
+			var delay_l = max(0.0, tiempo_vuelo - effective_windup_l)
 			_ataque_retrasado("left", delay_l)
 			ataco = true
 			

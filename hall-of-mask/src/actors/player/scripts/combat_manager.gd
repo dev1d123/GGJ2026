@@ -36,6 +36,8 @@ class_name CombatManager
 @export var damage_multiplier: float = 1.0 
 ## Cantidad base de carga de Ultimate que ganas por cada impacto exitoso.
 @export var ult_charge_reward: float = 10.0
+## Compensación en segundos para alinear hit timing con xfade del AnimationTree.
+@export var xfade_compensation_seconds: float = 0.1
 
 # ------------------------------------------------------------------------------
 # 3. INVENTARIO
@@ -55,6 +57,7 @@ class_name CombatManager
 @export var mask_slot_1: MaskData
 
 signal on_weapon_changed(hand, weapon_data)
+signal on_stop_movement_camera_mode(active: bool, transition_time: float)
 
 # ------------------------------------------------------------------------------
 # 4. VARIABLES INTERNAS
@@ -153,6 +156,11 @@ func _process(delta):
 	# Esto corrige que se vean raros al caminar/correr si una animación se cortó.
 	if not is_attacking:
 		_limpiar_blends_residuales(delta)
+
+func get_effective_windup_time(raw_windup: float, speed_scale: float = 1.0) -> float:
+	var safe_speed: float = maxf(speed_scale, 0.01)
+	var comp: float = maxf(xfade_compensation_seconds, 0.0)
+	return maxf(0.01, (raw_windup / safe_speed) - comp)
 
 # Función auxiliar para borrar rastros de ataques anteriores
 func _limpiar_blends_residuales(delta):
@@ -331,7 +339,7 @@ func _ejecutar_disparo_rango(w: RangedWeaponData, mano: String):
 	_viajar_animacion(PLAYBACK_RANGED, anim_name)
 	
 	var visual_speed = max(attack_speed_multiplier, 1.0)
-	var real_windup = w.windup_time / visual_speed
+	var real_windup = get_effective_windup_time(w.windup_time, visual_speed)
 	
 	if anim_player_node: anim_player_node.speed_scale = visual_speed
 	await get_tree().create_timer(real_windup).timeout
@@ -408,12 +416,16 @@ func _ejecutar_disparo_rango(w: RangedWeaponData, mano: String):
 # LÓGICA MELEE (RESTAURADA 1:1 DE TU CÓDIGO FUNCIONAL)
 # ------------------------------------------------------------------
 func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
+	var uses_stop_movement: bool = w.stop_movement
+
 	# 1. Configurar Estados
 	if w.is_two_handed: is_attacking_r = true; is_attacking_l = true
 	elif mano == "right": is_attacking_r = true
 	else: is_attacking_l = true
 	
-	if w.stop_movement: is_movement_locked = true
+	if uses_stop_movement:
+		is_movement_locked = true
+		emit_signal("on_stop_movement_camera_mode", true, 0.12)
 	
 	# 2. Seleccionar Animación y Huesos
 	var playback = ""
@@ -421,7 +433,7 @@ func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
 	var anim_name = w.anim_attack
 	var hand_node = null
 	
-	if w.stop_movement:
+	if uses_stop_movement:
 		playback = PLAYBACK_STATIC; blend_path = BLEND_STATIC; hand_node = right_hand_bone 
 	elif w.is_two_handed:
 		playback = PLAYBACK_2H; blend_path = BLEND_2H; hand_node = right_hand_bone
@@ -435,7 +447,7 @@ func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
 	var visual_windup_speed = target_speed
 	if target_speed > 1.7: visual_windup_speed = 1.7 
 	
-	var real_windup = w.windup_time / visual_windup_speed
+	var real_windup = get_effective_windup_time(w.windup_time, visual_windup_speed)
 	
 	# 🟢 RESTAURADO: Cálculo dinámico de Blend (Clave para atacar corriendo)
 	var visual_blend = w.blend_time
@@ -495,6 +507,8 @@ func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
 	else: is_attacking_l = false
 	
 	is_movement_locked = false
+	if uses_stop_movement:
+		emit_signal("on_stop_movement_camera_mode", false, 0.2)
 	
 	var real_cooldown = w.cooldown / target_speed
 	if mano == "right": cd_timer_r = real_cooldown
@@ -733,7 +747,7 @@ func _start_beam_sequence(w: RangedWeaponData):
 	
 	# 2. CALCULAR WINDUP
 	var visual_speed = max(attack_speed_multiplier, 1.0)
-	var real_windup = w.windup_time / visual_speed
+	var real_windup = get_effective_windup_time(w.windup_time, visual_speed)
 	
 	# Aseguramos velocidad normal para el windup
 	if anim_player_node: anim_player_node.speed_scale = visual_speed

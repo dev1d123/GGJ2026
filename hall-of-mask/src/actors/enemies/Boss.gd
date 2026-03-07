@@ -33,6 +33,10 @@ signal boss_died
 ## Multiplicador de daño del Atk3.
 @export var atk3_mult_dmg: float = 1.5
 
+@export_group("Compensación de XFade")
+## Compensación local para sincronizar hit timing con xfade del AnimationTree del boss.
+@export var xfade_delay_compensation: float = 0.1
+
 # Estado interno
 var is_doing_boss_attack: bool = false
 var has_equipped_mask: bool = false
@@ -301,13 +305,7 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	if combat_manager: combat_speed = combat_manager.attack_speed_multiplier
 	var total_speed_scale = max(0.1, current_anim_scale * combat_speed)
 	
-	# COMPENSACIÓN DE DESFASE (XFade Time)
-	# Los nodos AnimationTree suelen tener xfade_time de 0.2s o 0.3s. 
-	# Esto retrasa el "impacto visual" frente al código. 
-	# Forzamos que el timer compense este 'suavizado'
-	var xfade_delay_compensation = 0.2 
-	
-	var real_windup = max(0.01, (windup / total_speed_scale) - xfade_delay_compensation)
+	var real_windup = max(0.01, (windup / total_speed_scale) - maxf(xfade_delay_compensation, 0.0))
 	var real_active = active / total_speed_scale
 	
 	# Tracking inicial
