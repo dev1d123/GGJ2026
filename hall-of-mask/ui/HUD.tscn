@@ -71,7 +71,7 @@ expand_mode = 1
 [node name="BarsContainer" type="VBoxContainer" parent="GameUI/StatsPanel"]
 layout_mode = 2
 
-[node name="LifeContainer" type="HBoxContainer" parent="GameUI/StatsPanel/BarsContainer"]
+[node name="LifeContainer" type="HFlowContainer" parent="GameUI/StatsPanel/BarsContainer"]
 layout_mode = 2
 
 [node name="StaminaBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
