@@ -825,34 +825,34 @@ grow_vertical = 2
 [node name="fighterMask" type="ColorRect" parent="."]
 visible = false
 material = SubResource("ShaderMaterial_mlbc3")
-offset_left = -56.0
-offset_top = -30.0
-offset_right = 2008.0
-offset_bottom = 1131.0
+offset_left = -1643.0
+offset_top = -966.0
+offset_right = 3840.0
+offset_bottom = 2075.0
 
 [node name="shooterMask" type="ColorRect" parent="."]
 visible = false
 material = SubResource("ShaderMaterial_5ub7k")
-offset_left = -56.0
-offset_top = -30.0
-offset_right = 2008.0
-offset_bottom = 1131.0
+offset_left = -3762.0
+offset_top = -2614.0
+offset_right = 7517.0
+offset_bottom = 4226.0
 
 [node name="undeadMask" type="ColorRect" parent="."]
+visible = false
 material = SubResource("ShaderMaterial_oloty")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_left = -3361.0
+offset_top = -2588.0
+offset_right = 5859.0
+offset_bottom = 3551.0
 
 [node name="timeMask" type="ColorRect" parent="."]
 visible = false
 material = SubResource("ShaderMaterial_ipwkd")
-offset_left = -56.0
-offset_top = -30.0
-offset_right = 2008.0
-offset_bottom = 1131.0
+offset_left = -4374.0
+offset_top = -2614.0
+offset_right = 5409.0
+offset_bottom = 3818.0
 
 [node name="FootStep" type="AudioStreamPlayer3D" parent="."]
 

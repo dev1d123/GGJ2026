@@ -75,11 +75,14 @@ var shake_decay: float = 1.5
 @onready var undead_overlay: ColorRect = $undeadMask
 @onready var time_overlay: ColorRect = $timeMask
 var current_mask_visual: String = "" # "fighter", "shooter", "undead", "time", o ""
+var _time_ulti_active: bool = false
 
 # --- VARIABLES INTERNAS ---
 var max_health: float = 100.0
 var current_health: float = 100.0
 var is_dead: bool = false 
+var _toast_canvas: CanvasLayer = null
+var _active_toasts: int = 0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 const MOUSE_SENSITIVITY: float = 0.003
 var _cam_pitch: float = 0.0 
@@ -121,6 +124,56 @@ func start_distortion_transition(duration: float = 1.0) -> void:
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(distortion_mat, "shader_parameter/strength", 1.0, duration)
 
+func show_toast(message: String, color: Color = Color(1.0, 0.85, 0.1)) -> void:
+	if not _toast_canvas:
+		_toast_canvas = CanvasLayer.new()
+		_toast_canvas.layer = 20
+		add_child(_toast_canvas)
+
+	var slot := _active_toasts
+	_active_toasts += 1
+
+	var strip := CenterContainer.new()
+	strip.anchor_left = 0.0
+	strip.anchor_right = 1.0
+	strip.anchor_top = 0.0
+	strip.anchor_bottom = 0.0
+	strip.offset_top = 120.0 + slot * 52.0
+	strip.offset_bottom = 165.0 + slot * 52.0
+	_toast_canvas.add_child(strip)
+
+	var panel := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.04, 0.08, 0.82)
+	style.border_width_top = 2; style.border_width_bottom = 2
+	style.border_width_left = 2; style.border_width_right = 2
+	style.border_color = color
+	style.corner_radius_top_left = 6; style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6; style.corner_radius_bottom_right = 6
+	style.content_margin_left = 18; style.content_margin_right = 18
+	style.content_margin_top = 7; style.content_margin_bottom = 7
+	panel.add_theme_stylebox_override("panel", style)
+	strip.add_child(panel)
+
+	var lbl := Label.new()
+	lbl.text = message
+	var font = load("res://assets/imagesGUI/font.TTF")
+	if font: lbl.add_theme_font_override("font", font)
+	lbl.add_theme_font_size_override("font_size", 20)
+	lbl.add_theme_color_override("font_color", color)
+	panel.add_child(lbl)
+
+	strip.modulate.a = 0.0
+	var _s := strip
+	var tween := create_tween()
+	tween.tween_property(strip, "modulate:a", 1.0, 0.15)
+	tween.tween_interval(1.1)
+	tween.tween_property(strip, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func():
+		_active_toasts -= 1
+		if is_instance_valid(_s): _s.queue_free()
+	)
+
 # ------------------------------------------------------------------------------
 # 2. CICLO DE VIDA E INPUTS
 # ------------------------------------------------------------------------------
@@ -134,6 +187,10 @@ func _ready():
 		if "max_health" in health_component:
 			max_health = health_component.max_health
 			current_health = health_component.current_health
+
+	footstep_audio.volume_db = 6.0
+	attack_audio.volume_db = 8.0
+
 	
 	if attributes:
 		attributes.base_stats["move_speed"] = speed_walk
@@ -241,18 +298,28 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ultimate_ability"):
 		var mgr = mask_manager if "mask_manager" in self else get_node_or_null("MaskManager")
 		if mgr: mgr.activate_ultimate()
+	if event.is_action_pressed("ulti"):
+		var tipo = mask_manager.current_mask.mask_name if mask_manager and mask_manager.current_mask else "Sin máscara"
+		print(tipo + " activo ulti")
+		_intentar_activar_ulti()
 	if event.is_action_pressed("usar_pocion_1"): usar_pocion(0)
 	elif event.is_action_pressed("usar_pocion_2"): usar_pocion(1)
 	elif event.is_action_pressed("usar_pocion_3"): usar_pocion(2)
+	# DEBUG: Tecla N = +25 carga de ulti
+	if event is InputEventKey and event.pressed and event.keycode == KEY_N:
+		if mask_manager: mask_manager.add_charge(25.0)
 
 # ------------------------------------------------------------------------------
 # 3. FÍSICAS Y LÓGICA
 # ------------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
-	if is_dead: return 
-	
-	_apply_shake(delta)
-	_procesar_modificadores_combate(delta)
+	if is_dead: return
+	# ed = delta real compensado: cuando el ulti de tiempo está activo el player
+	# usa delta sin escalar para moverse a velocidad normal.
+	var ed: float = delta / Engine.time_scale if _time_ulti_active else delta
+
+	_apply_shake(ed)
+	_procesar_modificadores_combate(ed)
 
 	if is_on_floor() and (abs(velocity.x) > 0.1 or abs(velocity.z) > 0.1):
 		if not footstep_audio.playing and footstep_sounds.size() > 0:
@@ -262,7 +329,7 @@ func _physics_process(delta: float) -> void:
 		footstep_audio.stop()
 	# Gravedad
 	if not is_on_floor():
-		velocity.y -= (gravity * gravity_multiplier) * delta
+		velocity.y -= (gravity * gravity_multiplier) * ed
 		was_in_air = true
 	elif was_in_air:
 		was_in_air = false
@@ -287,29 +354,29 @@ func _physics_process(delta: float) -> void:
 		knockback_velocity = Vector3.ZERO
 
 	# Estados Bloqueantes
-	if current_state == State.DODGING: procesar_dodge(delta); return
-	if current_state == State.DIVING: procesar_dive(delta); return
-	
+	if current_state == State.DODGING: procesar_dodge(ed); return
+	if current_state == State.DIVING: procesar_dive(ed); return
+
 	if combat_manager.is_movement_locked:
-		velocity.x = move_toward(velocity.x, 0, 20.0 * delta)
-		velocity.z = move_toward(velocity.z, 0, 20.0 * delta)
-		move_and_slide()
-		actualizar_blendspaces(Vector2.ZERO, delta)
-		return 
-	
+		velocity.x = move_toward(velocity.x, 0, 20.0 * ed)
+		velocity.z = move_toward(velocity.z, 0, 20.0 * ed)
+		_cms()
+		actualizar_blendspaces(Vector2.ZERO, ed)
+		return
+
 	# Movimiento
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	controlar_inputs_postura(delta, input_dir.y > 0)
-	
-	if current_state == State.DODGING or current_state == State.DIVING: return 
-	
+	controlar_inputs_postura(ed, input_dir.y > 0)
+
+	if current_state == State.DODGING or current_state == State.DIVING: return
+
 	if current_state == State.SPRINT:
-		sprint_timer = min(sprint_timer + delta, MAX_MOMENTUM_TIME)
+		sprint_timer = min(sprint_timer + ed, MAX_MOMENTUM_TIME)
 	else:
 		sprint_timer = 0.0
 
-	procesar_movimiento_normal(delta, input_dir)
-	actualizar_blendspaces(input_dir, delta)
+	procesar_movimiento_normal(ed, input_dir)
+	actualizar_blendspaces(input_dir, ed)
 
 # ------------------------------------------------------------------------------
 # FOV y VELOCIDAD
@@ -348,7 +415,7 @@ func procesar_movimiento_normal(delta, input_dir):
 	else:
 		velocity.x = move_toward(velocity.x, 0, final_speed)
 		velocity.z = move_toward(velocity.z, 0, final_speed)
-	move_and_slide()
+	_cms()
 
 # ------------------------------------------------------------------------------
 # ESTADOS
@@ -359,9 +426,12 @@ func controlar_inputs_postura(delta, moving_back):
 			State.PRONE: cambiar_estado(State.CROUCH)
 			State.CROUCH: cambiar_estado(State.NORMAL)
 			State.NORMAL, State.SPRINT:
-				if is_on_floor() and stamina.try_consume(15):
-					velocity.y = jump_force * mask_jump_mult 
-					state_machine.travel("Jump_Start")
+				if is_on_floor():
+					if stamina.try_consume(15):
+						velocity.y = jump_force * mask_jump_mult 
+						state_machine.travel("Jump_Start")
+					else:
+						show_toast("Stamina required!", Color(1.0, 0.55, 0.1))
 		return
 	
 	if Input.is_action_just_pressed("dodge") and can_dodge and is_on_floor():
@@ -400,6 +470,15 @@ func controlar_inputs_postura(delta, moving_back):
 # ------------------------------------------------------------------------------
 func add_camera_trauma(amount: float):
 	trauma = min(trauma + amount, 1.0)
+
+# Compensa Engine.time_scale en move_and_slide para que el player no se ralentice
+# durante el ulti de tiempo. Infla velocity antes y la restaura después.
+func _cms() -> void:
+	if _time_ulti_active:
+		velocity /= Engine.time_scale
+	move_and_slide()
+	if _time_ulti_active:
+		velocity *= Engine.time_scale
 	
 func _apply_shake(delta):
 	if trauma > 0:
@@ -426,7 +505,7 @@ func iniciar_dodge():
 func procesar_dodge(delta):
 	velocity.x = move_toward(velocity.x, 0, 40.0 * delta)
 	velocity.z = move_toward(velocity.z, 0, 40.0 * delta)
-	move_and_slide()
+	_cms()
 	if str(state_machine.get_current_node()) != "Dodge": 
 		current_state = State.NORMAL
 		emit_signal("on_state_changed", "NORMAL")
@@ -457,7 +536,7 @@ func procesar_dive(delta):
 	if not is_on_floor(): velocity.y -= (gravity * gravity_multiplier) * delta
 	velocity.x = move_toward(velocity.x, 0, 5.0 * delta)
 	velocity.z = move_toward(velocity.z, 0, 5.0 * delta)
-	move_and_slide()
+	_cms()
 	dive_timer += delta
 	if is_on_floor() and dive_timer > 0.3: cambiar_estado(State.PRONE)
 
@@ -492,6 +571,443 @@ func rotar_columna_hacia_camara():
 		var m = Quaternion(Vector3.RIGHT, -_cam_pitch)
 		var r = skeleton_3d.get_bone_rest(spine_bone_id).basis.get_rotation_quaternion()
 		skeleton_3d.set_bone_pose_rotation(spine_bone_id, r * m)
+
+func _intentar_activar_ulti() -> void:
+	if not mask_manager or not mask_manager.current_mask: return
+	if mask_manager.current_ult_charge < mask_manager.max_ult_charge:
+		show_toast("Ultimate not ready!", Color(0.5, 0.2, 1.0))
+		return
+	var mask_name_lower = mask_manager.current_mask.mask_name.to_lower()
+	mask_manager.activate_ultimate()
+	if mask_name_lower.contains("fighter"):
+		combat_manager.ejecutar_animacion_ulti("Melee_2H_Attack_Spin", 2.0)
+		_mostrar_area_fighter_ulti(2.0)
+		_aplicar_dano_area_fighter_ulti()
+	if mask_name_lower.contains("time") or mask_name_lower.contains("tiempo"):
+		_activar_ulti_tiempo(5.0)
+	if mask_name_lower.contains("undead") or mask_name_lower.contains("muerto"):
+		_activar_ulti_undead()
+	if mask_name_lower.contains("shooter") or mask_name_lower.contains("tirador"):
+		_activar_ulti_shooter()
+
+func _activar_ulti_undead() -> void:
+	const NUM_SKELETONS  := 3
+	const SUMMON_RADIUS  := 3.5
+	const SKELETON_SCENE := "res://src/actors/enemies/Skeleton_Minion.tscn"
+
+	# ── 1. Círculo de invocación ──────────────────────────────────────
+	var ring := MeshInstance3D.new()
+	var cyl  := CylinderMesh.new()
+	cyl.top_radius     = SUMMON_RADIUS
+	cyl.bottom_radius  = SUMMON_RADIUS
+	cyl.height         = 0.04
+	cyl.radial_segments = 80
+	ring.mesh = cyl
+	var ring_mat := StandardMaterial3D.new()
+	ring_mat.albedo_color   = Color(0.5, 0.0, 0.9, 0.55)
+	ring_mat.emission_enabled = true
+	ring_mat.emission       = Color(0.55, 0.0, 1.0)
+	ring_mat.emission_energy = 3.0
+	ring_mat.transparency   = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ring_mat.shading_mode   = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ring_mat.cull_mode      = BaseMaterial3D.CULL_DISABLED
+	ring.material_override  = ring_mat
+	ring.scale = Vector3.ZERO
+	add_child(ring)
+	ring.position = Vector3(0.0, 0.05, 0.0)
+
+	# Escalar hacia afuera rápido
+	var t_ring := create_tween()
+	t_ring.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t_ring.tween_property(ring, "scale", Vector3.ONE, 0.35)
+
+	await get_tree().create_timer(0.4).timeout
+
+	# ── 2. Invocar esqueletos en círculo ─────────────────────────────
+	var scene: PackedScene = load(SKELETON_SCENE)
+	if not scene:
+		push_warning("AlliedSkeleton: no se encontró la escena en " + SKELETON_SCENE)
+		ring.queue_free()
+		return
+
+	for i in NUM_SKELETONS:
+		var angle: float = (TAU / NUM_SKELETONS) * i
+		var offset := Vector3(cos(angle), 0.0, sin(angle)) * SUMMON_RADIUS
+
+		var ally: Node = scene.instantiate()
+		# Reemplaza el script Enemy por AlliedSkeleton
+		ally.set_script(load("res://src/actors/enemies/AlliedSkeleton.gd"))
+		get_tree().current_scene.add_child(ally)
+		ally.global_position = global_position + offset
+		ally.global_position.y = global_position.y
+
+		# Asignar referencia al jugador para que no nos ataque
+		if "player_ref" in ally:
+			ally.player_ref = self
+
+		# Invulnerabilidad al player: cambiamos capas DESPUÉS del _ready
+		ally.collision_layer = 64
+		ally.collision_mask  = 4
+
+		# Tiempo de vida: cuando acabe el ulti se auto-destruyen
+		if "lifetime" in ally:
+			ally.lifetime = mask_manager.current_mask.ultimate_duration
+
+		# Partícula de aparición sencilla (flash morado)
+		var flash := OmniLight3D.new()
+		flash.light_color = Color(0.6, 0.0, 1.0)
+		flash.light_energy = 8.0
+		flash.omni_range = 3.0
+		ally.add_child(flash)
+		var t_flash := create_tween()
+		t_flash.tween_property(flash, "light_energy", 0.0, 0.5)
+		t_flash.tween_callback(flash.queue_free)
+
+		# Pequeño stagger de spawn para que no aparezcan todos a la vez
+		await get_tree().create_timer(0.08).timeout
+
+	# ── 3. Disolver el círculo ────────────────────────────────────────
+	var t_out := create_tween()
+	t_out.tween_property(ring_mat, "albedo_color:a", 0.0, 0.5)
+	await t_out.finished
+	ring.queue_free()
+
+func _activar_ulti_tiempo(duracion: float) -> void:
+	const SLOW := 0.12
+	_time_ulti_active = true
+	Engine.time_scale = SLOW
+	# NOTA: NO se cambia process_mode → el menú radial puede pausar normalmente
+
+	# ── UI ────────────────────────────────────────────────────────────
+	var canvas := CanvasLayer.new()
+	canvas.layer = 10
+	add_child(canvas)
+
+	var overlay := ColorRect.new()
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shader : Shader = load("res://src/actors/player/time_ulti_overlay.gdshader")
+	var smat := ShaderMaterial.new()
+	smat.shader = shader
+	smat.set_shader_parameter("strength", 0.0)
+	overlay.material = smat
+	canvas.add_child(overlay)
+
+	var bar_container := VBoxContainer.new()
+	bar_container.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	bar_container.offset_top    = -72.0
+	bar_container.offset_bottom = -16.0
+	bar_container.offset_left   = 220.0
+	bar_container.offset_right  = -220.0
+	bar_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	canvas.add_child(bar_container)
+
+	var lbl := Label.new()
+	lbl.text = "⏳ TIEMPO DETENIDO"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.modulate = Color(0.3, 0.9, 1.0, 1.0)
+	bar_container.add_child(lbl)
+
+	var bar := ProgressBar.new()
+	bar.min_value = 0.0
+	bar.max_value = 1.0
+	bar.value = 1.0
+	bar.custom_minimum_size = Vector2(0.0, 14.0)
+	bar.modulate = Color(0.1, 0.7, 1.0, 0.9)
+	bar_container.add_child(bar)
+
+	var t_in := create_tween()
+	t_in.tween_method(func(v: float): smat.set_shader_parameter("strength", v), 0.0, 1.0, 0.05)
+
+	# ── Cuenta atrás con tiempo REAL de pared ────────────────────────
+	# Time.get_ticks_msec() es inmune a Engine.time_scale.
+	# Cap de 100ms por frame evita saltos al cerrar el menú radial.
+	# Si el menú está abierto (paused) la barra se congela.
+	var elapsed_ms: int = 0
+	var last_ms: int = Time.get_ticks_msec()
+	var duration_ms: int = int(duracion * 1000.0)
+
+	while elapsed_ms < duration_ms:
+		await get_tree().process_frame
+		var now: int = Time.get_ticks_msec()
+		var frame_ms: int = mini(now - last_ms, 100)
+		last_ms = now
+		if not get_tree().paused:
+			elapsed_ms += frame_ms
+		var ratio: float = 1.0 - clamp(float(elapsed_ms) / float(duration_ms), 0.0, 1.0)
+		bar.value = ratio
+		if elapsed_ms > duration_ms - 1000:
+			var blink: float = sin(float(elapsed_ms) * 0.02) * 0.5 + 0.5
+			bar.modulate = Color(1.0, blink * 0.3 + 0.1, 0.1, 0.9)
+			lbl.text = "⚡ TIEMPO REGRESANDO..."
+			lbl.modulate = Color(1.0, 0.5 + blink * 0.5, 0.1, 1.0)
+
+	# ── Restaurar ─────────────────────────────────────────────────────
+	_time_ulti_active = false
+	Engine.time_scale = 1.0
+
+	var t_out := create_tween()
+	t_out.tween_method(func(v: float): smat.set_shader_parameter("strength", v), 1.0, 0.0, 0.35)
+	await t_out.finished
+	canvas.queue_free()
+
+func _aplicar_dano_area_fighter_ulti() -> void:
+	# Pequeño windup antes del golpe (mitad de la animación)
+	await get_tree().create_timer(0.35).timeout
+
+	var radio := 6.0
+	var damage_ulti := 50.0
+	if combat_manager and combat_manager.weapon_r:
+		damage_ulti = combat_manager.weapon_r.damage * 2.5 * combat_manager.damage_multiplier
+
+	var space := get_world_3d().direct_space_state
+	var sphere := SphereShape3D.new()
+	sphere.radius = radio
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape = sphere
+	params.transform = global_transform
+	params.exclude = [get_rid()]
+
+	var hits := space.intersect_shape(params, 32)
+	for hit in hits:
+		var body = hit.get("collider")
+		if not body or body == self: continue
+
+		# Daño
+		if body.has_method("take_damage"):
+			body.take_damage(damage_ulti)
+		elif body.has_node("HealthComponent"):
+			body.get_node("HealthComponent").take_damage(damage_ulti)
+
+		# Expulsión hacia afuera del centro
+		if body.has_method("apply_knockback"):
+			var dir: Vector3 = (body.global_position - global_position)
+			dir.y = 0.0
+			dir = dir.normalized()
+			body.apply_knockback(dir, 20.0, 7.0)
+
+func _mostrar_area_fighter_ulti(duracion: float) -> void:
+	var mesh_inst := MeshInstance3D.new()
+	var cylinder := CylinderMesh.new()
+	cylinder.top_radius     = 6.0
+	cylinder.bottom_radius  = 6.0
+	cylinder.height         = 0.04
+	cylinder.radial_segments = 96
+	mesh_inst.mesh = cylinder
+
+	var shader : Shader = load("res://src/actors/player/fighter_ulti_area.gdshader")
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	mesh_inst.material_override = mat
+
+	add_child(mesh_inst)
+	mesh_inst.position = Vector3(0.0, 0.05, 0.0)
+
+	# Fade in via scale (el shader es aditivo, escalamos el nodo)
+	mesh_inst.scale = Vector3.ZERO
+	var t_in := create_tween()
+	t_in.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t_in.tween_property(mesh_inst, "scale", Vector3.ONE, 0.2)
+
+	await get_tree().create_timer(duracion - 0.4).timeout
+
+	# Fade out via scale
+	var t_out := create_tween()
+	t_out.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t_out.tween_property(mesh_inst, "scale", Vector3.ZERO, 0.4)
+	await t_out.finished
+	mesh_inst.queue_free()
+
+# ------------------------------------------------------------------------------
+# ULTIMATE: SHOOTER — AUTO-LASER
+# ------------------------------------------------------------------------------
+func _activar_ulti_shooter() -> void:
+	const LASER_RADIUS   := 12.0   # radio reducido
+	const FIRE_INTERVAL  := 0.5    # segundos entre salvas
+	const MAX_TARGETS    := 2      # objetivos simultáneos por salva
+	const DAMAGE_PER_HIT := 10.0   # daño base por impacto
+
+	var damage_scaled := DAMAGE_PER_HIT
+	if combat_manager:
+		damage_scaled = DAMAGE_PER_HIT * combat_manager.damage_multiplier
+
+	# ── 1. Disco de área en el suelo ─────────────────────────────────
+	var area_mesh := MeshInstance3D.new()
+	var disc := CylinderMesh.new()
+	disc.top_radius      = LASER_RADIUS
+	disc.bottom_radius   = LASER_RADIUS
+	disc.height          = 0.04
+	disc.radial_segments = 128
+	area_mesh.mesh = disc
+	var area_shader : Shader = load("res://src/actors/player/shooter_ulti_area.gdshader")
+	var area_mat := ShaderMaterial.new()
+	area_mat.shader = area_shader
+	area_mesh.material_override = area_mat
+	add_child(area_mesh)
+	area_mesh.position = Vector3(0.0, 0.05, 0.0)
+	area_mesh.scale = Vector3.ZERO
+	var t_in := create_tween()
+	t_in.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t_in.tween_property(area_mesh, "scale", Vector3.ONE, 0.3)
+
+	# ── 2. HUD de duración ───────────────────────────────────────────
+	var canvas := CanvasLayer.new()
+	canvas.layer = 10
+	add_child(canvas)
+
+	var bar_container := VBoxContainer.new()
+	bar_container.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	bar_container.offset_top    = -72.0
+	bar_container.offset_bottom = -16.0
+	bar_container.offset_left   = 220.0
+	bar_container.offset_right  = -220.0
+	bar_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	canvas.add_child(bar_container)
+
+	var lbl := Label.new()
+	lbl.text = "⚡ AUTO-LASER"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 18)
+	lbl.modulate = Color(0.0, 1.0, 0.9, 1.0)
+	bar_container.add_child(lbl)
+
+	var bar := ProgressBar.new()
+	bar.min_value = 0.0
+	bar.max_value = 1.0
+	bar.value     = 1.0
+	bar.custom_minimum_size = Vector2(0.0, 12.0)
+	bar.modulate = Color(0.0, 0.9, 1.0, 0.9)
+	bar_container.add_child(bar)
+
+	# ── 3. Luz ambiental tenue mientras dure ─────────────────────────
+	var ambient_light := OmniLight3D.new()
+	ambient_light.light_color  = Color(0.0, 0.85, 1.0)
+	ambient_light.light_energy = 1.2
+	ambient_light.omni_range   = LASER_RADIUS * 0.6
+	add_child(ambient_light)
+	ambient_light.position = Vector3.ZERO
+
+	# ── 4. Loop de disparo automático ────────────────────────────────
+	var elapsed_ms: int = 0
+	var last_ms: int    = Time.get_ticks_msec()
+	var duration_ms: int = int(5.0 * 1000.0)  # 5 segundos fijos
+
+	while elapsed_ms < duration_ms and mask_manager and mask_manager.is_ultimate_active:
+		await get_tree().create_timer(FIRE_INTERVAL).timeout
+		var now: int      = Time.get_ticks_msec()
+		elapsed_ms       += now - last_ms
+		last_ms           = now
+
+		var ratio: float = 1.0 - clamp(float(elapsed_ms) / float(duration_ms), 0.0, 1.0)
+		bar.value = ratio
+		if ratio < 0.25:
+			var blink := sin(float(elapsed_ms) * 0.025) * 0.5 + 0.5
+			bar.modulate  = Color(0.3, 1.0 - blink * 0.5, blink * 0.5 + 0.5, 0.9)
+			lbl.text      = "⚡ RECARGANDO..."
+			lbl.modulate  = Color(1.0, 0.6 + blink * 0.4, 0.1, 1.0)
+
+		if not (mask_manager and mask_manager.is_ultimate_active): break
+
+		var targets := _shooter_buscar_targets(LASER_RADIUS, MAX_TARGETS)
+		for tgt in targets:
+			_shooter_disparar_laser(tgt, damage_scaled)
+
+	# ── 5. Limpieza ───────────────────────────────────────────────────
+	var t_out := create_tween()
+	t_out.tween_property(area_mesh, "scale", Vector3.ZERO, 0.35)
+	t_out.parallel().tween_property(lbl, "modulate:a", 0.0, 0.35)
+	t_out.parallel().tween_property(bar_container, "modulate:a", 0.0, 0.35)
+	t_out.parallel().tween_property(ambient_light, "light_energy", 0.0, 0.35)
+	await t_out.finished
+	area_mesh.queue_free()
+	ambient_light.queue_free()
+	canvas.queue_free()
+
+func _shooter_buscar_targets(radio: float, max_count: int) -> Array:
+	var space  := get_world_3d().direct_space_state
+	var sphere := SphereShape3D.new()
+	sphere.radius = radio
+	var params := PhysicsShapeQueryParameters3D.new()
+	params.shape           = sphere
+	params.transform       = global_transform
+	params.collision_mask  = 0xFFFFFFFF  # detectar todas las capas
+	params.exclude         = [get_rid()]
+	var hits := space.intersect_shape(params, 64)
+
+	var candidatos: Array = []
+	var vistos: Array = []  # evitar duplicados
+	for hit in hits:
+		var body = hit.get("collider")
+		if not body or body == self or body in vistos: continue
+		if body.is_in_group("Player") or body.is_in_group("allied_skeleton"): continue
+		# Aceptar cualquier cuerpo que pueda recibir daño
+		if not (body.has_method("take_damage") or body.has_node("HealthComponent")): continue
+		# Descartar si ya muerto
+		if body.has_node("HealthComponent"):
+			var hc = body.get_node("HealthComponent")
+			if "current_health" in hc and hc.current_health <= 0: continue
+		vistos.append(body)
+		candidatos.append(body)
+
+	candidatos.sort_custom(func(a, b): return global_position.distance_to(a.global_position) < global_position.distance_to(b.global_position))
+	return candidatos.slice(0, max_count)
+
+func _shooter_disparar_laser(target: Node3D, damage: float) -> void:
+	# ── Daño ─────────────────────────────────────────────────────────
+	if target.has_method("take_damage"):
+		target.take_damage(damage)
+	elif target.has_node("HealthComponent"):
+		target.get_node("HealthComponent").take_damage(damage)
+
+	# ── Visual del rayo ───────────────────────────────────────────────
+	var origin := global_position + Vector3(0.0, 1.2, 0.0)
+	var dest   := target.global_position + Vector3(0.0, 1.0, 0.0)
+	var diff   := dest - origin
+	var length := diff.length()
+	if length < 0.3: return
+	var dir := diff / length
+
+	# Construir base: Y local apunta en 'dir' (eje del CylinderMesh)
+	var ref_up := Vector3.UP
+	if abs(dir.dot(ref_up)) > 0.98:
+		ref_up = Vector3.RIGHT
+	var x_axis := ref_up.cross(dir).normalized()
+	var z_axis := x_axis.cross(dir).normalized()
+
+	var beam := MeshInstance3D.new()
+	var cyl  := CylinderMesh.new()
+	cyl.top_radius      = 0.055
+	cyl.bottom_radius   = 0.055
+	cyl.height          = length
+	cyl.radial_segments = 8
+	beam.mesh = cyl
+
+	var laser_mat := ShaderMaterial.new()
+	laser_mat.shader = load("res://src/actors/player/shooter_laser_beam.gdshader")
+	laser_mat.set_shader_parameter("alpha_mult", 1.0)
+	beam.material_override = laser_mat
+
+	get_tree().current_scene.add_child(beam)
+	beam.global_transform = Transform3D(Basis(x_axis, dir, z_axis), (origin + dest) * 0.5)
+
+	# Luz de impacto en el objetivo
+	var impact := OmniLight3D.new()
+	impact.light_color  = Color(0.0, 0.9, 1.0)
+	impact.light_energy = 9.0
+	impact.omni_range   = 4.5
+	beam.add_child(impact)
+	impact.global_position = dest
+
+	# Fade out → destruir (lambda en variable para evitar problemas de parseo)
+	var _lmat := laser_mat
+	var _beam := beam
+	var fade_fn := func(v: float):
+		if is_instance_valid(_lmat): _lmat.set_shader_parameter("alpha_mult", v)
+	var t := create_tween()
+	t.tween_method(fade_fn, 1.0, 0.0, 0.22)
+	t.parallel().tween_property(impact, "light_energy", 0.0, 0.18)
+	t.tween_callback(_beam.queue_free)
 
 func take_damage(amount: float):
 	add_camera_trauma(0.6) # Tiembla la pantalla al recibir daño bruto
@@ -606,6 +1122,8 @@ func usar_pocion(index):
 				health_component.current_health = health_component.max_health
 			emit_signal("vida_cambiada", health_component.current_health)
 		emit_signal("pociones_cambiadas", index + 1, pociones_ui[index])
+	else:
+		show_toast("You don't have that potion!", Color(1.0, 0.4, 0.1))
 func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 	if is_dead: return
 	

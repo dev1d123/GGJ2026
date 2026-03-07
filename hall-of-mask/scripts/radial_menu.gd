@@ -347,3 +347,127 @@ func _agregar_opcion_sin_mascara():
 	
 	# Usamos push_front para meterlo al PRINCIPIO de la lista del Sector 0
 	inventory_data[0].push_front(no_mask)
+
+# -----------------------------------------------------------
+# 📊 PANEL DE ESTADÍSTICAS (desde feature/ulti)
+# -----------------------------------------------------------
+func _build_stats_panel():
+	# PanelContainer raíz
+	_stats_panel = PanelContainer.new()
+	_stats_panel.name = "StatsPanel"
+	_stats_panel.visible = false
+	# Posición: lado derecho, ligeramente arriba del centro
+	_stats_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_stats_panel.position = Vector2(-320, -100)
+	_stats_panel.custom_minimum_size = Vector2(300, 0)
+	add_child(_stats_panel)
+
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.85)
+	style.border_width_top = 1; style.border_width_bottom = 1
+	style.border_width_left = 1; style.border_width_right = 1
+	style.border_color = Color(0.4, 0.6, 1.0, 0.7)
+	style.corner_radius_top_left = 8; style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8; style.corner_radius_bottom_right = 8
+	style.content_margin_left = 14; style.content_margin_right = 14
+	style.content_margin_top = 12; style.content_margin_bottom = 12
+	_stats_panel.add_theme_stylebox_override("panel", style)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
+	_stats_panel.add_child(vbox)
+
+	# Título
+	var title = Label.new()
+	title.text = "— ATTRIBUTES —"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0))
+	title.add_theme_font_size_override("font_size", 20)
+	vbox.add_child(title)
+
+	var sep = HSeparator.new()
+	sep.add_theme_color_override("color", Color(0.4, 0.6, 1.0, 0.5))
+	vbox.add_child(sep)
+
+	# Definición de filas: [clave_interna, etiqueta_display]
+	var rows = [
+		["mask",         "Mask"],
+		["hp",           "HP"],
+		["speed",        "Speed"],
+		["jump",         "Jump"],
+		["damage",       "Damage"],
+		["defense",      "Defense"],
+		["atk_speed",    "Atk Speed"],
+		["crit",         "Crit Chance"],
+		["ult",          "Ultimate"],
+	]
+
+	for row in rows:
+		var hbox = HBoxContainer.new()
+		vbox.add_child(hbox)
+
+		var lbl_key = Label.new()
+		lbl_key.text = row[1]
+		lbl_key.custom_minimum_size = Vector2(140, 0)
+		lbl_key.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
+		lbl_key.add_theme_font_size_override("font_size", 16)
+		hbox.add_child(lbl_key)
+
+		var lbl_val = Label.new()
+		lbl_val.text = "—"
+		lbl_val.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		lbl_val.add_theme_font_size_override("font_size", 16)
+		hbox.add_child(lbl_val)
+		_stat_labels[row[0]] = lbl_val
+
+func _refresh_stats():
+	if not _stats_panel or not _player_ref:
+		return
+	_stats_panel.visible = true
+
+	var hc  = _player_ref.get_node_or_null("HealthComponent")
+	var cm  = _player_ref.get_node_or_null("CombatManager")
+	var mm  = _player_ref.get_node_or_null("MaskManager")
+
+	# Mask
+	var mask_name = "None"
+	if mm and mm.current_mask:
+		mask_name = mm.current_mask.mask_name
+	_stat_labels["mask"].text = mask_name
+
+	# HP
+	if hc:
+		_stat_labels["hp"].text = "%d / %d" % [int(hc.current_health), int(hc.max_health)]
+	else:
+		_stat_labels["hp"].text = "��"
+
+	# Speed (respeta el multiplicador de máscara si existe)
+	var spd = _player_ref.speed_walk if "speed_walk" in _player_ref else 0.0
+	var spd_mult = _player_ref.mask_speed_mult if "mask_speed_mult" in _player_ref else 1.0
+	_stat_labels["speed"].text = "%.0f" % (spd * spd_mult)
+
+	# Jump
+	var jmp = _player_ref.jump_force if "jump_force" in _player_ref else 0.0
+	var jmp_mult = _player_ref.mask_jump_mult if "mask_jump_mult" in _player_ref else 1.0
+	_stat_labels["jump"].text = "%.1f" % (jmp * jmp_mult)
+
+	# Damage, Defense, Atk Speed, Crit
+	if cm:
+		_stat_labels["damage"].text   = "x%.2f" % cm.damage_multiplier
+		_stat_labels["atk_speed"].text = "x%.2f" % cm.attack_speed_multiplier
+		_stat_labels["crit"].text      = "%.0f%%" % (cm.crit_chance * 100.0)
+	else:
+		_stat_labels["damage"].text   = "—"
+		_stat_labels["atk_speed"].text = "—"
+		_stat_labels["crit"].text      = "—"
+
+	if hc:
+		_stat_labels["defense"].text = "x%.2f" % hc.defense_multiplier
+	else:
+		_stat_labels["defense"].text = "—"
+
+	# Ultimate
+	if mm:
+		_stat_labels["ult"].text = "%d / %d" % [int(mm.current_ult_charge), int(mm.max_ult_charge)]
+	else:
+		_stat_labels["ult"].text = "—"

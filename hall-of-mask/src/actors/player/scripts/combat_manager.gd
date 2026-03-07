@@ -275,12 +275,16 @@ func handle_left_click(pressed: bool):
 			if is_attacking_r or cd_timer_r > 0: return 
 			if w.mana_cost > 0:
 				if mana_component and mana_component.has_method("try_consume"):
-					if not mana_component.try_consume(w.mana_cost): return
-			_ejecutar_disparo_rango(w, "right")
-	
+					if not mana_component.try_consume(w.mana_cost):
+						_notify_toast("Insufficient mana!", Color(0.2, 0.5, 1.0))
+						return
 	# CASO 2: MELEE
 	else:
 		if pressed: _try_melee_attack("left")
+
+func _notify_toast(message: String, color: Color) -> void:
+	if owner_node and owner_node.has_method("show_toast"):
+		owner_node.show_toast(message, color)
 
 # Wrapper Interno Melee
 func _try_melee_attack(mano: String):
@@ -303,7 +307,9 @@ func _try_melee_attack(mano: String):
 	
 	# Stamina
 	if stamina_component and stamina_component.has_method("try_consume"):
-		if not stamina_component.try_consume(w.stamina_cost): return
+		if not stamina_component.try_consume(w.stamina_cost):
+			_notify_toast("Not enough stamina!", Color(1.0, 0.55, 0.1))
+			return
 		
 	_ejecutar_secuencia_ataque(w, mano)
 
@@ -586,6 +592,25 @@ func _buscar_hitbox(parent):
 		var weapon = parent.get_child(0)
 		return weapon.find_child("Hitbox")
 	return null
+
+# ------------------------------------------------------------------
+# ULTIMATE ANIMATION (llamado desde player.gd u otras máscaras)
+# ------------------------------------------------------------------
+func ejecutar_animacion_ulti(anim_name: String, duration: float) -> void:
+	if is_attacking_r or is_attacking_l: return
+	is_attacking_r = true
+	is_attacking_l = true
+	is_movement_locked = true
+	if anim_player_node: anim_player_node.speed_scale = 1.0
+	_safe_set_tween(BLEND_2H, 1.0, 0.05)
+	if animation_tree and animation_tree.get(PLAYBACK_2H) != null:
+		animation_tree[PLAYBACK_2H].start(anim_name)
+	await get_tree().create_timer(duration).timeout
+	_safe_set_tween(BLEND_2H, 0.0, 0.3)
+	if anim_player_node: anim_player_node.speed_scale = 1.0
+	is_attacking_r = false
+	is_attacking_l = false
+	is_movement_locked = false
 
 func manual_hitbox_activation(damage_mult_override: float, duration: float, knockback_force: float, hand_node: Node3D):
 	var hitbox = _buscar_hitbox(hand_node)
