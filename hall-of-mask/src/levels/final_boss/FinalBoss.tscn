@@ -1,0 +1,144 @@
+[gd_scene load_steps=14 format=3 uid="uid://b1naf05s3y2k"]
+
+[ext_resource type="Script" path="res://src/levels/final_boss/final_boss.gd" id="1_fboss"]
+[ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="2_fboss"]
+[ext_resource type="Texture2D" uid="uid://n2tj07qienjt" path="res://assets/textures/lobby/lobbyTerrain.png" id="3_fboss"]
+[ext_resource type="Texture2D" uid="uid://dan5opfdaco31" path="res://assets/textures/lobby/lobbyTerrain_normal.png" id="4_fboss"]
+[ext_resource type="Texture2D" uid="uid://c4hndxj41d8go" path="res://assets/textures/lobby/lobbyTerrain3.png" id="5_fboss"]
+[ext_resource type="Texture2D" uid="uid://tbt35xsdys0s" path="res://assets/textures/lobby/lobbyTerrain3_normal.png" id="6_fboss"]
+[ext_resource type="PackedScene" uid="uid://djqdqbmjeb171" path="res://src/levels/lobby/PCUpper.tscn" id="7_fboss"]
+[ext_resource type="PackedScene" uid="uid://y2bb4vdakael" path="res://assets/models/pc/pc.fbx" id="8_fboss"]
+[ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="9_fboss"]
+[ext_resource type="AudioStream" uid="uid://c5rtrvjoycrxt" path="res://assets/sounds/HardFighter.wav" id="10_fboss"]
+[ext_resource type="PackedScene" uid="uid://p54djcq7e4qo" path="res://src/actors/enemies/bosses/frost_golem.tscn" id="11_fboss"]
+[ext_resource type="PackedScene" uid="uid://cdyglwgplotai" path="res://src/actors/enemies/bosses/orc_brute_blue.tscn" id="12_fboss"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_fb"]
+vertices = PackedVector3Array(-249.5, 0.2779607, -249.46419, -249.5, 0.2779607, 249.53581, 249.5, 0.2779607, 249.53581, 249.5, 0.2779607, -249.46419)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fb"]
+size = Vector3(500, 0.476, 500)
+
+[sub_resource type="Gradient" id="Gradient_fb"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fb"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_fb"]
+noise = SubResource("FastNoiseLite_fb")
+color_ramp = SubResource("Gradient_fb")
+seamless = true
+
+[sub_resource type="Terrain3DMaterial" id="Terrain3DMaterial_fb"]
+_shader_parameters = {
+&"bias_distance": 512.0,
+&"blend_sharpness": 0.5,
+&"depth_blur": 0.0,
+&"enable_macro_variation": true,
+&"enable_projection": true,
+&"flat_terrain_normals": false,
+&"macro_variation1": Color(1, 1, 1, 1),
+&"macro_variation2": Color(1, 1, 1, 1),
+&"macro_variation_slope": 0.333,
+&"mipmap_bias": 1.0,
+&"noise1_angle": 0.0,
+&"noise1_offset": Vector2(0.5, 0.5),
+&"noise1_scale": 0.04,
+&"noise2_scale": 0.076,
+&"noise_texture": SubResource("NoiseTexture2D_fb"),
+&"projection_threshold": 0.8
+}
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fb"]
+transparency = 4
+cull_mode = 2
+vertex_color_use_as_albedo = true
+backlight_enabled = true
+backlight = Color(0.5, 0.5, 0.5, 1)
+distance_fade_mode = 1
+distance_fade_min_distance = 128.0
+distance_fade_max_distance = 96.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_fb"]
+generated_type = 1
+height_offset = 0.5
+material_override = SubResource("StandardMaterial3D_fb")
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_fb1"]
+name = "lobbyTerrain"
+albedo_texture = ExtResource("3_fboss")
+normal_texture = ExtResource("4_fboss")
+uv_scale = 0.03
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_fb3"]
+name = "lobbyTerrain3"
+albedo_texture = ExtResource("5_fboss")
+normal_texture = ExtResource("6_fboss")
+uv_scale = 0.03
+
+[sub_resource type="Terrain3DAssets" id="Terrain3DAssets_fb"]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_fb")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_fb1"), SubResource("Terrain3DTextureAsset_fb3")])
+
+[node name="FinalBoss" type="Node3D"]
+script = ExtResource("1_fboss")
+
+[node name="Player" parent="." instance=ExtResource("9_fboss")]
+transform = Transform3D(-0.9986748, 0, 0.051464375, 0, 1, 0, -0.051464375, 0, -0.9986748, 7.7723417, 3.1063814, -8.023512)
+collision_mask = 133
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_fb")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
+collision_layer = 255
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2340393, 0)
+shape = SubResource("BoxShape3D_fb")
+
+[node name="Environment" parent="." instance=ExtResource("2_fboss")]
+
+[node name="Node" type="Node" parent="."]
+
+[node name="StaticBody3D" parent="Node" instance=ExtResource("7_fboss")]
+transform = Transform3D(7.83, 0, 0, 0, 2.545, 0, 0, 0, 7.71, 0, 0, 0)
+
+[node name="Gaming Setup Low Poly" parent="Node" instance=ExtResource("8_fboss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.11003208, 1.4008598, 0.12667441)
+
+[node name="Terrain3D" type="Terrain3D" parent="Node"]
+data_directory = "res://src/levels/lobby"
+material = SubResource("Terrain3DMaterial_fb")
+assets = SubResource("Terrain3DAssets_fb")
+top_level = true
+metadata/_edit_lock_ = true
+
+[node name="FrostGolem" parent="." groups=["Enemies"] instance=ExtResource("11_fboss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.0, 3.1, 8.0)
+collision_layer = 255
+collision_mask = 255
+
+[node name="OrcBruteBlue" parent="." groups=["Enemies"] instance=ExtResource("12_fboss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.0, 3.1, 8.0)
+collision_layer = 255
+collision_mask = 255
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_fboss")
+autoplay = true

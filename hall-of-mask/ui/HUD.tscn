@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://bs0f617h5k5u4"]
+[gd_scene load_steps=39 format=3 uid="uid://bs0f617h5k5u4"]
 
 [ext_resource type="Script" uid="uid://qnvbgg883dg5" path="res://scripts/radial_menu.gd" id="1_nsbp6"]
 [ext_resource type="Script" uid="uid://b2liomcfs5kk7" path="res://scripts/hud.gd" id="1_oqdbm"]
@@ -28,13 +28,17 @@
 [ext_resource type="Texture2D" uid="uid://dkc2xqgv4pk8j" path="res://UI_assets/ManStand.png" id="22_3tkt7"]
 [ext_resource type="Texture2D" uid="uid://d3eeaesdcld4q" path="res://UI_assets/mochila.png" id="22_vn47m"]
 [ext_resource type="Texture2D" uid="uid://7bru2kld1jnj" path="res://UI_assets/bordEquipo.png" id="24_3tkt7"]
+[ext_resource type="LabelSettings" uid="uid://bmopgkhe4cxe2" path="res://src/GUI/Cinematic.tres" id="30_6lojm"]
+[ext_resource type="FontFile" uid="uid://3qoskpc6gny4" path="res://assets/imagesGUI/font.TTF" id="font_hud"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_pfnlp"]
+font = ExtResource("font_hud")
 font_size = 25
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_jd13s"]
+font = ExtResource("font_hud")
 font_size = 20
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
@@ -47,11 +51,13 @@ corner_radius_bottom_right = 15
 corner_radius_bottom_left = 15
 
 [sub_resource type="LabelSettings" id="LabelSettings_wxbmk"]
+font = ExtResource("font_hud")
 font_size = 20
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_pom5v"]
+font = ExtResource("font_hud")
 font_size = 20
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
@@ -149,7 +155,7 @@ script = ExtResource("4_pfnlp")
 
 [node name="Label" type="Label" parent="GameUI/ConsumablesPanel"]
 layout_mode = 2
-text = "1        2        3  "
+text = "1    2    3 "
 label_settings = SubResource("LabelSettings_pfnlp")
 horizontal_alignment = 2
 vertical_alignment = 2
@@ -1001,5 +1007,6 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 0, 1)
 theme_override_font_sizes/font_size = 28
 text = "🎭 ¡NUEVA MÁSCARA DESBLOQUEADA!"
+label_settings = ExtResource("30_6lojm")
 horizontal_alignment = 1
 vertical_alignment = 1

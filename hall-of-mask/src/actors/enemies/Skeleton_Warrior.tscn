@@ -753,7 +753,7 @@ size = Vector3(0.88098145, 2.1611938, 0.8808594)
 
 [node name="Skeleton_Minion" type="CharacterBody3D" node_paths=PackedStringArray("visual_mesh", "anim_tree")]
 collision_layer = 4
-collision_mask = 2
+collision_mask = 7
 script = ExtResource("1_idp5r")
 loadout_weapon_r = ExtResource("2_aryhv")
 loadout_mask = ExtResource("3_p6tyb")

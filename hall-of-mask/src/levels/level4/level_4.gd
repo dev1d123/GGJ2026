@@ -42,6 +42,8 @@ func _ready() -> void:
 	add_child(sfx_player)
 	sfx_player.bus = "Master"
 	sfx_player.volume_db = 6.0
+	sfx_player.stream = preload("res://assets/sfx/startLevel.mp3")
+	sfx_player.play()
 	# Música ligeramente más baja
 	audio.volume_db      -= 6.0
 	audio_zone.volume_db -= 6.0
@@ -71,22 +73,6 @@ func _ready() -> void:
 	# audio_zone en loop
 	audio_zone.finished.connect(_on_audio_zone_finished)
 
-	_show_entry_dialog()
-
-func _show_entry_dialog() -> void:
-	if not GameData.is_first_visit(LEVEL_ID):
-		return
-	GameData.mark_level_visited(LEVEL_ID)
-	var char_id: String = GameData.selected_character
-	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
-		return
-	ToastNotification.show_toast(char_id, GameData.DIALOGS[char_id][LEVEL_ID]["entry"])
-
-func _show_exit_dialog() -> void:
-	var char_id: String = GameData.selected_character
-	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
-		return
-	ToastNotification.show_toast(char_id, GameData.DIALOGS[char_id][LEVEL_ID]["exit"])
 
 # ---------------- AUDIO LOOP ----------------
 func _on_audio_finished() -> void:
@@ -163,7 +149,6 @@ func _complete_level():
 	audio_zone.stop()
 	sfx_player.stream = victory_sound
 	sfx_player.play()
-	_show_exit_dialog()
 	
 	GameManager.complete_level("level4")
 	await get_tree().create_timer(4.0).timeout

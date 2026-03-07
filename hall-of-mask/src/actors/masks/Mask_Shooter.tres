@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="MaskData" load_steps=4 format=3 uid="uid://hem3q1sub2wa"]
+[gd_resource type="Resource" script_class="MaskData" load_steps=4 format=3 uid="uid://b2khd00oijrd"]
 
 [ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_shooter"]
 [ext_resource type="PackedScene" uid="uid://cr5iraqhcbu26" path="res://src/actors/masks/Mask_Shooter_2.glb" id="2_ogy6t"]

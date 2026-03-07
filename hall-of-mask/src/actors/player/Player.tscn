@@ -685,7 +685,7 @@ reticle_ui = NodePath("../HUD2/ReticleUI")
 
 [node name="HealthComponent" type="Node3D" parent="."]
 script = ExtResource("143_rad4r")
-max_health = 200.0
+max_health = 500.0
 
 [node name="MaskManager" type="Node" parent="." node_paths=PackedStringArray("player", "combat_manager", "stamina_component", "screen_overlay")]
 script = ExtResource("151_j1o44")

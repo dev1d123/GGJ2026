@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://drc75wnvc5krj"]
+[gd_scene load_steps=39 format=3 uid="uid://drc75wnvc5krj"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_40ody"]
 [ext_resource type="Script" uid="uid://ol4wcmbkt4d4" path="res://src/levels/level3/level_3.gd" id="1_710q4"]
@@ -23,10 +23,12 @@
 [ext_resource type="PackedScene" uid="uid://fkknnwxtt25e" path="res://src/levels/level3/structures/shrub3.tscn" id="20_eavg7"]
 [ext_resource type="PackedScene" uid="uid://g4uowe3svs3x" path="res://src/levels/level3/structures/mausoleum.tscn" id="21_8a8h7"]
 [ext_resource type="AudioStream" uid="uid://f0r58ojm1lll" path="res://assets/sounds/LivingSoul.wav" id="23_xw760"]
+[ext_resource type="AudioStream" uid="uid://c5rtrvjoycrxt" path="res://assets/sounds/HardFighter.wav" id="29_boss3"]
 [ext_resource type="PackedScene" uid="uid://fjmfpedjk6b" path="res://src/actors/enemies/Skeleton_Mage.tscn" id="24_5deba"]
 [ext_resource type="PackedScene" uid="uid://bip75ya5ux6hv" path="res://src/actors/enemies/Skeleton_Minion.tscn" id="25_tvdmr"]
 [ext_resource type="PackedScene" uid="uid://550j3hb7qwen" path="res://src/actors/enemies/Skeleton_Rogue.tscn" id="26_oyg6j"]
 [ext_resource type="PackedScene" uid="uid://5y3h1r2k7nhq" path="res://src/actors/enemies/Skeleton_Warrior.tscn" id="27_5y5qm"]
+[ext_resource type="PackedScene" path="res://src/actors/enemies/bosses/monstrosity.tscn" id="28_tvdmr"]
 
 [sub_resource type="Gradient" id="Gradient_ggtw4"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -121,6 +123,10 @@ metadata/_edit_lock_ = true
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("23_xw760")
 autoplay = true
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("29_boss3")
+volume_db = -10.13
 
 [node name="Elements" type="Node" parent="."]
 
@@ -914,3 +920,9 @@ collision_mask = 255
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.71299, -0.25592422, 43.760254)
 shape = SubResource("BoxShape3D_5deba")
 debug_color = Color(0.90588236, 0.12156863, 0.6784314, 1)
+
+[node name="Monstrosity" parent="." instance=ExtResource("28_tvdmr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9052603, 4.8710756, 71.33843)
+collision_mask = 135
+visible = false
+process_mode = 4

@@ -18,5 +18,5 @@ windup_time = 0.4
 total_animation_time = 1.27
 cooldown = 0.4
 is_two_handed = true
-damage = 15.0
+damage = 18.0
 stamina_cost = 10.0

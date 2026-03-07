@@ -382,6 +382,7 @@ func _build_stats_panel():
 	title.text = "— ATTRIBUTES —"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0))
+	title.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 	title.add_theme_font_size_override("font_size", 20)
 	vbox.add_child(title)
 
@@ -410,12 +411,14 @@ func _build_stats_panel():
 		lbl_key.text = row[1]
 		lbl_key.custom_minimum_size = Vector2(140, 0)
 		lbl_key.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
+		lbl_key.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 		lbl_key.add_theme_font_size_override("font_size", 16)
 		hbox.add_child(lbl_key)
 
 		var lbl_val = Label.new()
 		lbl_val.text = "—"
 		lbl_val.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		lbl_val.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 		lbl_val.add_theme_font_size_override("font_size", 16)
 		hbox.add_child(lbl_val)
 		_stat_labels[row[0]] = lbl_val

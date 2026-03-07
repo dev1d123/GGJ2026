@@ -1,6 +1,8 @@
 extends CharacterBody3D
 class_name Enemy
 
+const _SFX_DEFEAT_ENEMY: AudioStream = preload("res://assets/sfx/defeatEnemy.wav")
+
 # ------------------------------------------------------------------------------
 # CONFIGURACIÓN
 # ------------------------------------------------------------------------------
@@ -967,10 +969,21 @@ func _on_damage_received(a, c):
 	_register_enemy_ultimate_event("HIT_RECEIVED")
 	_check_enemy_emergency_ultimate()
 
+
 func _morir():
 	if is_instance_valid(player_ref) and player_ref.has_node("MaskManager"):
 		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
-	
+
+	# SFX de derrota (se agrega al padre para sobrevivir al queue_free del enemigo)
+	var _sfx_defeat := AudioStreamPlayer.new()
+	var _sfx_parent = get_parent()
+	if is_instance_valid(_sfx_parent):
+		_sfx_parent.add_child(_sfx_defeat)
+		_sfx_defeat.stream = _SFX_DEFEAT_ENEMY
+		_sfx_defeat.bus = "Master"
+		_sfx_defeat.play()
+		_sfx_defeat.finished.connect(_sfx_defeat.queue_free)
+
 	current_state = State.DEAD
 	set_physics_process(false)
 	

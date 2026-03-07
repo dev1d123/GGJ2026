@@ -1,11 +1,11 @@
-[gd_scene load_steps=31 format=3 uid="uid://deomqtukglycp"]
+[gd_scene load_steps=41 format=3 uid="uid://deomqtukglycp"]
 
 [ext_resource type="Texture2D" uid="uid://b7havhf0ua35l" path="res://assets/textures/level2/level2Rocks.dds" id="1_cp82e"]
 [ext_resource type="Script" uid="uid://gwxmmwihf4uo" path="res://src/levels/level2/level_2.gd" id="1_dqyqn"]
 [ext_resource type="Texture2D" uid="uid://l4lhdp6tiq2k" path="res://assets/textures/level2/level2Rocks_normal.dds" id="2_fyp4o"]
 [ext_resource type="PackedScene" uid="uid://c0uot6iwull41" path="res://src/environment.tscn" id="3_hp4bj"]
 [ext_resource type="PackedScene" uid="uid://bttr6hyupm2vo" path="res://src/levels/level2/structures/enter_tunnel.tscn" id="5_8hsde"]
-[ext_resource type="PackedScene" uid="uid://bt7tyncl32uya" path="res://src/levels/level2/structures/rock_platafform.tscn" id="6_qamio"]
+[ext_resource type="PackedScene" uid="uid://f68lnkrvm8am" path="res://src/levels/level2/structures/rock_platafform.tscn" id="6_qamio"]
 [ext_resource type="PackedScene" uid="uid://dv0gn4jrfypnf" path="res://src/levels/level2/structures/stair_wood.tscn" id="7_qbw0w"]
 [ext_resource type="PackedScene" uid="uid://cakbsmr8x3aj7" path="res://src/levels/level2/structures/metal_bridge.tscn" id="8_0odbh"]
 [ext_resource type="PackedScene" uid="uid://dbtcit4yiinti" path="res://src/levels/level2/structures/rock_cliff.tscn" id="9_sqpsr"]
@@ -14,11 +14,20 @@
 [ext_resource type="PackedScene" uid="uid://qa57fojc1bcm" path="res://src/levels/level2/structures/metal_stair.tscn" id="12_dpe5t"]
 [ext_resource type="PackedScene" uid="uid://bk3adcpyrs3s0" path="res://src/levels/level2/structures/rock1_model.tscn" id="13_0wu3u"]
 [ext_resource type="AudioStream" uid="uid://bcqevbi6q4kk" path="res://assets/sounds/JazzyFall.wav" id="15_43bsa"]
+[ext_resource type="AudioStream" uid="uid://c5rtrvjoycrxt" path="res://assets/sounds/HardFighter.wav" id="28_boss2"]
 [ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="15_a1g1w"]
 [ext_resource type="PackedScene" uid="uid://5y3h1r2k7nhq" path="res://src/actors/enemies/Skeleton_Warrior.tscn" id="16_a1g1w"]
 [ext_resource type="PackedScene" uid="uid://550j3hb7qwen" path="res://src/actors/enemies/Skeleton_Rogue.tscn" id="17_r5i3b"]
 [ext_resource type="PackedScene" uid="uid://bip75ya5ux6hv" path="res://src/actors/enemies/Skeleton_Minion.tscn" id="18_weda2"]
 [ext_resource type="PackedScene" uid="uid://fjmfpedjk6b" path="res://src/actors/enemies/Skeleton_Mage.tscn" id="19_e43h2"]
+[ext_resource type="PackedScene" uid="uid://eupffqfwx45" path="res://src/actors/enemies/Demon_Blue.tscn" id="20_iu5hk"]
+[ext_resource type="PackedScene" uid="uid://blr5tagoawhb0" path="res://src/actors/enemies/Hunter_A.tscn" id="21_200nn"]
+[ext_resource type="PackedScene" uid="uid://dl1o1joxmllgq" path="res://src/actors/enemies/Hunter_B.tscn" id="22_avlh3"]
+[ext_resource type="PackedScene" uid="uid://bap4xfpr5idkx" path="res://src/actors/enemies/Knight_A.tscn" id="23_tlfh0"]
+[ext_resource type="PackedScene" uid="uid://dhuqsrotb0x7e" path="res://src/actors/enemies/Knight_B.tscn" id="24_uqvb1"]
+[ext_resource type="PackedScene" uid="uid://7elcdw4doero" path="res://src/actors/enemies/Warrior_A.tscn" id="25_5l6c3"]
+[ext_resource type="PackedScene" uid="uid://bes6lb467snxh" path="res://src/actors/enemies/Warrior_B.tscn" id="26_51cq1"]
+[ext_resource type="PackedScene" uid="uid://u6ejpuv2gfn0" path="res://src/actors/enemies/bosses/skull_knight.tscn" id="27_200nn"]
 
 [sub_resource type="Gradient" id="Gradient_hp4bj"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -93,11 +102,15 @@ mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_0odbh")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_sqpsr")])
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_43bsa"]
-vertices = PackedVector3Array(-18.287628, -13.629898, -45.978516, -18.287628, -13.629898, -31.728516, -7.537628, -13.629898, -31.728516, -7.537628, -13.629898, -45.978516, 33.96237, -31.129898, -30.728516, 33.96237, -31.129898, -16.478516, 44.71237, -31.129898, -16.478516, 44.71237, -31.129898, -30.728516, -46.28763, -109.3799, -26.728516, -46.28763, -109.3799, -12.478516, -35.78763, -109.3799, -12.478516, -35.78763, -109.3799, -26.728516, 33.96237, -125.3799, 2.7714844, 33.96237, -125.3799, 17.021484, 44.71237, -125.3799, 17.021484, 44.71237, -125.3799, 2.7714844, -34.28763, -115.8799, 17.771484, -34.28763, -115.8799, 32.021484, -23.787628, -115.8799, 32.021484, -23.787628, -115.8799, 17.771484, -9.037628, -59.879898, 30.771484, -9.037628, -59.879898, 45.021484, 1.7123718, -59.879898, 45.021484, 1.7123718, -59.879898, 30.771484, 17.962372, -66.6299, 30.771484, 17.962372, -66.6299, 45.021484, 28.712372, -66.6299, 45.021484, 28.712372, -66.6299, 30.771484)
-polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1), PackedInt32Array(7, 6, 4), PackedInt32Array(4, 6, 5), PackedInt32Array(11, 10, 8), PackedInt32Array(8, 10, 9), PackedInt32Array(15, 14, 12), PackedInt32Array(12, 14, 13), PackedInt32Array(19, 18, 16), PackedInt32Array(16, 18, 17), PackedInt32Array(23, 22, 20), PackedInt32Array(20, 22, 21), PackedInt32Array(27, 26, 24), PackedInt32Array(24, 26, 25)]
+vertices = PackedVector3Array(-22.356445, -199.01535, 53.893555, -16.606445, -199.01535, 55.893555, -11.606445, -199.01535, 57.143555, -28.106445, -199.01535, 51.143555, 53.893555, -199.01535, 22.393555, 55.893555, -199.01535, 16.643555, 57.143555, -199.01535, 11.643555, 22.393555, -199.01535, 53.893555, 27.643555, -199.01535, 51.393555, 32.643555, -199.01535, 48.393555, 48.393555, -199.01535, 32.643555, 51.393555, -199.01535, 27.643555, 55.893555, -199.01535, -16.606445, 53.893555, -199.01535, -22.356445, 51.143555, -199.01535, -28.106445, 37.893555, -199.01535, 44.393555, 44.393555, -199.01535, 37.893555, 6.8935547, -199.01535, 57.893555, 16.643555, -199.01535, 55.893555, -4.1064453, -199.01535, 58.143555, -45.106445, -199.01535, -37.106445, -51.106445, -199.01535, -28.106445, -55.856445, -199.01535, -16.856445, -58.106445, -199.01535, -4.8564453, -55.856445, -199.01535, 16.893555, -28.106445, -199.01535, -51.106445, 28.143555, -199.01535, -51.106445, 58.143555, -199.01535, 4.1435547, 57.893555, -199.01535, -6.8564453, -51.106445, -199.01535, 28.143555, -44.856445, -199.01535, 37.393555, -37.606445, -199.01535, 44.643555, 44.643555, -199.01535, -37.606445, 37.393555, -199.01535, -44.856445, -58.106445, -199.01535, 4.8935547, 16.893555, -199.01535, -55.856445, 4.8935547, -199.01535, -58.106445, -4.8564453, -199.01535, -58.106445, -16.856445, -199.01535, -55.856445, -37.106445, -199.01535, -45.106445, -18.356445, -13.51535, -46.106445, -18.356445, -13.51535, -31.856445, -7.6064453, -13.51535, -31.856445, -7.6064453, -13.51535, -46.106445, 33.893555, -31.01535, -30.856445, 33.893555, -31.01535, -16.606445, 44.643555, -31.01535, -16.606445, 44.643555, -31.01535, -30.856445, -46.356445, -109.26535, -26.606445, -46.356445, -109.26535, -12.356445, -35.856445, -109.26535, -12.356445, -35.856445, -109.26535, -26.606445, 34.143555, -125.51535, 2.8935547, 34.143555, -125.51535, 17.143555, 44.643555, -125.51535, 17.143555, 44.643555, -125.51535, 2.8935547, -34.356445, -116.01535, 17.643555, -34.356445, -116.01535, 31.893555, -23.606445, -116.01535, 31.893555, -23.606445, -116.01535, 17.643555, -8.856445, -59.76535, 30.893555, -8.856445, -59.76535, 45.143555, 1.6435547, -59.76535, 45.143555, 1.6435547, -59.76535, 30.893555, 18.143555, -66.76535, 30.893555, 18.143555, -66.76535, 45.143555, 28.643555, -66.76535, 45.143555, 28.643555, -66.76535, 30.893555)
+polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(4, 6, 5), PackedInt32Array(9, 8, 7), PackedInt32Array(10, 4, 11), PackedInt32Array(13, 12, 14), PackedInt32Array(16, 15, 9), PackedInt32Array(18, 17, 7), PackedInt32Array(7, 17, 19), PackedInt32Array(7, 19, 2), PackedInt32Array(21, 20, 22), PackedInt32Array(22, 20, 23), PackedInt32Array(23, 20, 24), PackedInt32Array(24, 20, 25), PackedInt32Array(10, 16, 4), PackedInt32Array(4, 16, 6), PackedInt32Array(6, 16, 9), PackedInt32Array(6, 9, 7), PackedInt32Array(7, 2, 6), PackedInt32Array(6, 2, 24), PackedInt32Array(6, 24, 26), PackedInt32Array(26, 24, 25), PackedInt32Array(28, 27, 6), PackedInt32Array(30, 29, 31), PackedInt32Array(31, 29, 3), PackedInt32Array(3, 29, 24), PackedInt32Array(3, 24, 2), PackedInt32Array(26, 33, 32), PackedInt32Array(24, 34, 23), PackedInt32Array(36, 35, 37), PackedInt32Array(37, 35, 26), PackedInt32Array(37, 26, 38), PackedInt32Array(38, 26, 25), PackedInt32Array(20, 39, 25), PackedInt32Array(12, 28, 14), PackedInt32Array(14, 28, 32), PackedInt32Array(32, 28, 6), PackedInt32Array(32, 6, 26), PackedInt32Array(43, 42, 40), PackedInt32Array(40, 42, 41), PackedInt32Array(47, 46, 44), PackedInt32Array(44, 46, 45), PackedInt32Array(51, 50, 48), PackedInt32Array(48, 50, 49), PackedInt32Array(55, 54, 52), PackedInt32Array(52, 54, 53), PackedInt32Array(59, 58, 56), PackedInt32Array(56, 58, 57), PackedInt32Array(63, 62, 60), PackedInt32Array(60, 62, 61), PackedInt32Array(67, 66, 64), PackedInt32Array(64, 66, 65)]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_43bsa"]
 size = Vector3(11.4140625, 1, 15.012207)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_200nn"]
+height = 4.8867188
+radius = 58.606445
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_r5i3b"]
 size = Vector3(112.47139, 45.061584, 49.62683)
@@ -118,7 +131,7 @@ metadata/_edit_lock_ = true
 transform = Transform3D(24.81, 0, 0, 0, 24.81, 0, 0, 0, 24.81, -65.863434, 8.3689, -0.29740667)
 
 [node name="RockPlatafform" parent="." instance=ExtResource("6_qamio")]
-transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, -50.28846, -9.136018, 0.8216977)
+transform = Transform3D(10.415, 0, 0, 0, 10.415, 0, 0, 0, 10.415, -49.85101, -9.136018, 0.8216977)
 
 [node name="StairWood" parent="." instance=ExtResource("7_qbw0w")]
 transform = Transform3D(-4.371139e-07, 0, 10, 0, 10, 0, -10, 0, -4.371139e-07, -50.047035, -11.730503, -7.735754)
@@ -280,39 +293,47 @@ shape = SubResource("BoxShape3D_43bsa")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.38214, -126.3799, 9.986866)
 shape = SubResource("BoxShape3D_43bsa")
 
-[node name="Skeleton_Minion" parent="." instance=ExtResource("16_a1g1w")]
+[node name="StaticBody3D2" type="StaticBody3D" parent="NavigationRegion3D"]
+collision_layer = 4294967295
+collision_mask = 4294967295
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -201.82199, 0)
+shape = SubResource("CylinderShape3D_200nn")
+
+[node name="Skeleton_Minion" parent="." groups=["Enemies"] instance=ExtResource("16_a1g1w")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.17696, -13.919296, -41.17813)
 collision_mask = 135
 
-[node name="Skeleton_Minion2" parent="." instance=ExtResource("17_r5i3b")]
+[node name="Skeleton_Minion2" parent="." groups=["Enemies"] instance=ExtResource("17_r5i3b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.709747, -31.511925, -24.539253)
 collision_mask = 135
 
-[node name="Skeleton_Minion3" parent="." instance=ExtResource("18_weda2")]
+[node name="Skeleton_Minion3" parent="." groups=["Enemies"] instance=ExtResource("18_weda2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 43.036194, -31.511925, -21.731625)
 collision_mask = 135
 
-[node name="Skeleton_Minion4" parent="." instance=ExtResource("16_a1g1w")]
+[node name="Skeleton_Minion4" parent="." groups=["Enemies"] instance=ExtResource("16_a1g1w")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.95018, -67.1126, 38.301895)
 collision_mask = 135
 
-[node name="Skeleton_Minion5" parent="." instance=ExtResource("19_e43h2")]
+[node name="Skeleton_Minion5" parent="." groups=["Enemies"] instance=ExtResource("19_e43h2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5483522, -60.24129, 40.299473)
 collision_mask = 135
 
-[node name="Skeleton_Minion6" parent="." instance=ExtResource("17_r5i3b")]
+[node name="Skeleton_Minion6" parent="." groups=["Enemies"] instance=ExtResource("17_r5i3b")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.36221, -105.233185, -15.749823)
 collision_mask = 135
 
-[node name="Skeleton_Minion7" parent="." instance=ExtResource("19_e43h2")]
+[node name="Skeleton_Minion7" parent="." groups=["Enemies"] instance=ExtResource("19_e43h2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.48611, -116.37496, 24.035305)
 collision_mask = 135
 
-[node name="Skeleton_Minion8" parent="." instance=ExtResource("18_weda2")]
+[node name="Skeleton_Minion8" parent="." groups=["Enemies"] instance=ExtResource("18_weda2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.5273, -125.879875, 11.59304)
 collision_mask = 135
 
-[node name="Skeleton_Minion9" parent="." instance=ExtResource("18_weda2")]
+[node name="Skeleton_Minion9" parent="." groups=["Enemies"] instance=ExtResource("18_weda2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.45187, -125.879875, 5.8886824)
 collision_mask = 135
 
@@ -325,3 +346,40 @@ collision_mask = 255
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -532.5853, 102.15637, -7.2690125)
 shape = SubResource("BoxShape3D_r5i3b")
 debug_color = Color(0.8401974, 0.0001807791, 0.73116165, 0.41960785)
+
+[node name="Skeleton_Minion10" parent="." groups=["Enemies"] instance=ExtResource("20_iu5hk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.46479, -27.22248, -28.20972)
+collision_mask = 135
+
+[node name="Barbarian_A" parent="." groups=["Enemies"] instance=ExtResource("21_200nn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.215832, -64.95342, 37.9399)
+collision_mask = 135
+
+[node name="Barbarian_B" parent="." groups=["Enemies"] instance=ExtResource("22_avlh3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.406998, -104.5546, -17.271833)
+collision_mask = 135
+
+[node name="Warrior_A" parent="." groups=["Enemies"] instance=ExtResource("23_tlfh0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.44126, -133.87054, -24.91001)
+collision_mask = 135
+
+[node name="Warrior_B" parent="." groups=["Enemies"] instance=ExtResource("24_uqvb1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.125843, -154.70749, -36.21405)
+collision_mask = 135
+
+[node name="Warrior_A2" parent="." groups=["Enemies"] instance=ExtResource("25_5l6c3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.42994, -116.37296, 20.749159)
+collision_mask = 135
+
+[node name="Warrior_A3" parent="." groups=["Enemies"] instance=ExtResource("26_51cq1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39.589806, -125.87788, 8.010415)
+collision_mask = 135
+
+[node name="BlackKnight" parent="." groups=["Enemies"] instance=ExtResource("27_200nn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.215195, -189.8229, -0.51174736)
+collision_layer = 255
+collision_mask = 255
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("28_boss2")
+volume_db = -10.13

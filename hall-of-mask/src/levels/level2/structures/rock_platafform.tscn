@@ -1,13 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://bt7tyncl32uya"]
+[gd_scene load_steps=3 format=3 uid="uid://f68lnkrvm8am"]
 
 [ext_resource type="PackedScene" uid="uid://bdsgkumq0v3yo" path="res://src/levels/level2/structures/rock_platafform_model.tscn" id="1_p05o6"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_p05o6"]
-size = Vector3(0.915, 0.265, 1)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_p05o6"]
+height = 0.13867188
 
 [node name="RockPlatafform" type="StaticBody3D"]
 
 [node name="rockPlatafform" parent="." instance=ExtResource("1_p05o6")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("BoxShape3D_p05o6")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025618315, 0)
+shape = SubResource("CylinderShape3D_p05o6")

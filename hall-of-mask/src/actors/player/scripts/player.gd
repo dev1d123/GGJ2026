@@ -6,6 +6,13 @@ extends CharacterBody3D
 ## Array de sonidos para asignar a los ataques.
 @export var attack_sounds: Array[AudioStream] = []
 
+# ── SFX de UI (pociones / ulti) ──────────────────────────────────────────────
+var sfx_ui_player: AudioStreamPlayer
+const SOUND_HEALTH_POTION  := preload("res://assets/sfx/healthPotion.wav")
+const SOUND_MAGIC_POTION   := preload("res://assets/sfx/magicPotion.mp3")
+const SOUND_STAMINA_POTION := preload("res://assets/sfx/staminaPotion.wav")
+const SOUND_ULTI           := preload("res://assets/sfx/ulti.wav")
+
 # ------------------------------------------------------------------------------
 # 1. CONFIGURACIÓN Y REFERENCIAS
 # ------------------------------------------------------------------------------
@@ -30,11 +37,11 @@ var damage_vignette: ColorRect
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
 ## Velocidad base del jugador al caminar de frente.
-@export var speed_walk: float = 5.0
+@export var speed_walk: float = 6.5
 ## Multiplicador de velocidad al correr hacia adelante. (Correr hacia atrás usa la mitad).
 @export var speed_sprint_mult: float = 1.6
 ## Fuerza vertical del salto.
-@export var jump_force: float = 15.0 
+@export var jump_force: float = 18.0 
 ## Multiplicador artificial de la gravedad para hacer el salto menos "flotante".
 @export var gravity_multiplier: float = 3.0
 
@@ -207,6 +214,9 @@ func _ready():
 
 	footstep_audio.volume_db = 6.0
 	attack_audio.volume_db = 8.0
+	sfx_ui_player = AudioStreamPlayer.new()
+	sfx_ui_player.bus = "Master"
+	add_child(sfx_ui_player)
 
 	
 	if attributes:
@@ -641,6 +651,7 @@ func _intentar_activar_ulti() -> void:
 		return
 	var mask_name_lower = mask_manager.current_mask.mask_name.to_lower()
 	mask_manager.activate_ultimate()
+	_play_sfx_ui(SOUND_ULTI)
 	if mask_name_lower.contains("fighter"):
 		combat_manager.ejecutar_animacion_ulti("Melee_2H_Attack_Spin", 2.0)
 		_mostrar_area_fighter_ulti(2.0)
@@ -767,6 +778,7 @@ func _activar_ulti_tiempo(duracion: float) -> void:
 	var lbl := Label.new()
 	lbl.text = "⏳ TIEMPO DETENIDO"
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 	lbl.add_theme_font_size_override("font_size", 16)
 	lbl.modulate = Color(0.3, 0.9, 1.0, 1.0)
 	bar_container.add_child(lbl)
@@ -930,6 +942,7 @@ func _activar_ulti_shooter() -> void:
 	var lbl := Label.new()
 	lbl.text = "⚡ AUTO-LASER"
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 	lbl.add_theme_font_size_override("font_size", 18)
 	lbl.modulate = Color(0.0, 1.0, 0.9, 1.0)
 	bar_container.add_child(lbl)
@@ -1119,7 +1132,7 @@ signal pociones_cambiadas(slot_index, cantidad)
 signal ulti_cambiada(nueva_carga, max_carga)
 signal mascara_cambiada(mask_data) 
 
-var pociones_ui = [3, 1, 0] 
+var pociones_ui = [10, 10, 10] 
 
 func _ready_ui_connections():
 	vida_cambiada.connect(_update_damage_vignette)
@@ -1183,9 +1196,26 @@ func usar_pocion(index):
 			if health_component.current_health > health_component.max_health:
 				health_component.current_health = health_component.max_health
 			emit_signal("vida_cambiada", health_component.current_health)
+			_play_sfx_ui(SOUND_HEALTH_POTION)
+		elif index == 1:
+			var mana_comp = get_node_or_null("ManaComponent")
+			if mana_comp and "current_value" in mana_comp:
+				mana_comp.current_value = min(mana_comp.current_value + 50.0, mana_comp.max_value)
+				mana_comp.on_value_changed.emit(mana_comp.current_value, mana_comp.max_value)
+			_play_sfx_ui(SOUND_MAGIC_POTION)
+		elif index == 2:
+			if stamina and "current_value" in stamina:
+				stamina.current_value = min(stamina.current_value + 50.0, stamina.max_value)
+				stamina.on_value_changed.emit(stamina.current_value, stamina.max_value)
+			_play_sfx_ui(SOUND_STAMINA_POTION)
 		emit_signal("pociones_cambiadas", index + 1, pociones_ui[index])
 	else:
 		show_toast("You don't have that potion!", Color(1.0, 0.4, 0.1))
+
+func _play_sfx_ui(stream: AudioStream) -> void:
+	if not sfx_ui_player: return
+	sfx_ui_player.stream = stream
+	sfx_ui_player.play()
 func apply_knockback(direction: Vector3, force: float, vertical_force: float):
 	if is_dead: return
 	

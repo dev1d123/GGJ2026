@@ -1,0 +1,7 @@
+[gd_resource type="Theme" format=3 uid="uid://game_theme_hom"]
+
+[ext_resource type="FontFile" uid="uid://3qoskpc6gny4" path="res://assets/imagesGUI/font.TTF" id="1_font"]
+
+[resource]
+default_font = ExtResource("1_font")
+default_font_size = 16

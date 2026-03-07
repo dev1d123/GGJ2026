@@ -93,8 +93,8 @@ mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_8abm2")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_fti30")])
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_4huky"]
-vertices = PackedVector3Array(540.26794, 0.81133175, -58.518982, 540.26794, 0.81133175, 39.731018, 606.76794, 0.81133175, 39.731018, 606.76794, 0.81133175, -58.518982, 269.76794, 25.311333, -15.768982, 270.51794, 25.311333, -19.268982, 270.26794, 25.311333, -20.018982, 259.01794, 25.311333, -22.268982, 258.01794, 25.311333, -18.518982, 244.51794, 25.311333, -11.018982, 240.01794, 25.311333, -1.2689819, 240.26794, 25.311333, -0.51898193, 244.51794, 25.311333, 1.2310181, 249.01794, 25.311333, -8.518982, 248.76794, 25.311333, -9.268982, 403.26794, 25.311333, 8.731018, 403.51794, 25.311333, 9.481018, 407.01794, 25.311333, 10.731018, 411.76794, 25.311333, 0.23101807, 408.51794, 25.311333, -1.5189819, 407.76794, 25.311333, -1.2689819, 148.26794, 5.5613317, 0.48101807, 147.76794, 5.5613317, 0.73101807, 148.26794, 5.5613317, 1.2310181, 149.01794, 5.5613317, -0.26898193, 148.26794, 5.5613317, -0.26898193, 148.01794, 5.5613317, 2.481018, 149.01794, 5.5613317, 4.731018, 137.76794, 5.5613317, 4.731018, 145.76794, 5.5613317, 2.731018, 145.01794, 5.5613317, 2.231018, 145.01794, 5.5613317, -0.26898193, 137.76794, 5.5613317, -0.26898193, 217.01794, 25.311333, 10.481018, 217.01794, 25.311333, 15.481018, 228.51794, 25.311333, 15.481018, 228.51794, 25.311333, 10.481018, 310.01794, 25.311333, 21.981018, 313.01794, 25.311333, 23.731018, 314.01794, 25.311333, 23.731018, 318.51794, 25.311333, 13.731018, 318.51794, 25.311333, 12.981018, 314.76794, 25.311333, 11.481018, 278.01794, 25.311333, 15.731018, 277.01794, 25.311333, 15.481018, 274.01794, 25.311333, 16.481018, 277.26794, 25.311333, 27.731018, 281.26794, 25.311333, 26.731018)
-polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1), PackedInt32Array(5, 4, 6), PackedInt32Array(6, 4, 7), PackedInt32Array(7, 4, 8), PackedInt32Array(14, 13, 9), PackedInt32Array(9, 13, 10), PackedInt32Array(10, 13, 11), PackedInt32Array(11, 13, 12), PackedInt32Array(19, 18, 20), PackedInt32Array(20, 18, 15), PackedInt32Array(15, 18, 16), PackedInt32Array(16, 18, 17), PackedInt32Array(23, 22, 21), PackedInt32Array(21, 25, 24), PackedInt32Array(24, 23, 21), PackedInt32Array(23, 24, 26), PackedInt32Array(26, 24, 27), PackedInt32Array(30, 29, 28), PackedInt32Array(26, 27, 29), PackedInt32Array(29, 27, 28), PackedInt32Array(31, 30, 32), PackedInt32Array(32, 30, 28), PackedInt32Array(36, 35, 33), PackedInt32Array(33, 35, 34), PackedInt32Array(38, 37, 39), PackedInt32Array(39, 37, 40), PackedInt32Array(40, 37, 41), PackedInt32Array(41, 37, 42), PackedInt32Array(44, 43, 45), PackedInt32Array(45, 43, 46), PackedInt32Array(46, 43, 47)]
+vertices = PackedVector3Array(540.26794, 0.81133175, -58.518982, 540.26794, 0.81133175, 39.731018, 606.76794, 0.81133175, 39.731018, 606.76794, 0.81133175, -58.518982, 269.76794, 25.311333, -15.768982, 270.51794, 25.311333, -19.268982, 270.26794, 25.311333, -20.018982, 259.01794, 25.311333, -22.268982, 258.01794, 25.311333, -18.518982, 244.51794, 25.311333, -11.018982, 240.01794, 25.311333, -1.2689819, 240.26794, 25.311333, -0.51898193, 244.51794, 25.311333, 1.2310181, 249.01794, 25.311333, -8.518982, 248.76794, 25.311333, -9.268982, 137.76794, 5.5613317, -3.518982, 137.76794, 5.5613317, 1.7310181, 149.01794, 5.5613317, 1.7310181, 149.01794, 5.5613317, -3.518982, 403.26794, 25.311333, 8.731018, 403.51794, 25.311333, 9.481018, 407.01794, 25.311333, 10.731018, 411.76794, 25.311333, 0.23101807, 408.51794, 25.311333, -1.5189819, 407.76794, 25.311333, -1.2689819, 217.01794, 25.311333, 10.481018, 217.01794, 25.311333, 15.481018, 228.51794, 25.311333, 15.481018, 228.51794, 25.311333, 10.481018, 310.01794, 25.311333, 21.981018, 313.01794, 25.311333, 23.731018, 314.01794, 25.311333, 23.731018, 318.51794, 25.311333, 13.731018, 318.51794, 25.311333, 12.981018, 314.76794, 25.311333, 11.481018, 278.01794, 25.311333, 15.731018, 277.01794, 25.311333, 15.481018, 274.01794, 25.311333, 16.481018, 277.26794, 25.311333, 27.731018, 281.26794, 25.311333, 26.731018)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1), PackedInt32Array(5, 4, 6), PackedInt32Array(6, 4, 7), PackedInt32Array(7, 4, 8), PackedInt32Array(14, 13, 9), PackedInt32Array(9, 13, 10), PackedInt32Array(10, 13, 11), PackedInt32Array(11, 13, 12), PackedInt32Array(18, 17, 15), PackedInt32Array(15, 17, 16), PackedInt32Array(23, 22, 24), PackedInt32Array(24, 22, 19), PackedInt32Array(19, 22, 20), PackedInt32Array(20, 22, 21), PackedInt32Array(28, 27, 25), PackedInt32Array(25, 27, 26), PackedInt32Array(30, 29, 31), PackedInt32Array(31, 29, 32), PackedInt32Array(32, 29, 33), PackedInt32Array(33, 29, 34), PackedInt32Array(36, 35, 37), PackedInt32Array(37, 35, 38), PackedInt32Array(38, 35, 39)]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4huky"]
 size = Vector3(67.350525, 1, 99.19705)
@@ -112,10 +112,12 @@ script = ExtResource("1_crcck")
 data_directory = "res://src/levels/level4"
 material = SubResource("Terrain3DMaterial_gvxw3")
 assets = SubResource("Terrain3DAssets_fti30")
+collision_layer = 255
+collision_mask = 255
 top_level = true
 metadata/_edit_lock_ = true
 
-[node name="Environment" parent="." instance=ExtResource("1_d1atx")]
+[node name="Environment" parent="Terrain3D" instance=ExtResource("1_d1atx")]
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("15_71euu")
@@ -354,6 +356,8 @@ collision_mask = 133
 navigation_mesh = SubResource("NavigationMesh_4huky")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D"]
+collision_layer = 16777215
+collision_mask = 134217983
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 573.5748, -0.18866825, -9.420456)
@@ -361,9 +365,11 @@ shape = SubResource("BoxShape3D_4huky")
 
 [node name="StaticBody3D2" type="StaticBody3D" parent="NavigationRegion3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 138.76144, 21.319733, 0)
+collision_layer = 4294967295
+collision_mask = 16777215
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.561, -16.74, 2.171)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5610046, -16.74, -0.85198164)
 shape = SubResource("BoxShape3D_j2ljt")
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D2"]
@@ -389,12 +395,6 @@ shape = SubResource("BoxShape3D_j2ljt")
 [node name="CollisionShape3D7" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D2"]
 transform = Transform3D(-0.4295345, 0, -0.75603133, 0, 0.99999994, 0, 0.9469911, 0, -0.34291935, 268.68857, 3.189, 4.611448)
 shape = SubResource("BoxShape3D_j2ljt")
-
-[node name="Skeleton_Minion" parent="NavigationRegion3D/StaticBody3D2" instance=ExtResource("19_om8jg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.8032837, -16.239973, 0.15414429)
-
-[node name="Skeleton_Minion2" parent="NavigationRegion3D/StaticBody3D2" instance=ExtResource("18_om8jg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.802429, -16.239973, 1.6978371)
 
 [node name="Time_Boss" parent="." instance=ExtResource("17_4huky")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 586.25336, 9.510793, -6.6188784)
@@ -444,3 +444,13 @@ debug_color = Color(0.8401974, 0.0001807791, 0.73116165, 0.41960785)
 [node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("22_8rk31")
 volume_db = -10.13
+
+[node name="Skeleton_Minion9" parent="." groups=["Enemies"] instance=ExtResource("19_om8jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 146.56473, 5.0797596, 0.15414429)
+collision_layer = 5
+collision_mask = 135
+
+[node name="Skeleton_Minion10" parent="." groups=["Enemies"] instance=ExtResource("18_om8jg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 146.56387, 5.0797596, 1.6978371)
+collision_layer = 5
+collision_mask = 135

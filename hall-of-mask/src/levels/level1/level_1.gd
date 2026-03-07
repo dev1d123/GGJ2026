@@ -4,7 +4,12 @@ extends Node3D
 @onready var audio_zone:   AudioStreamPlayer = $AudioStreamPlayer2
 @onready var zone:         Area3D            = $zoneBoss
 @onready var player:       Node              = $Player
-@onready var boss:         BossOrc           = $Node/Orc_Brute_Green
+
+# Jefe spawnea dinámicamente al entrar a la zona
+const BOSS_SCENE := preload("res://src/actors/enemies/bosses/orc_brute_green.tscn")
+const BOSS_SPAWN_POS := Vector3(113.09914, 24.901669, 127.99787)
+var _boss: BossOrc = null
+var _boss_spawned: bool = false
 
 # Sonidos de victoria y derrota
 var victory_sound: AudioStream = preload("res://assets/sounds/win.wav")
@@ -19,6 +24,8 @@ func _ready() -> void:
 	add_child(sfx_player)
 	sfx_player.bus = "Master"
 	sfx_player.volume_db = 6.0
+	sfx_player.stream = preload("res://assets/sfx/startLevel.mp3")
+	sfx_player.play()
 	audio_normal.volume_db -= 6.0
 	audio_zone.volume_db   -= 6.0
 
@@ -28,7 +35,6 @@ func _ready() -> void:
 		if health.has_signal("on_death"):
 			health.on_death.connect(_on_player_died)
 
-	boss.boss_died.connect(_on_boss_died)
 	zone.body_entered.connect(_on_zone_entered)
 	zone.body_exited.connect(_on_zone_exited)
 	audio_normal.finished.connect(_on_audio_normal_finished)
@@ -36,30 +42,11 @@ func _ready() -> void:
 
 	audio_normal.play()
 
-	# ── Diálogo de entrada (primera visita) ────────────────────────────
-	_show_entry_dialog()
 
 func _process(_delta: float) -> void:
 	# Atajo para completar nivel con tecla M
 	if Input.is_key_pressed(KEY_M):
 		_complete_level()
-
-func _show_entry_dialog() -> void:
-	if not GameData.is_first_visit(LEVEL_ID):
-		return
-	GameData.mark_level_visited(LEVEL_ID)
-	var char_id: String = GameData.selected_character
-	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
-		return
-	var text: String = GameData.DIALOGS[char_id][LEVEL_ID]["entry"]
-	ToastNotification.show_toast(char_id, text)
-
-func _show_exit_dialog() -> void:
-	var char_id: String = GameData.selected_character
-	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
-		return
-	var text: String = GameData.DIALOGS[char_id][LEVEL_ID]["exit"]
-	ToastNotification.show_toast(char_id, text)
 
 func _on_audio_normal_finished() -> void:
 	audio_normal.play()
@@ -73,6 +60,21 @@ func _on_zone_entered(body: Node) -> void:
 		return
 	audio_normal.stop()
 	audio_zone.play()
+	# Spawn el jefe la primera vez que el jugador entra a la zona
+	if not _boss_spawned:
+		_boss_spawned = true
+		_spawn_boss()
+
+func _spawn_boss() -> void:
+	_boss = BOSS_SCENE.instantiate() as BossOrc
+	# Capas iguales a las del nodo pre-colocado en la escena (capa 1 = Terrain3D)
+	_boss.collision_layer = 255
+	_boss.collision_mask  = 255
+	get_node("Node").add_child(_boss)
+	# Diferir un frame para que el chunk de Terrain3D esté registrado en el servidor de física
+	await get_tree().physics_frame
+	_boss.global_position = BOSS_SPAWN_POS
+	_boss.boss_died.connect(_on_boss_died)
 
 func _on_zone_exited(body: Node) -> void:
 	if body != player:
@@ -80,7 +82,7 @@ func _on_zone_exited(body: Node) -> void:
 	audio_zone.stop()
 	audio_normal.play()
 
-func _on_boss_died(_boss):
+func _on_boss_died(_boss = null):
 	_complete_level()
 
 func _complete_level():
@@ -89,7 +91,6 @@ func _complete_level():
 	audio_zone.stop()
 	sfx_player.stream = victory_sound
 	sfx_player.play()
-	_show_exit_dialog()
 	
 	GameManager.complete_level("level1")
 	await get_tree().create_timer(4.0).timeout

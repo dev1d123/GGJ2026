@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=92 format=3 uid="uid://do73t117vjkgg"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=92 format=3 uid="uid://cgxgrmc1rnyh1"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_fq326"]
 animation = &"Player/Axe_1H_Attack"

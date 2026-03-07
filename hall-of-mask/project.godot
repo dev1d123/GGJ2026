@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="GGJ2026"
-run/main_scene="uid://7dv1bm5xckwp"
+run/main_scene="uid://dwk18we86selq"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -31,6 +31,10 @@ window/stretch/mode="viewport"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/terrain_3d/plugin.cfg")
+
+[gui]
+
+theme/custom="res://assets/imagesGUI/game_theme.tres"
 
 [input]
 

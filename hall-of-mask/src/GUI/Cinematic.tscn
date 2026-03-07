@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://doswye7wju3c" path="res://src/GUI/cinematic.gd" id="1_y7g73"]
 [ext_resource type="LabelSettings" uid="uid://bmopgkhe4cxe2" path="res://src/GUI/Cinematic.tres" id="2_8l2yi"]
 [ext_resource type="FontFile" uid="uid://3qoskpc6gny4" path="res://assets/imagesGUI/font.TTF" id="3_font"]
-[ext_resource type="AudioStream" uid="uid://dex6rr3ivlni" path="res://assets/sounds/UnwritedHistory.wav" id="8_m50fs"]
+[ext_resource type="AudioStream" uid="uid://ee1o38gmde3y" path="res://assets/sounds/introCinematic.mp3" id="8_m50fs"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_name"]
 font = ExtResource("3_font")

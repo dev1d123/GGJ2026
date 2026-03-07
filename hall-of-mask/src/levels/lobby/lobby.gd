@@ -3,6 +3,9 @@ extends Node3D
 @onready var audio: AudioStreamPlayer = $AudioStreamPlayer
 @onready var player: CharacterBody3D = $Player
 
+var sfx_player: AudioStreamPlayer
+const SOUND_PORTAL := preload("res://assets/sfx/portal.wav")
+
 @onready var level_areas: Dictionary[Area3D, String] = {
 	$Level1Area3D: "res://src/levels/level1/Level1.tscn",
 	$Level2Area3D: "res://src/levels/level2/Level2.tscn",
@@ -15,6 +18,10 @@ var victory_ui: Label
 var is_going_to_end: bool = false
 
 func _ready() -> void:
+	sfx_player = AudioStreamPlayer.new()
+	sfx_player.bus = "Master"
+	add_child(sfx_player)
+
 	audio.volume_db -= 6.0
 	audio.finished.connect(_on_audio_finished)
 	audio.play()
@@ -37,20 +44,6 @@ func _ready() -> void:
 	if GameManager.get_completed_count() == 4:
 		_on_all_levels_completed()
 
-	# Diálogo de primera visita al Lobby
-	_show_entry_dialog()
-
-func _show_entry_dialog() -> void:
-	if not GameData.is_first_visit("lobby"):
-		return
-	GameData.mark_level_visited("lobby")
-	var char_id: String = GameData.selected_character
-	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
-		return
-	var dialogs: Dictionary = GameData.DIALOGS[char_id]
-	if not dialogs.has("lobby"):
-		return
-	ToastNotification.show_toast(char_id, dialogs["lobby"]["entry"])
 
 func _create_progress_ui():
 	# Crear CanvasLayer
@@ -73,12 +66,14 @@ func _create_progress_ui():
 	# Label de progreso
 	progress_ui = Label.new()
 	progress_ui.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	progress_ui.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 	progress_ui.add_theme_font_size_override("font_size", 24)
 	vbox.add_child(progress_ui)
 	
 	# Label de victoria (oculto inicialmente)
 	victory_ui = Label.new()
 	victory_ui.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	victory_ui.add_theme_font_override("font", load("res://assets/imagesGUI/font.TTF"))
 	victory_ui.add_theme_font_size_override("font_size", 28)
 	victory_ui.add_theme_color_override("font_color", Color.GOLD)
 	victory_ui.visible = false
@@ -121,14 +116,14 @@ func _show_victory_message():
 		print("🎊 Mostrando mensaje de victoria...")
 
 func _go_to_ending():
-	print("🎬 Cargando pantalla de final...")
+	print("🎬 Cargando jefe final...")
 	# Fade out del audio
 	var fade_tween = create_tween()
 	fade_tween.tween_property(audio, "volume_db", -80.0, 1.5)
 	await fade_tween.finished
-	
-	# Cargar escena de final
-	get_tree().change_scene_to_file("res://src/GUI/End.tscn")
+
+	# Cargar escena del jefe final (derrota a los jefes → cinematica final)
+	get_tree().change_scene_to_file("res://src/levels/final_boss/FinalBoss.tscn")
 
 func _on_audio_finished() -> void:
 	audio.play()
@@ -136,6 +131,9 @@ func _on_audio_finished() -> void:
 func _on_area_body_entered(body: Node3D, area: Area3D) -> void:
 	if body != player:
 		return
+
+	sfx_player.stream = SOUND_PORTAL
+	sfx_player.play()
 
 	# transición visual del player
 	player.start_distortion_transition(1.0)
