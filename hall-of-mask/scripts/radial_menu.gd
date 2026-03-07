@@ -305,10 +305,10 @@ func _build_stats_panel():
 	_stats_panel = PanelContainer.new()
 	_stats_panel.name = "StatsPanel"
 	_stats_panel.visible = false
-	# Posición: lado izquierdo, centrado verticalmente
-	_stats_panel.set_anchors_preset(Control.PRESET_CENTER_LEFT)
-	_stats_panel.position = Vector2(20, 0)
-	_stats_panel.custom_minimum_size = Vector2(220, 0)
+	# Posición: lado derecho, ligeramente arriba del centro
+	_stats_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_stats_panel.position = Vector2(-320, -100)
+	_stats_panel.custom_minimum_size = Vector2(300, 0)
 	add_child(_stats_panel)
 
 	var style = StyleBoxFlat.new()
@@ -323,7 +323,7 @@ func _build_stats_panel():
 	_stats_panel.add_theme_stylebox_override("panel", style)
 
 	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 6)
+	vbox.add_theme_constant_override("separation", 10)
 	_stats_panel.add_child(vbox)
 
 	# Título
@@ -331,7 +331,7 @@ func _build_stats_panel():
 	title.text = "— ATTRIBUTES —"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0))
-	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_font_size_override("font_size", 20)
 	vbox.add_child(title)
 
 	var sep = HSeparator.new()
@@ -357,15 +357,15 @@ func _build_stats_panel():
 
 		var lbl_key = Label.new()
 		lbl_key.text = row[1]
-		lbl_key.custom_minimum_size = Vector2(100, 0)
+		lbl_key.custom_minimum_size = Vector2(140, 0)
 		lbl_key.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75))
-		lbl_key.add_theme_font_size_override("font_size", 12)
+		lbl_key.add_theme_font_size_override("font_size", 16)
 		hbox.add_child(lbl_key)
 
 		var lbl_val = Label.new()
 		lbl_val.text = "—"
 		lbl_val.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
-		lbl_val.add_theme_font_size_override("font_size", 12)
+		lbl_val.add_theme_font_size_override("font_size", 16)
 		hbox.add_child(lbl_val)
 		_stat_labels[row[0]] = lbl_val
 
