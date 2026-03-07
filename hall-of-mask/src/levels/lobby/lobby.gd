@@ -37,6 +37,21 @@ func _ready() -> void:
 	if GameManager.get_completed_count() == 4:
 		_on_all_levels_completed()
 
+	# Diálogo de primera visita al Lobby
+	_show_entry_dialog()
+
+func _show_entry_dialog() -> void:
+	if not GameData.is_first_visit("lobby"):
+		return
+	GameData.mark_level_visited("lobby")
+	var char_id: String = GameData.selected_character
+	if char_id.is_empty() or not GameData.DIALOGS.has(char_id):
+		return
+	var dialogs: Dictionary = GameData.DIALOGS[char_id]
+	if not dialogs.has("lobby"):
+		return
+	ToastNotification.show_toast(char_id, dialogs["lobby"]["entry"])
+
 func _create_progress_ui():
 	# Crear CanvasLayer
 	var canvas = CanvasLayer.new()
