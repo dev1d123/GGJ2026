@@ -9,4 +9,4 @@ weapon_scene = ExtResource("2_sl1wk")
 windup_time = 0.4
 cooldown = 0.5
 stop_movement = true
-damage = 20.0
+damage = 15.0

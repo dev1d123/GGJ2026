@@ -386,7 +386,11 @@ func _ejecutar_dodging():
 	playback.travel("Dodge")
 	
 	# Transformar 2D Direction a 3D Global Direction basado en el ángulo del enemigo
-	var dir_3d = (global_transform.basis * Vector3(_dodge_direction.x, 0, _dodge_direction.y)).normalized()
+	# X: 1 es derecha, -1 es izquierda. Y: 1 es adelante, -1 es atrás. 
+	# En Godot, adelante local = -Z. Atrás local = +Z.
+	var forward_local = -global_transform.basis.z * _dodge_direction.y
+	var right_local = global_transform.basis.x * _dodge_direction.x
+	var dir_3d = (forward_local + right_local).normalized()
 	
 	var multiplicador_potencia = 1.0
 	if _dodge_is_aggressive: multiplicador_potencia = 1.8 # ¡Que se note violentamente el esquive hacia adelante!
@@ -422,9 +426,8 @@ func _iniciar_esquive_ofensivo():
 	current_state = State.PRE_DODGE
 	_dodge_timer = dodge_reaction_time * 0.5 # Reacción más rápida al ser ofensivo
 	_dodge_is_aggressive = true
-	
 	# OFENSIVO: ESTRICTAMENTE HACIA ADELANTE para acortar distancia y golpear
-	_dodge_direction = Vector2(0, -1)
+	_dodge_direction = Vector2(0, 1)
 
 # ------------------------------------------------------------------------------
 # LÓGICA DE ESTADOS

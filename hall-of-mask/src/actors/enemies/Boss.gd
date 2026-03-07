@@ -17,21 +17,21 @@ signal boss_died
 ## Segundos que dura el daño del golpe Atk1.
 @export var atk1_active: float = 0.2
 ## Multiplicador de daño del Atk1.
-@export var atk1_dmg: float = 1.0      
+@export var atk1_mult_dmg: float = 1.0      
 
 ## Segundos de preparación antes del golpe Atk2.
 @export var atk2_windup: float = 0.25
 ## Segundos que dura el daño del golpe Atk2.
 @export var atk2_active: float = 0.3
 ## Multiplicador de daño del Atk2.
-@export var atk2_dmg: float = 0.8
+@export var atk2_mult_dmg: float = 1.25
 
 ## Segundos de preparación antes del golpe Atk3.
 @export var atk3_windup: float = 0.55
 ## Segundos que dura el daño del golpe Atk3.
 @export var atk3_active: float = 0.4
 ## Multiplicador de daño del Atk3.
-@export var atk3_dmg: float = 1.5
+@export var atk3_mult_dmg: float = 1.5
 
 # Estado interno
 var is_doing_boss_attack: bool = false
@@ -63,8 +63,17 @@ func _ready():
 		internal_anim_player = $OrcBrute/AnimationPlayer
 	
 	current_archetype = Archetype.MELEE_2H 
-	current_speed = base_speed * 0.9
-	preferred_range = 3
+	current_speed = base_speed
+	preferred_range = 3.5
+	
+	# ACTIVAR MECÁNICAS HEREDADAS DE ENEMY
+	can_sprint = true
+	can_jump = true
+	can_dodge = true
+	sprint_speed_mult = 2.0 # Garantizar que llega al BlendPosition 2 (Correr)
+	dodge_power = 15.0
+	jump_force = 12.0
+	gravity_multiplier = 3.0
 	
 	_reiniciar_timer_sprint()
 	_actualizar_velocidad_fases(100.0)
@@ -81,17 +90,15 @@ func _ready():
 # 2. PHYSICS PROCESS (MODIFICADO PARA SPRINT INFINITO)
 # ----------------------------------------------------------------
 func _physics_process(delta):
-	super._physics_process(delta)
-	
 	zigzag_time += delta
 	
-	if is_doing_boss_attack:
-		velocity.x = 0
-		velocity.z = 0
-		# Nota: No tocamos velocity.y para que la gravedad siga funcionando
+	super._physics_process(delta)
 	
-	# Solo gestionamos sprint si está vivo y no está atacando
-	if current_state != State.ATTACKING and health_component.current_health > 0:
+	# Solo gestionamos sprint si está vivo y no está en otros estados críticos
+	var can_manage_sprint = current_state != State.ATTACKING and current_state != State.DODGING and current_state != State.PRE_DODGE
+
+	
+	if can_manage_sprint and health_component.current_health > 0:
 		
 		# 🔴 LÓGICA DE SPRINT HÍBRIDA 🔴
 		if has_equipped_mask:
@@ -130,20 +137,20 @@ func _comportamiento_persecucion(delta: float):
 	
 	var dist = global_position.distance_to(player_ref.global_position)
 	var target_pos = player_ref.global_position
+	var dir_to_player = (player_ref.global_position - global_position).normalized()
+	
+	# INTENTAR MANIOBRAS OFENSIVAS (SALTO / DODGE-ATTACK)
+	if _intentar_maniobra_ofensiva(dist, dir_to_player, "Persecución (Jefe)"):
+		return
 	
 	# 🔴 MEJORA: ZIG-ZAG COMPATIBLE CON SPRINT (FASE 2)
-	# - Fase 1: ZigZag solo si camina.
-	# - Fase 2 (Máscara): ZigZag INCLUSO si corre (esprinta en serpiente).
 	var aplicar_zigzag = false
-	
 	if dist > 5.0:
 		if has_equipped_mask: aplicar_zigzag = true # Fase 2: Siempre esquiva
 		elif not is_sprinting: aplicar_zigzag = true # Fase 1: Solo si camina
 	
 	if aplicar_zigzag:
-		var dir_to_player = (player_ref.global_position - global_position).normalized()
 		var right_vec = dir_to_player.cross(Vector3.UP)
-		# ZigZag más rápido en fase 2
 		var speed_zigzag = 8.0 if has_equipped_mask else 5.0
 		var offset = right_vec * sin(zigzag_time * speed_zigzag) * 2.0
 		target_pos += offset
@@ -151,7 +158,7 @@ func _comportamiento_persecucion(delta: float):
 	nav_agent.target_position = target_pos
 	
 	# Velocidad dinámica
-	var final_speed = current_speed
+	var final_speed = base_speed
 	if is_sprinting: final_speed = base_speed * sprint_speed_mult
 	
 	_mover_hacia(nav_agent.get_next_path_position(), delta, final_speed)
@@ -162,12 +169,11 @@ func _comportamiento_persecucion(delta: float):
 	if dist <= preferred_range:
 		# Si llega corriendo, golpe inmediato
 		if is_sprinting:
-			# En fase máscara no imprimimos texto para no saturar consola
 			if not has_equipped_mask: print("😡 JEFE: ¡TE ALCANCÉ!")
 			
 			is_sprinting = false
 			_reiniciar_timer_sprint()
-			current_speed = base_speed * 0.9 
+			current_speed = base_speed 
 			_realizar_ataque_3_spin()
 		else:
 			current_state = State.COMBAT_MANEUVER
@@ -197,10 +203,14 @@ func _comportamiento_combate(delta: float):
 
 	if is_doing_boss_attack: return
 
-	# Acercarse si el jugador huye un poco
 	var dist = global_position.distance_to(player_ref.global_position)
+	var dir = (player_ref.global_position - global_position).normalized()
+	
+	if _intentar_maniobra_ofensiva(dist, dir, "Combate (Jefe)"):
+		return
+
+	# Acercarse si el jugador huye un poco
 	if dist > preferred_range + 0.5:
-		var dir = (player_ref.global_position - global_position).normalized()
 		var speed_to_use = base_speed
 		if is_sprinting: speed_to_use = base_speed * sprint_speed_mult
 		
@@ -208,22 +218,66 @@ func _comportamiento_combate(delta: float):
 		velocity.z = dir.z * speed_to_use
 		return
 
+	_iniciar_ataque_melee()
+
+# ----------------------------------------------------------------
+# OVERRIDES DE ESTADOS PADRE Y ENEMIGO PARA JEFES
+# ----------------------------------------------------------------
+func _procesar_ataque_en_curso(delta: float):
+	# Los Jefes usan corutinas (await) para los ataques con is_doing_boss_attack.
+	# Nos movemos lentamente hacia el jugador, pero NO llamamos a super para evitar 
+	# que la lógica del enemigo corte el ataque prematuramente al pasar a COOLDOWN.
+	if is_on_floor():
+		if is_instance_valid(player_ref):
+			var dir = (player_ref.global_position - global_position).normalized()
+			var speed_to_use = base_speed * attack_movement_mult
+			velocity.x = dir.x * speed_to_use
+			velocity.z = dir.z * speed_to_use
+		else:
+			velocity.x = move_toward(velocity.x, 0, base_speed * delta)
+			velocity.z = move_toward(velocity.z, 0, base_speed * delta)
+
+func _comportamiento_cooldown(delta: float):
+	# Jefes no tienen cooldown de strafe. Si caen aquí, regresan directo a combatir
+	current_state = State.CHASE
+
+func _iniciar_ataque_melee():
 	var roll = randf()
 	if roll < 0.4: _realizar_ataque_1_chop()
 	elif roll < 0.7: _realizar_ataque_2_thrust()
 	else: _realizar_ataque_3_spin()
 
+func _intentar_maniobra_ofensiva(dist: float, dir: Vector3, estado_origen: String) -> bool:
+	if can_jump and is_on_floor() and dist <= 6.5 and dist >= 3.5 and _next_combat_maneuver == "JUMP_ATTACK":
+		print("👹 BOSS OFFENSIVE-JUMP en ", estado_origen)
+		velocity.y = jump_force
+		velocity.x = dir.x * base_speed * sprint_speed_mult
+		velocity.z = dir.z * base_speed * sprint_speed_mult
+		_next_combat_maneuver = ""
+		
+		# Disparamos ataque pesado inmediatamente y dejamos que la gravedad lo aterrice
+		_realizar_ataque_1_chop()
+		return true
+
+	if can_dodge and dist <= 3.75 and dist >= 2.0 and _next_combat_maneuver == "DODGE_ATTACK":
+		print("👹 BOSS DODGE-ATTACK en ", estado_origen)
+		_next_combat_maneuver = ""
+		_iniciar_esquive_ofensivo()
+		return true
+
+	return false
+
 # ----------------------------------------------------------------
 # 6. ATAQUES
 # ----------------------------------------------------------------
 func _realizar_ataque_1_chop():
-	_iniciar_secuencia("Orc_Axe_2H_Attack_1", atk1_windup, atk1_active, atk1_dmg, 6.0)
+	_iniciar_secuencia("Orc_Axe_2H_Attack_1", atk1_windup, atk1_active, atk1_mult_dmg, 6.0)
 
 func _realizar_ataque_2_thrust():
-	_iniciar_secuencia("Orc_Axe_2H_Attack_2", atk2_windup, atk2_active, atk2_dmg, 9.0)
+	_iniciar_secuencia("Orc_Axe_2H_Attack_2", atk2_windup, atk2_active, atk2_mult_dmg, 9.0)
 
 func _realizar_ataque_3_spin():
-	_iniciar_secuencia("Orc_Axe_2H_Attack_3", atk3_windup, atk3_active, atk3_dmg, 14.0)
+	_iniciar_secuencia("Orc_Axe_2H_Attack_3", atk3_windup, atk3_active, atk3_mult_dmg, 14.0)
 
 func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mult: float, knockback: float):
 	is_doing_boss_attack = true
@@ -273,15 +327,11 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	if combat_manager:
 		combat_manager.manual_hitbox_activation(dmg_mult, real_active, knockback, combat_manager.right_hand_bone)
 	
-	await get_tree().create_timer(real_active + 0.2).timeout
+	await get_tree().create_timer(real_active).timeout
 	
 	current_speed = vel_original
 	is_doing_boss_attack = false
-	
-	# Cooldown reducido en Fase 2
-	var cooldown_time = 1.2 / current_anim_scale 
-	if mask_manager and mask_manager.is_ultimate_active: cooldown_time = 0.3 # ¡Casi sin pausa!
-	_entrar_cooldown(cooldown_time)
+	current_state = State.CHASE
 
 # ----------------------------------------------------------------
 # 7. FASES

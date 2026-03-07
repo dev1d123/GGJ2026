@@ -475,7 +475,6 @@ func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
 	var tiempo_gastado = real_windup + real_active
 	var tiempo_restante_anim = real_total - tiempo_gastado
 	var duracion_fade = max(0.15, tiempo_restante_anim)
-	
 	_safe_set_tween(blend_path, 0.0, duracion_fade)
 	
 	if duracion_fade > 0:
@@ -594,9 +593,16 @@ func manual_hitbox_activation(damage_mult_override: float, duration: float, knoc
 		hitbox.collision_mask = attack_layer_mask
 		var base_dmg = 10.0
 		if weapon_r: base_dmg = weapon_r.damage 
+		
+		# --- RESPETANDO EL DAÑO ORIGINAL DEL ARMA ---
+		# Permite que el '.tres' y los atributos definan la letalidad.
+		# Jefes usan el "override" como un multiplicador final de esta base (ahora llamado atk_mult_dmg).
+		var dmg_from_attributes = 0.0
 		if attribute_manager and attribute_manager.has_method("get_stat"):
-			base_dmg += attribute_manager.get_stat("melee_damage")
-		var final_damage = base_dmg * damage_multiplier * damage_mult_override
+			dmg_from_attributes = attribute_manager.get_stat("melee_damage")
+		
+		var final_damage = (base_dmg + dmg_from_attributes) * damage_multiplier * damage_mult_override
+		
 		hitbox.activate(final_damage, knockback_force, 5.0, owner_node)
 		await get_tree().create_timer(duration).timeout
 		if hitbox: hitbox.deactivate()

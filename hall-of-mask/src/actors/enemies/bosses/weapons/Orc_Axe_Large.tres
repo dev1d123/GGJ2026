@@ -10,3 +10,4 @@ windup_time = 0.4
 cooldown = 0.5
 stop_movement = true
 damage = 20.0
+knockback_force = 10.0

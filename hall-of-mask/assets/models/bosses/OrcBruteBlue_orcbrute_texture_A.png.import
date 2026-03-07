@@ -2,14 +2,11 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csq07n8eptk8r"
+uid="uid://b03qxycxlsn0x"
 path.s3tc="res://.godot/imported/OrcBruteBlue_orcbrute_texture_A.png-e8bdedfb4d6bec64e6984f9c74434b01.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
-}
-generator_parameters={
-"md5": "348d500c7b1a64e06baa0eae7749031e"
 }
 
 [deps]

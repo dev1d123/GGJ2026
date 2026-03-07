@@ -13,4 +13,5 @@ windup_time = 0.5
 active_time = 0.15
 total_animation_time = 1.135
 cooldown = 0.4
-damage = 15.0
+damage = 12.5
+stamina_cost = 12.5

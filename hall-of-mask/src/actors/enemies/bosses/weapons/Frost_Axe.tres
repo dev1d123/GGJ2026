@@ -9,4 +9,5 @@ weapon_scene = ExtResource("2_psxu1")
 windup_time = 0.4
 cooldown = 0.5
 stop_movement = true
-damage = 20.0
+damage = 17.5
+knockback_force = 10.0

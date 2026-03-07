@@ -22,6 +22,7 @@ var _weapon_length: float = 1.0
 var _is_emitting: bool = false
 var _last_top_pos: Vector3 = Vector3.ZERO
 var _last_center_pos: Vector3 = Vector3.ZERO
+var _last_bot_pos: Vector3 = Vector3.ZERO
 var _last_weapon_x: Vector3 = Vector3.ZERO
 var _last_weapon_z: Vector3 = Vector3.ZERO
 
