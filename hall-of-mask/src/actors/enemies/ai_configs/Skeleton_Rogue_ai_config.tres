@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="AIBehaviorConfig" load_steps=2 format=3 uid="uid://cf15mah25h3wc"]
+
+[ext_resource type="Script" uid="uid://lgk5kify5c0c" path="res://src/actors/enemies/ai/AIBehaviorConfig.gd" id="1_nonhw"]
+
+[resource]
+script = ExtResource("1_nonhw")
+aggression = 1.5
+courage = 0.6
+vision_range = 25.0
+lose_aggro_time = 8.0
+can_dodge = true
+dodge_chance_vs_ranged = 0.6
+zigzag_when_chasing = true
+flee_health_percent = 0.2

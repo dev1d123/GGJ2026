@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://cwudfcyq18ecw"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_yvf11"]
+[ext_resource type="PackedScene" uid="uid://deiihjn2fcimd" path="res://src/actors/enemies/bosses/weapons/Sword_Large.tscn" id="2_yvf11"]
+
+[resource]
+script = ExtResource("1_yvf11")
+weapon_scene = ExtResource("2_yvf11")
+windup_time = 0.4
+cooldown = 0.5
+stop_movement = true
+damage = 22.5
+knockback_force = 10.0
+jump_force = 5.0

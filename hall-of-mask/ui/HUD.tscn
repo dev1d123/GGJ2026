@@ -14,9 +14,14 @@
 [ext_resource type="Texture2D" uid="uid://cpvoc7hsob0ml" path="res://UI_assets/flecha-de-tiro-con-arco.png" id="9_ioimr"]
 [ext_resource type="Texture2D" uid="uid://bsoq7it838k6r" path="res://UI_assets/bala.png" id="10_cjw2x"]
 [ext_resource type="Texture2D" uid="uid://btbet8x5kodvd" path="res://UI_assets/star-trek.png" id="12_5d7l6"]
+[ext_resource type="Texture2D" uid="uid://c2reyso7juxhf" path="res://UI_assets/ulti1.png" id="13_1il8e"]
+[ext_resource type="Texture2D" uid="uid://dtevjrymrb1ku" path="res://UI_assets/ulti2.png" id="14_3tkt7"]
+[ext_resource type="Texture2D" uid="uid://bhnc3uae213pg" path="res://UI_assets/ulti3.png" id="15_t2xmg"]
 [ext_resource type="Texture2D" uid="uid://djyq0cf5cybfu" path="res://UI_assets/diamante.png" id="15_wxjpw"]
 [ext_resource type="Texture2D" uid="uid://d3eeaesdcld4q" path="res://UI_assets/mochila.png" id="16_5d7l6"]
 [ext_resource type="Texture2D" uid="uid://gjgqtsreegxl" path="res://UI_assets/images.png" id="16_l08fo"]
+[ext_resource type="Texture2D" uid="uid://djp7bxufjxbbx" path="res://UI_assets/ulti4.png" id="16_vn47m"]
+[ext_resource type="Texture2D" uid="uid://ds7bcb0l1u1op" path="res://UI_assets/ulti5.png" id="17_tb8nc"]
 [ext_resource type="Texture2D" uid="uid://cao2fhyhavqds" path="res://assets/imagesGUI/container_minimap.png" id="17_tlkqj"]
 [ext_resource type="PackedScene" uid="uid://dr78isevg8l5m" path="res://ui/reticle_ui.tscn" id="18_reticle"]
 [ext_resource type="Script" uid="uid://cjdptnroc6hkg" path="res://scripts/components/mask_selection_panel.gd" id="19_mask_panel"]
@@ -72,7 +77,7 @@ expand_mode = 1
 [node name="BarsContainer" type="VBoxContainer" parent="GameUI/StatsPanel"]
 layout_mode = 2
 
-[node name="LifeContainer" type="HBoxContainer" parent="GameUI/StatsPanel/BarsContainer"]
+[node name="LifeContainer" type="HFlowContainer" parent="GameUI/StatsPanel/BarsContainer"]
 layout_mode = 2
 
 [node name="StaminaBar" type="TextureProgressBar" parent="GameUI/StatsPanel/BarsContainer"]
@@ -278,6 +283,7 @@ horizontal_alignment = 2
 vertical_alignment = 2
 
 [node name="SkillR" type="TextureProgressBar" parent="GameUI/SkillsPanel"]
+visible = false
 layout_mode = 0
 offset_left = 132.0
 offset_top = 132.0
@@ -297,7 +303,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -40.0
-offset_top = -28.0
+offset_top = -49.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "R"

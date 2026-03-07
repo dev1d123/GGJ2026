@@ -15,5 +15,5 @@ total_animation_time = 1.6
 cooldown = 0.4
 is_two_handed = true
 damage = 20.0
-jump_force = 1.0
+knockback_force = 10.0
 stamina_cost = 20.0

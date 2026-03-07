@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="AIBehaviorConfig" load_steps=2 format=3 uid="uid://boje8aw4muuju"]
+
+[ext_resource type="Script" uid="uid://lgk5kify5c0c" path="res://src/actors/enemies/ai/AIBehaviorConfig.gd" id="1_omiqe"]
+
+[resource]
+script = ExtResource("1_omiqe")
+aggression = 2.0
+vision_range = 50.0

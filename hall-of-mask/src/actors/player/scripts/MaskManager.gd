@@ -1,6 +1,14 @@
 extends Node
 class_name MaskManager
 
+# Referencias a los iconos de progreso de la ultimate en el HUD
+# (Se resuelven diferidos porque HUD2 es una escena instanciada externa)
+var _ult_label = null
+var _ulti1 = null
+var _ulti2 = null
+var _ulti3 = null
+var _ulti4 = null
+var _ulti5 = null
 # ------------------------------------------------------------------------------
 # 1. CONFIGURACIÓN
 # ------------------------------------------------------------------------------
@@ -23,6 +31,9 @@ signal on_ult_charge_changed(current, max)
 @export var max_ult_charge: float = 100.0
 @export var charge_decay_rate: float = 0.0 # Si quieres que baje sola con el tiempo
 
+@export_group("Animaciones y Tiempos")
+@export var mask_equip_delay: float = 0.3
+
 # ------------------------------------------------------------------------------
 # 2. VARIABLES INTERNAS
 # ------------------------------------------------------------------------------
@@ -40,6 +51,34 @@ var current_mask_visual_node: Node3D = null
 func _ready():
 	# Inicializar carga en 0
 	current_ult_charge = 0.0
+	# HUD2 es una escena instanciada externa: sus hijos no están listos aún.
+	# Diferimos la búsqueda de nodos para el siguiente frame.
+	call_deferred("_init_hud_refs")
+
+func _init_hud_refs():
+	# Estrategia 1: usar el export 'player' si apunta al Player real (tiene HUD2 como hijo)
+	# Estrategia 2: buscar HUD2 como hermano de este MaskManager (../HUD2)
+	# Estrategia 3: no hay HUD -> enemigo, saltar silenciosamente
+	var hud_root: Node = null
+
+	if player and player.has_node("HUD2"):
+		hud_root = player.get_node("HUD2")
+		print("[MaskManager] _init_hud_refs | HUD2 encontrado via 'player' export (", player.name, ")")
+	elif has_node("../HUD2"):
+		hud_root = get_node("../HUD2")
+		print("[MaskManager] _init_hud_refs | HUD2 encontrado via path relativo ../HUD2")
+	else:
+		print("[MaskManager] _init_hud_refs | Sin HUD2 (soy enemigo: ", get_parent().name, ") -> skip")
+		return
+
+	_ult_label = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/Label")
+	_ulti1     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti1")
+	_ulti2     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti2")
+	_ulti3     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti3")
+	_ulti4     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti4")
+	_ulti5     = hud_root.get_node_or_null("GameUI/SkillsPanel/UltiProgess/ulti5")
+	print("[MaskManager] _init_hud_refs | ulti1=", _ulti1, " ulti2=", _ulti2, " ulti3=", _ulti3, " ulti4=", _ulti4, " ulti5=", _ulti5, " label=", _ult_label)
+	_update_ult_icons()
 
 func _process(delta):
 	# Lógica de duración de la Ulti
@@ -63,26 +102,45 @@ func _process(delta):
 # ------------------------------------------------------------------------------
 # 4. GESTIÓN DE MÁSCARA (EQUIPAR / QUITAR)
 # ------------------------------------------------------------------------------
-func equip_mask(data: MaskData):
+func equip_mask(data: MaskData, instant_spawn: bool = false):
 	if not data: return
 	
 	# Si ya teníamos una, la quitamos primero visualmente
 	if current_mask_visual_node: _remove_visual_model()
 	
 	current_mask = data
-	emit_signal("on_mask_changed", data)
 	print("🎭 Manager: Equipando ", data.mask_name)
 	
-	# 1. Aplicar Stats Base
+	# 1. GENERAR MODELO VISUAL INMEDIATAMENTE PARA ANIMARLO
+	_spawn_mask_visual(data)
+	
+	# Si es instantáneo (ej. al spawnear) o no hay delay configurado
+	if instant_spawn or mask_equip_delay <= 0.01:
+		_finalize_equip_mask(data)
+	else:
+		# ANIMACIÓN DE APARICIÓN (Scala de 0 a 1 tipo pop-in)
+		if current_mask_visual_node:
+			current_mask_visual_node.scale = Vector3.ZERO
+			var tween = create_tween()
+			tween.tween_property(current_mask_visual_node, "scale", Vector3.ONE, mask_equip_delay)\
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				
+		await get_tree().create_timer(mask_equip_delay).timeout
+		
+		# Validar que no se haya quitado la máscara mientras esperábamos
+		if current_mask == data:
+			_finalize_equip_mask(data)
+
+func _finalize_equip_mask(data: MaskData):
+	emit_signal("on_mask_changed", data)
+	
+	# 2. Aplicar Stats Base
 	apply_stats(false)
 	
-	# 2. Tintar pantalla (Solo Player)
+	# 3. Tintar pantalla (Solo Player)
 	if screen_overlay:
 		screen_overlay.visible = true
 		screen_overlay.color = data.screen_tint
-	
-	# 3. GENERAR MODELO VISUAL (NUEVO)
-	_spawn_mask_visual(data)
 
 func remove_mask():
 	print("🎭 Manager: Removiendo máscara")
@@ -163,9 +221,12 @@ func _reset_stats_to_default():
 # 6. SISTEMA DE ULTIMATE
 # ------------------------------------------------------------------------------
 func add_charge(amount: float):
-	if is_ultimate_active or not current_mask: return
+	if is_ultimate_active or not current_mask:
+		return
 	current_ult_charge = min(current_ult_charge + amount, max_ult_charge)
+	print("[MaskManager] Carga actualizada: ", current_ult_charge, "/", max_ult_charge)
 	emit_signal("on_ult_charge_changed", current_ult_charge, max_ult_charge)
+	_update_ult_icons()
 
 func activate_ultimate():
 	if not current_mask or current_ult_charge < max_ult_charge: 
@@ -179,6 +240,7 @@ func activate_ultimate():
 	current_ult_charge = 0.0 # Consumir carga
 	emit_signal("on_ult_charge_changed", 0.0, max_ult_charge)
 	emit_signal("on_ultimate_state", true)
+	_update_ult_icons()
 	
 	apply_stats(true) # Aplicar stats OP
 
@@ -203,8 +265,12 @@ func _spawn_mask_visual(data: MaskData):
 	
 	# Validaciones
 	if not mask_attachment_point:
-		# Si no hay punto asignado, no hacemos nada (falla silenciosamente)
-		return
+		# Auto-buscar si se olvidó asignar en el Inspector
+		if get_parent():
+			var found = get_parent().find_child("MaskMount", true, false)
+			if found is Node3D: mask_attachment_point = found
+			
+		if not mask_attachment_point: return # Falla silenciosa si no existe en la escena
 		
 	# ¡OJO! Asegúrate de haber agregado 'mask_visual_scene' a tu MaskData.gd
 	if not "mask_visual_scene" in data or not data.mask_visual_scene:
@@ -227,3 +293,19 @@ func _remove_visual_model():
 	if current_mask_visual_node:
 		current_mask_visual_node.queue_free()
 		current_mask_visual_node = null
+
+# ------------------------------------------------------------------------------
+# 8. PROGRESO DE ULTIMATE EN HUD
+# ------------------------------------------------------------------------------
+func _update_ult_icons():
+	# ulti1 = siempre visible (0+)
+	# ulti2 = >= 25
+	# ulti3 = >= 50
+	# ulti4 = >= 75
+	# ulti5 + label = 100 (carga completa)
+	if _ulti1: _ulti1.visible = true
+	if _ulti2: _ulti2.visible = current_ult_charge >= 25.0
+	if _ulti3: _ulti3.visible = current_ult_charge >= 50.0
+	if _ulti4: _ulti4.visible = current_ult_charge >= 75.0
+	if _ulti5: _ulti5.visible = current_ult_charge >= 100.0
+	if _ult_label: _ult_label.visible = current_ult_charge >= max_ult_charge

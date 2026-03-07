@@ -1,4 +1,4 @@
-[gd_resource type="AnimationNodeBlendTree" load_steps=90 format=3 uid="uid://d20sj1ecv6luv"]
+[gd_resource type="AnimationNodeBlendTree" load_steps=92 format=3 uid="uid://d20sj1ecv6luv"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_fq326"]
 animation = &"Player/Axe_1H_Attack"
@@ -183,16 +183,16 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_nqw73")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_smrui"]
-animation = &"Player/Dodge_Forward"
+animation = &"animations/Dodge_Forward"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i5vde"]
-animation = &"Player/Dodge_Backward"
+animation = &"animations/Dodge_Backward"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ffi44"]
-animation = &"Player/Dodge_Right"
+animation = &"animations/Dodge_Right"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8sp7e"]
-animation = &"Player/Dodge_Left"
+animation = &"animations/Dodge_Left"
 
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_ubrgq"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_smrui")
@@ -216,10 +216,10 @@ start_offset = 0.0
 loop_mode = 0
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0ttn4"]
-animation = &"animations/2H_Melee_Attack_Chop"
+animation = &"animations/1H_Melee_Attack_Chop"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ot3u1"]
-animation = &"animations/2H_Melee_Attack_Stab"
+animation = &"animations/1H_Melee_Attack_Stab"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ixdoq"]
 animation = &"animations/2H_Melee_Attack_Spin"
@@ -252,25 +252,31 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_vg1t3")
 blend_point_4/pos = Vector2(-1, 0)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jaqw0"]
-animation = &"animations/Idle_B"
+animation = &"animations/Idle"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_avnyl"]
-animation = &"animations/Walking_C"
+animation = &"animations/Walking_A"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_sp4d7"]
-animation = &"animations/Walking_C"
+animation = &"animations/Walking_A"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8t3s0"]
-animation = &"animations/Running_A"
+animation = &"animations/Running_B"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ds4ex"]
-animation = &"animations/Running_A"
+animation = &"animations/Running_B"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8xefb"]
-animation = &"animations/Running_A"
+animation = &"animations/Running_B"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_baejd"]
-animation = &"animations/Running_A"
+animation = &"animations/Running_B"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ygqfx"]
+animation = &"animations/Walking_A"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_w75qj"]
+animation = &"animations/Walking_A"
 
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_cupkb"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_jaqw0")
@@ -287,6 +293,10 @@ blend_point_5/node = SubResource("AnimationNodeAnimation_8xefb")
 blend_point_5/pos = Vector2(0, -2)
 blend_point_6/node = SubResource("AnimationNodeAnimation_baejd")
 blend_point_6/pos = Vector2(2, 0)
+blend_point_7/node = SubResource("AnimationNodeAnimation_ygqfx")
+blend_point_7/pos = Vector2(0.90000004, 0)
+blend_point_8/node = SubResource("AnimationNodeAnimation_w75qj")
+blend_point_8/pos = Vector2(-1, 0)
 min_space = Vector2(-2, -2)
 max_space = Vector2(2, 2)
 
@@ -329,26 +339,20 @@ switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_q3xa7"]
-xfade_time = 0.3
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_8ycu5"]
-xfade_time = 0.4
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_31uth"]
-xfade_time = 0.3
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0rbmx"]
-xfade_time = 0.4
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_4j0vm"]
-xfade_time = 0.3
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bf1ay"]
-xfade_time = 0.5
 switch_mode = 2
 advance_mode = 2
 
@@ -365,7 +369,7 @@ states/Jump_Start/position = Vector2(450.9214, 26.133759)
 states/Orc_Axe_2H_Attack_1/node = SubResource("AnimationNodeAnimation_0ttn4")
 states/Orc_Axe_2H_Attack_1/position = Vector2(135.92181, 271.13376)
 states/Orc_Axe_2H_Attack_2/node = SubResource("AnimationNodeAnimation_ot3u1")
-states/Orc_Axe_2H_Attack_2/position = Vector2(355.9218, 265.13376)
+states/Orc_Axe_2H_Attack_2/position = Vector2(353.9218, 271.13376)
 states/Orc_Axe_2H_Attack_3/node = SubResource("AnimationNodeAnimation_ixdoq")
 states/Orc_Axe_2H_Attack_3/position = Vector2(450.9214, 176.13376)
 states/Sneaking/node = SubResource("AnimationNodeBlendSpace2D_yca3x")
@@ -377,7 +381,8 @@ transitions = ["Start", "Standing", SubResource("AnimationNodeStateMachineTransi
 graph_offset = Vector2(-256.0782, -47.866245)
 
 [resource]
-graph_offset = Vector2(-381.05768, -125.81978)
+resource_local_to_scene = true
+graph_offset = Vector2(-413.81497, 56.67816)
 nodes/output/position = Vector2(-20, -40)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_786ps")
 nodes/StateMachine/position = Vector2(-300, 100)

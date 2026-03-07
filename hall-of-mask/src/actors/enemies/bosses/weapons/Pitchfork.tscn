@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://c4fbqrpccncfg"]
+
+[ext_resource type="PackedScene" uid="uid://cg2axf73ohq06" path="res://assets/models/bosses/weapons/Monstrosity_Pitchfork_Large.gltf" id="2_jfwhn"]
+[ext_resource type="Script" uid="uid://cn5kkl7yys5k1" path="res://src/actors/player/scripts/WeaponHitbox.gd" id="2_mib7f"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nmrsx"]
+size = Vector3(1.7108612, 3.4362316, 1.1856464)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Hitbox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("2_mib7f")
+trail_color = Color(0.39939582, 0.22191057, 0.9676741, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0037765503, 0.6650431, -0.013011292)
+shape = SubResource("BoxShape3D_nmrsx")
+debug_color = Color(0.8627451, 0.30980393, 0.49019608, 1)
+
+[node name="Monstrosity_Pitchfork_Large2" parent="." instance=ExtResource("2_jfwhn")]
