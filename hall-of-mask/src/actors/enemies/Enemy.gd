@@ -122,7 +122,7 @@ var strafe_dir: int = 1
 # Variable para controlar la agresividad (1.0 normal, 2.0 frenético)
 var aggression: float = 1.2 
 
-enum State { IDLE, PATROL, CHASE, COMBAT_MANEUVER, ATTACKING, COOLDOWN, STUNNED, DODGING, PRE_DODGE }
+enum State { IDLE, PATROL, CHASE, COMBAT_MANEUVER, ATTACKING, COOLDOWN, STUNNED, DODGING, PRE_DODGE, DEAD }
 var current_state = State.PATROL
 var player_ref: Node3D = null
 
@@ -145,7 +145,7 @@ var _dodge_is_aggressive: bool = false
 
 var gravity = 9.8
 var knockback_velocity: Vector3 = Vector3.ZERO
-var unique_materials: Array[StandardMaterial3D] = []
+var unique_materials: Array[BaseMaterial3D] = []
 var flash_tween: Tween
 var original_colors: Dictionary = {}
 
@@ -970,8 +970,54 @@ func _on_damage_received(a, c):
 func _morir():
 	if is_instance_valid(player_ref) and player_ref.has_node("MaskManager"):
 		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
+	
+	current_state = State.DEAD
 	set_physics_process(false)
-	queue_free()
+	
+	# Desactivar colisiones para que no estorbe (la Capa 2 suele ser Enemy, 1 es World, etc)
+	collision_layer = 0
+	collision_mask = 0
+	
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false
+		combat_manager.is_movement_locked = true
+	
+	if anim_tree:
+		var playback = anim_tree["parameters/StateMachine/playback"]
+		if playback:
+			# Evitar que siga la animación de correr o atacar
+			playback.travel("Standing") 
+			
+	# Congelar la animación actual
+	if has_node("Visual/AnimationTree"): $Visual/AnimationTree.active = false
+	elif has_node("OrcBrute/AnimationTree"): $OrcBrute/AnimationTree.active = false
+	elif has_node("Rig/AnimationTree"): $Rig/AnimationTree.active = false
+	else: anim_tree.active = false
+
+	if not visual_mesh:
+		queue_free()
+		return
+		
+	# Efecto visual de muerte con Tween
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	# 1. Hacer que brille en rojo intenso
+	for m in unique_materials:
+		if m is StandardMaterial3D or m is ORMMaterial3D:
+			t.tween_property(m, "albedo_color", Color(4.0, 0.2, 0.2, 1.0), 0.3)
+			if "emission_enabled" in m:
+				m.emission_enabled = true
+				t.tween_property(m, "emission", Color(2.0, 0.0, 0.0), 0.3)
+	
+	# 2. Encoger hasta desaparecer dramáticamente
+	t.tween_property(visual_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.8).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	# 3. Flotar un poco hacia arriba mientras se encoge
+	t.tween_property(visual_mesh, "position:y", visual_mesh.position.y + 1.5, 0.8).set_ease(Tween.EASE_OUT)
+	
+	# Cuando el tween termina, se borra el nodo
+	t.chain().tween_callback(self.queue_free)
 
 # --- VISUALES ---
 func _setup_unique_materials():

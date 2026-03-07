@@ -491,9 +491,48 @@ func _morir():
 	print("💀 Boss Orc derrotado!")
 	boss_died.emit(self)
 	
+	current_state = State.DEAD
+	set_physics_process(false)
+	
+	# Desactivar colisiones
+	collision_layer = 0
+	collision_mask = 0
+	
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false
+		combat_manager.is_movement_locked = true
+		
+	# Detener animación agresiva
+	if anim_tree:
+		var playback = anim_tree["parameters/StateMachine/playback"]
+		if playback: playback.travel("Standing")
+		
+	if internal_anim_player: internal_anim_player.speed_scale = 0.5
+	
 	# Recompensa de carga
 	if player_ref and player_ref.has_node("MaskManager"):
-		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
+		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward * 2.5) # Recompensa extra de jefe
 	
-	set_physics_process(false)
-	queue_free()
+	if not visual_mesh:
+		queue_free()
+		return
+		
+	# EFECTO DE MUERTE DE JEFE (Más dramático)
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	# 1. Brillo morado/negro intenso
+	for m in unique_materials:
+		if m is StandardMaterial3D or m is ORMMaterial3D:
+			t.tween_property(m, "albedo_color", Color(2.0, 0.0, 3.0, 1.0), 1.5)
+			if "emission_enabled" in m:
+				m.emission_enabled = true
+				t.tween_property(m, "emission", Color(3.0, 0.0, 5.0), 1.5)
+				
+	# 2. Encoger lentamente y elevarse más
+	t.tween_property(visual_mesh, "scale", Vector3(0.01, 0.01, 0.01), 3.0).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(visual_mesh, "position:y", visual_mesh.position.y + 3.0, 3.0).set_ease(Tween.EASE_IN_OUT)
+	
+	# Al finalizar, eliminar al jefe
+	t.chain().tween_callback(self.queue_free)

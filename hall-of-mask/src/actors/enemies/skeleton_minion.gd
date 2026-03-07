@@ -32,7 +32,7 @@ var attack_range: float = 1.8
 var aggression: float = 1.0 
 var archetype: String = "Duelista"
 
-enum State { PATROL, CHASE, ATTACK, COOLDOWN }
+enum State { PATROL, CHASE, ATTACK, COOLDOWN, DEAD }
 var current_state = State.PATROL
 var player_ref: Node3D = null
 var patrol_timer = 0.0
@@ -42,7 +42,7 @@ var _last_vision_blocker = ""
 # Físicas
 var gravity = 9.8
 var knockback_velocity: Vector3 = Vector3.ZERO
-var unique_materials: Array[StandardMaterial3D] = []
+var unique_materials: Array[BaseMaterial3D] = []
 var flash_tween: Tween
 
 # ------------------------------------------------------------------------------
@@ -313,8 +313,45 @@ func _morir():
 	if target_player and target_player.has_node("MaskManager"):
 		target_player.get_node("MaskManager").add_charge(reward_amount)
 	
+	current_state = State.COOLDOWN
 	set_physics_process(false)
-	queue_free()
+	
+	# Desactivar colisiones (para que no te bloqueen el paso al desvanecerse)
+	collision_layer = 0
+	collision_mask = 0
+	
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false
+		combat_manager.is_movement_locked = true
+	
+	if anim_tree:
+		# En lugar de congelarla bruscamente, forzamos la postura idle si es posible
+		var actual = anim_tree.get(P_MOVIMIENTO)
+		if actual != null:
+			anim_tree.set(P_MOVIMIENTO, Vector2.ZERO)
+		anim_tree.active = false
+		
+	if not visual_mesh:
+		queue_free()
+		return
+		
+	# EFECTO DE MUERTE (Rápido, los aliados son chatarra y los enemigos frágiles mueren rápido)
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	for m in unique_materials:
+		if m is StandardMaterial3D or m is ORMMaterial3D:
+			t.tween_property(m, "albedo_color", Color(3.0, 0.4, 0.1, 1.0), 0.2)
+			if "emission_enabled" in m:
+				m.emission_enabled = true
+				t.tween_property(m, "emission", Color(3.0, 0.5, 0.0), 0.2)
+				
+	# Encogimiento brusco simulando hacerse polvo
+	t.tween_property(visual_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	t.tween_property(visual_mesh, "position:y", visual_mesh.position.y - 0.5, 0.6) # hundiéndose
+	
+	t.chain().tween_callback(self.queue_free)
 
 func _setup_unique_materials():
 	# 1. Validación de seguridad
