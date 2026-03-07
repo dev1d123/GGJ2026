@@ -278,6 +278,7 @@ func handle_left_click(pressed: bool):
 					if not mana_component.try_consume(w.mana_cost):
 						_notify_toast("Insufficient mana!", Color(0.2, 0.5, 1.0))
 						return
+			_ejecutar_disparo_rango(w, "right")
 	# CASO 2: MELEE
 	else:
 		if pressed: _try_melee_attack("left")
