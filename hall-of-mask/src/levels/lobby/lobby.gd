@@ -15,6 +15,7 @@ var victory_ui: Label
 var is_going_to_end: bool = false
 
 func _ready() -> void:
+	audio.volume_db -= 6.0
 	audio.finished.connect(_on_audio_finished)
 	audio.play()
 
