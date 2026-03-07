@@ -12,6 +12,16 @@ class_name MaskData
 @export var screen_tint: Color = Color(1, 1, 1, 0.1)     # Tinte suave pasivo
 @export var ult_screen_tint: Color = Color(1, 0, 0, 0.3) # Tinte intenso en Ulti
 
+@export_category("Aura 3D (Enemy/Boss)")
+@export var aura_enabled: bool = true
+@export var aura_color: Color = Color(1, 1, 1, 0.65)
+@export_range(0.0, 16.0, 0.1) var aura_emission_energy: float = 4.5
+@export_range(0.0, 0.2, 0.001) var aura_grow_amount: float = 0.06
+@export_range(0.0, 1.0, 0.01) var aura_alpha: float = 0.65
+@export_range(1.0, 4.0, 0.05) var ult_aura_emission_mult: float = 1.8
+@export_range(1.0, 4.0, 0.05) var ult_aura_grow_mult: float = 1.8
+@export_range(1.0, 2.0, 0.05) var ult_aura_alpha_mult: float = 1.15
+
 # ----------------------------------------------------------------
 # STATS BASE (PASIVOS)
 # ----------------------------------------------------------------

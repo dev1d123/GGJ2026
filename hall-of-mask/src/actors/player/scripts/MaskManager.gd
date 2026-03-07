@@ -259,32 +259,57 @@ func deactivate_ultimate():
 # ------------------------------------------------------------------------------
 # 7. LÓGICA VISUAL (SPAWN DE MÁSCARA 3D)
 # ------------------------------------------------------------------------------
+func _resolve_mask_attachment_point() -> Node3D:
+	if is_instance_valid(mask_attachment_point):
+		return mask_attachment_point
+
+	var search_roots: Array[Node] = []
+	if get_parent():
+		search_roots.append(get_parent())
+	if is_instance_valid(player):
+		search_roots.append(player)
+	search_roots.append(self)
+
+	for root in search_roots:
+		if not is_instance_valid(root):
+			continue
+		var found := root.find_child("MaskMount", true, false)
+		if found is Node3D:
+			mask_attachment_point = found
+			return found
+
+	return null
+
 func _spawn_mask_visual(data: MaskData):
 	# Limpieza previa
 	_remove_visual_model()
-	
+
 	# Validaciones
-	if not mask_attachment_point:
-		# Auto-buscar si se olvidó asignar en el Inspector
-		if get_parent():
-			var found = get_parent().find_child("MaskMount", true, false)
-			if found is Node3D: mask_attachment_point = found
-			
-		if not mask_attachment_point: return # Falla silenciosa si no existe en la escena
-		
-	# ¡OJO! Asegúrate de haber agregado 'mask_visual_scene' a tu MaskData.gd
-	if not "mask_visual_scene" in data or not data.mask_visual_scene:
-		# print("⚠️ La máscara no tiene escena visual asignada (.tscn)")
+	var mount := _resolve_mask_attachment_point()
+	if not mount:
+		push_warning("[MaskManager] No se encontró MaskMount para %s" % [str(data.mask_name)])
 		return
-	
+
+	if not data.mask_visual_scene:
+		return
+
 	# Instanciar
-	var visual_instance = data.mask_visual_scene.instantiate()
-	
+	var scene_instance: Node = data.mask_visual_scene.instantiate()
+	if not scene_instance:
+		return
+
+	var visual_instance: Node3D
+	if scene_instance is Node3D:
+		visual_instance = scene_instance as Node3D
+	else:
+		visual_instance = Node3D.new()
+		visual_instance.name = "MaskVisualRoot"
+		visual_instance.add_child(scene_instance)
+
 	# Añadir al MaskMount
-	# Al ser hijo, hereda la escala que le diste al MaskMount en el editor del enemigo
-	mask_attachment_point.add_child(visual_instance)
+	mount.add_child(visual_instance)
 	current_mask_visual_node = visual_instance
-	
+
 	# Resetear pos/rot local (La escala NO se toca para respetar el MaskMount)
 	visual_instance.position = Vector3.ZERO
 	visual_instance.rotation = Vector3.ZERO

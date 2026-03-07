@@ -285,6 +285,8 @@ func _on_body_entered(body):
 	
 	if hit_connected:
 		hit_history.append(body)
+		if attacker_node and attacker_node.has_method("_on_attack_hit_landed"):
+			attacker_node._on_attack_hit_landed(body)
 		
 		if body.has_method("apply_knockback"):
 			# --- AQUÍ ESTÁ LA MAGIA DEL CÓDIGO ANTIGUO ---
@@ -333,3 +335,5 @@ func _on_area_entered(area):
 		
 		area.hit(damage, dir, knockback, jump)
 		hit_history.append(area)
+		if attacker_node and attacker_node.has_method("_on_attack_hit_landed"):
+			attacker_node._on_attack_hit_landed(entity)

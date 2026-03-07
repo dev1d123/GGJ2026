@@ -256,16 +256,12 @@ debug_color = Color(0.9607843, 0, 0.5254902, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.098664, 0.003987068, -14.935822)
 
 [node name="Skeleton_Minion2" parent="." instance=ExtResource("21_xoriv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.365303, 0, 9.361349)
+transform = Transform3D(0.6118032, 0, -0.79101, 0, 1, 0, 0.79101, 0, 0.6118032, -7.365303, 0, 9.361349)
+mask_handling = 0
 
 [node name="Skeleton_Minion3" parent="." instance=ExtResource("22_4r8hd")]
 transform = Transform3D(-0.25881904, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, -0.25881904, -11, 0, -14)
 loadout_mask = ExtResource("17_fi7gg")
-
-[node name="Orc_Brute_Green" parent="." instance=ExtResource("19_5gnw2")]
-transform = Transform3D(-0.998494, 0, -0.054862995, 0, 1, 0, 0.054862995, 0, -0.998494, 42.901188, 0.8229659, -23.01744)
-loadout_weapon_r = null
-loadout_mask = null
 
 [node name="Skeleton_Minion4" parent="." instance=ExtResource("27_fi7gg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8421707, 0.003961563, 27.059727)
@@ -273,3 +269,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.8421707, 0.003961563, 27.0
 [node name="Skeleton_Minion5" parent="." instance=ExtResource("28_180rk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.408817, 0.003961563, -28.235971)
 loadout_weapon_r = ExtResource("29_xn7sa")
+
+[node name="Orc_Brute_Green" parent="." instance=ExtResource("19_5gnw2")]
+transform = Transform3D(-0.9227266, 0, -0.3854552, 0, 1, 0, 0.3854552, 0, -0.9227266, 36.82666, 0, -12.5121975)

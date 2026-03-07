@@ -30,6 +30,10 @@ enum MaskEquipCondition {
 ## Condición bajo la cual el enemigo se equipará la máscara si la tiene en inventario.
 @export var mask_equip_condition: MaskEquipCondition = MaskEquipCondition.NONE
 
+@export_group("Ultimate IA (Enemigos)")
+## Probabilidad (%) de que ESTA instancia de enemigo pueda usar ultimate si tiene máscara equipada.
+@export_range(0.0, 100.0, 1.0) var ultimate_instance_chance_with_mask: float = 35.0
+
 # --- COMPONENTES ---
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var health_component: HealthComponent = $HealthComponent
@@ -156,6 +160,13 @@ var _bloom_change_timer: float = 0.0
 var _time_in_combat_timer: float = 0.0
 var _next_combat_maneuver: String = ""
 
+var _has_ultimate_roll: bool = false
+var _can_activate_ultimate: bool = false
+var _ultimate_proc_chance: float = 0.0
+var _ultimate_hits_dealt: int = 0
+var _ultimate_hits_received: int = 0
+var _forced_low_health_ultimate_used: bool = false
+
 # --- VARIABLES DE EVASIÓN ---
 var evade_cooldown: float = 0.0
 var _dodge_direction: Vector2 = Vector2.ZERO
@@ -194,13 +205,19 @@ func _ready():
 		_definir_arquetipo()
 		_decidir_proxima_maniobra()
 
-		mask_manager.on_mask_changed.connect(_on_mask_changed_event)
+		if mask_manager:
+			mask_manager.on_mask_changed.connect(_on_mask_changed_event)
+			mask_manager.on_ultimate_state.connect(_on_ultimate_visuals)
 		
-		if loadout_mask:
+		if loadout_mask and mask_manager:
 			if mask_handling == MaskHandling.EQUIP_ON_SPAWN:
 				mask_manager.equip_mask(loadout_mask, true) # true = instant spawn, no delay
 			elif mask_handling == MaskHandling.SIN_MASCARA:
 				loadout_mask = null # Ignorar la máscara asignada
+		elif mask_handling == MaskHandling.SIN_MASCARA:
+			loadout_mask = null
+
+	_initialize_enemy_ultimate_roll()
 
 	if health_component:
 		health_component.on_death.connect(_morir)
@@ -362,6 +379,8 @@ func _process_mask_triggers(delta: float):
 		
 	if global_position.distance_to(player_ref.global_position) <= 6.5:
 		_check_mask_condition(MaskEquipCondition.ON_PROXIMITY)
+
+	_check_enemy_emergency_ultimate()
 
 func _process_evasion_logic(delta: float):
 	if evade_cooldown > 0.0: evade_cooldown -= delta
@@ -846,6 +865,78 @@ func equipar_mascara_guardada():
 	if mask_manager and loadout_mask and mask_handling == MaskHandling.EN_INVENTARIO:
 		mask_manager.equip_mask(loadout_mask, false) # false = animate spawn
 
+func _uses_enemy_ultimate_roll_system() -> bool:
+	return true
+
+func _initialize_enemy_ultimate_roll():
+	_has_ultimate_roll = true
+	_can_activate_ultimate = false
+	_ultimate_proc_chance = 0.0
+	_ultimate_hits_dealt = 0
+	_ultimate_hits_received = 0
+	_forced_low_health_ultimate_used = false
+
+	if not _uses_enemy_ultimate_roll_system():
+		return
+
+	if mask_handling == MaskHandling.SIN_MASCARA:
+		return
+
+	if not loadout_mask:
+		return
+
+	_can_activate_ultimate = randf() <= (ultimate_instance_chance_with_mask / 100.0)
+
+func _can_try_enemy_ultimate() -> bool:
+	if not _uses_enemy_ultimate_roll_system():
+		return false
+	if not _has_ultimate_roll or not _can_activate_ultimate:
+		return false
+	if not mask_manager or not mask_manager.current_mask:
+		return false
+	if mask_manager.is_ultimate_active:
+		return false
+	return true
+
+func _activate_enemy_ultimate(reason: String):
+	if not _can_try_enemy_ultimate():
+		return
+
+	mask_manager.current_ult_charge = mask_manager.max_ult_charge
+	mask_manager.activate_ultimate()
+
+	if mask_manager.is_ultimate_active:
+		_ultimate_proc_chance = 0.0
+
+func _check_enemy_emergency_ultimate():
+	if _forced_low_health_ultimate_used:
+		return
+	if not _can_try_enemy_ultimate():
+		return
+	if not health_component or health_component.max_health <= 0:
+		return
+
+	var hp_ratio := health_component.current_health / health_component.max_health
+	if hp_ratio <= 0.33:
+		_forced_low_health_ultimate_used = true
+		_activate_enemy_ultimate("LOW_HEALTH_33")
+
+func _register_enemy_ultimate_event(event_name: String):
+	if not _can_try_enemy_ultimate():
+		return
+
+	_check_enemy_emergency_ultimate()
+	if mask_manager and mask_manager.is_ultimate_active:
+		return
+
+	_ultimate_proc_chance = clampf(_ultimate_proc_chance + 10.0, 0.0, 100.0)
+	if randf() * 100.0 <= _ultimate_proc_chance:
+		_activate_enemy_ultimate(event_name)
+
+func _on_attack_hit_landed(_target: Node = null):
+	_ultimate_hits_dealt += 1
+	_register_enemy_ultimate_event("HIT_DEALT")
+
 func _check_mask_condition(trigger: MaskEquipCondition):
 	if mask_handling != MaskHandling.EN_INVENTARIO: return
 	if mask_manager and mask_manager.current_mask: return # Ya equipada
@@ -871,6 +962,10 @@ func _on_damage_received(a, c):
 			_check_mask_condition(MaskEquipCondition.HALF_HEALTH)
 		if health_component.current_health <= health_component.max_health * 0.25:
 			_check_mask_condition(MaskEquipCondition.LOW_HEALTH_DESPERATION)
+
+	_ultimate_hits_received += 1
+	_register_enemy_ultimate_event("HIT_RECEIVED")
+	_check_enemy_emergency_ultimate()
 
 func _morir():
 	if is_instance_valid(player_ref) and player_ref.has_node("MaskManager"):
@@ -901,19 +996,60 @@ func flash_red():
 	for m in unique_materials:
 		if m in original_colors: flash_tween.parallel().tween_property(m, "albedo_color", original_colors[m], 0.2)
 
-func _activar_aura_mascara():
+func _get_effective_aura_color(mask_data: MaskData) -> Color:
+	var aura_c: Color = mask_data.aura_color
+	var looks_default_white: bool = (
+		is_equal_approx(aura_c.r, 1.0)
+		and is_equal_approx(aura_c.g, 1.0)
+		and is_equal_approx(aura_c.b, 1.0)
+	)
+
+	if looks_default_white:
+		aura_c = mask_data.screen_tint
+
+	aura_c.a = clampf(mask_data.aura_alpha, 0.0, 1.0)
+	return aura_c
+
+func _activar_aura_mascara(is_ult: bool = false):
 	if not mask_manager or not mask_manager.current_mask: return
 	if unique_materials.is_empty(): _setup_unique_materials()
-	var c = mask_manager.current_mask.screen_tint; c.a = 0.2
+	if unique_materials.is_empty(): return
+
+	var mask_data: MaskData = mask_manager.current_mask
+	if not mask_data.aura_enabled:
+		for m in unique_materials: m.next_pass = null
+		return
+
+	var aura_alpha_mult: float = mask_data.ult_aura_alpha_mult if is_ult else 1.0
+	var aura_emission_mult: float = mask_data.ult_aura_emission_mult if is_ult else 1.0
+	var aura_grow_mult: float = mask_data.ult_aura_grow_mult if is_ult else 1.0
+
+	var c: Color = _get_effective_aura_color(mask_data)
+	c.a = clampf(c.a * aura_alpha_mult, 0.0, 1.0)
+	var emission_c: Color = c
+	emission_c.a = 1.0
+
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = c; mat.emission = c; mat.emission_enabled = true; mat.emission_energy = 2.0
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; mat.cull_mode = BaseMaterial3D.CULL_FRONT; mat.grow = true; mat.grow_amount = 0.03
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	mat.albedo_color = c
+	mat.emission = emission_c
+	mat.emission_enabled = true
+	mat.emission_energy = maxf(0.0, mask_data.aura_emission_energy * aura_emission_mult)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.cull_mode = BaseMaterial3D.CULL_FRONT
+	mat.grow = true
+	mat.grow_amount = maxf(0.0, mask_data.aura_grow_amount * aura_grow_mult)
 	for m in unique_materials: m.next_pass = mat
 
 func _on_mask_changed_event(data: MaskData):
 	if data != null:
-		_activar_aura_mascara()
+		var is_ult_active := mask_manager != null and mask_manager.is_ultimate_active
+		_activar_aura_mascara(is_ult_active)
 	else:
 		for m in unique_materials: m.next_pass = null
 
-func _on_ultimate_visuals(a): pass
+func _on_ultimate_visuals(is_active: bool):
+	if not mask_manager or not mask_manager.current_mask:
+		return
+	_activar_aura_mascara(is_active)

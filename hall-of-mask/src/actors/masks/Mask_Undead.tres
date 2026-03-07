@@ -1,15 +1,21 @@
-[gd_resource type="Resource" script_class="MaskData" load_steps=3 format=3 uid="uid://undead_mask_003"]
+[gd_resource type="Resource" script_class="MaskData" load_steps=4 format=3 uid="uid://cvw7u5jurxj6d"]
 
 [ext_resource type="Script" uid="uid://bhqvs7f2gl7qo" path="res://src/actors/player/scripts/MaskData.gd" id="1_undead"]
-[ext_resource type="Texture2D" path="res://assets/imagesGUI/undead_mask.png" id="2_undead_icon"]
+[ext_resource type="PackedScene" uid="uid://bdlrim5x3xybk" path="res://src/actors/masks/Mask_Undead.glb" id="2_kxojc"]
+[ext_resource type="Texture2D" uid="uid://cm6k6viar7hos" path="res://assets/imagesGUI/undead_mask.png" id="2_undead_icon"]
 
 [resource]
 script = ExtResource("1_undead")
 mask_name = "Undead"
 icon = ExtResource("2_undead_icon")
 description = "Máscara del No Muerto - Resistencia extrema y regeneración constante"
+mask_visual_scene = ExtResource("2_kxojc")
 screen_tint = Color(0.5, 0.2, 1, 0.1)
 ult_screen_tint = Color(0.5, 0, 1, 0.3)
+aura_color = Color(0.6, 0.25, 1, 0.78)
+aura_emission_energy = 5.6
+aura_grow_amount = 0.075
+aura_alpha = 0.78
 speed_mult = 0.9
 jump_mult = 0.9
 defense_mult = 1.5
@@ -20,13 +26,10 @@ stamina_cost_mult = 0.7
 stamina_regen_mult = 1.5
 stamina_delay_mult = 0.6
 ultimate_duration = 12.0
-ult_speed_mult = 1.2
 ult_jump_mult = 1.1
 ult_defense_mult = 2.5
-ult_damage_mult = 1.5
 ult_attack_speed_mult = 1.3
 ult_crit_chance = 0.15
 ult_stamina_cost_mult = 0.3
 ult_stamina_regen_mult = 3.0
 ult_stamina_delay_mult = 0.2
-crit_damage = 2.0

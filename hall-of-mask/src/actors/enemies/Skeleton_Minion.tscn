@@ -4,7 +4,7 @@
 [ext_resource type="Material" uid="uid://32d74rck3sni" path="res://assets/materials/characters/skeleton.tres" id="1_ybmvs"]
 [ext_resource type="Resource" uid="uid://daaebpm6rbbe2" path="res://src/actors/weapons/Hacha_Mano.tres" id="2_o0cpg"]
 [ext_resource type="Material" uid="uid://bcty1fmbst271" path="res://assets/materials/characters/Glow.tres" id="2_sfx70"]
-[ext_resource type="Resource" uid="uid://bidblay1hqrnw" path="res://src/actors/masks/Mask_Combatiente.tres" id="3_o0cpg"]
+[ext_resource type="Resource" path="res://src/actors/masks/Mask_Undead.tres" id="3_o0cpg"]
 [ext_resource type="Script" uid="uid://b1ulnfh2lfyv0" path="res://src/actors/player/scripts/HealthComponent.gd" id="3_sfx70"]
 [ext_resource type="Script" uid="uid://jcg751xxldjo" path="res://src/actors/player/scripts/Hurtbox.gd" id="4_3v6cu"]
 [ext_resource type="AnimationLibrary" uid="uid://f5oamg6nxr8v" path="res://assets/animations/characters/animations/Player.res" id="6_ecyta"]
