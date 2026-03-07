@@ -183,16 +183,16 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_nqw73")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_smrui"]
-animation = &"Player/Dodge_Forward"
+animation = &"animations/Dodge_Forward"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i5vde"]
-animation = &"Player/Dodge_Backward"
+animation = &"animations/Dodge_Backward"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ffi44"]
-animation = &"Player/Dodge_Right"
+animation = &"animations/Dodge_Right"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8sp7e"]
-animation = &"Player/Dodge_Left"
+animation = &"animations/Dodge_Left"
 
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_ubrgq"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_smrui")
@@ -339,26 +339,20 @@ switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_q3xa7"]
-xfade_time = 0.3
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_8ycu5"]
-xfade_time = 0.4
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_31uth"]
-xfade_time = 0.3
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0rbmx"]
-xfade_time = 0.4
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_4j0vm"]
-xfade_time = 0.3
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bf1ay"]
-xfade_time = 0.5
 switch_mode = 2
 advance_mode = 2
 
@@ -388,7 +382,7 @@ graph_offset = Vector2(-256.0782, -47.866245)
 
 [resource]
 resource_local_to_scene = true
-graph_offset = Vector2(-498.89316, 131.16939)
+graph_offset = Vector2(-518.7113, 68.40551)
 nodes/output/position = Vector2(-20, -40)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_786ps")
 nodes/StateMachine/position = Vector2(-300, 100)

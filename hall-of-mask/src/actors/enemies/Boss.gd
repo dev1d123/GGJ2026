@@ -13,21 +13,21 @@ signal boss_died
 
 @export_group("Tiempos de Ataque Base")
 ## Segundos de preparación antes del golpe Atk1.
-@export var atk1_windup: float = 0.6
+@export var atk1_windup: float = 0.4
 ## Segundos que dura el daño del golpe Atk1.
 @export var atk1_active: float = 0.2
 ## Multiplicador de daño del Atk1.
 @export var atk1_dmg: float = 1.0      
 
 ## Segundos de preparación antes del golpe Atk2.
-@export var atk2_windup: float = 0.4
+@export var atk2_windup: float = 0.25
 ## Segundos que dura el daño del golpe Atk2.
 @export var atk2_active: float = 0.3
 ## Multiplicador de daño del Atk2.
 @export var atk2_dmg: float = 0.8
 
 ## Segundos de preparación antes del golpe Atk3.
-@export var atk3_windup: float = 0.8
+@export var atk3_windup: float = 0.55
 ## Segundos que dura el daño del golpe Atk3.
 @export var atk3_active: float = 0.4
 ## Multiplicador de daño del Atk3.
@@ -120,7 +120,7 @@ func _iniciar_carga():
 	# Solo imprimimos y flasheamos si es un inicio de carga "real" (no spam de frame)
 	if not has_equipped_mask: 
 		print("😡 JEFE: ¡CARGA FURIOSA!")
-		flash_red() 
+		# Se quita el flash_red() aquí porque confundía al jugador, parecía que recibía daño.
 	
 	current_speed = base_speed * sprint_speed_mult
 	current_state = State.CHASE
@@ -247,7 +247,13 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	if combat_manager: combat_speed = combat_manager.attack_speed_multiplier
 	var total_speed_scale = max(0.1, current_anim_scale * combat_speed)
 	
-	var real_windup = windup / total_speed_scale
+	# COMPENSACIÓN DE DESFASE (XFade Time)
+	# Los nodos AnimationTree suelen tener xfade_time de 0.2s o 0.3s. 
+	# Esto retrasa el "impacto visual" frente al código. 
+	# Forzamos que el timer compense este 'suavizado'
+	var xfade_delay_compensation = 0.2 
+	
+	var real_windup = max(0.01, (windup / total_speed_scale) - xfade_delay_compensation)
 	var real_active = active / total_speed_scale
 	
 	# Tracking inicial
@@ -256,10 +262,10 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	
 	while timer < track_time:
 		if not is_inside_tree(): return
-		var dt = get_physics_process_delta_time()
+		await get_tree().process_frame 
+		var dt = get_process_delta_time()
 		if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, dt * 5.0)
 		timer += dt
-		await get_tree().process_frame 
 	
 	if real_windup > track_time:
 		await get_tree().create_timer(real_windup - track_time).timeout

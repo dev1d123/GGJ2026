@@ -183,16 +183,16 @@ blend_point_4/node = SubResource("AnimationNodeAnimation_nqw73_SK_ns8x")
 blend_point_4/pos = Vector2(0, -1)
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_smrui_SK_W5uP"]
-animation = &"Player/Dodge_Forward"
+animation = &"animations/Dodge_Forward"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_i5vde_SK_xX9G"]
-animation = &"Player/Dodge_Backward"
+animation = &"animations/Dodge_Backward"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ffi44_SK_cKZB"]
-animation = &"Player/Dodge_Right"
+animation = &"animations/Dodge_Right"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8sp7e_SK_EAMu"]
-animation = &"Player/Dodge_Left"
+animation = &"animations/Dodge_Left"
 
 [sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_ubrgq_SK_vLEs"]
 blend_point_0/node = SubResource("AnimationNodeAnimation_smrui_SK_W5uP")

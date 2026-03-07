@@ -12,7 +12,6 @@ size = Vector3(1.7108612, 3.4362316, 1.1856464)
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("2_mib7f")
-enable_trail = true
 trail_color = Color(0.39939582, 0.22191057, 0.9676741, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]

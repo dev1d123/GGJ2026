@@ -22,7 +22,6 @@ var _weapon_length: float = 1.0
 var _is_emitting: bool = false
 var _last_top_pos: Vector3 = Vector3.ZERO
 var _last_center_pos: Vector3 = Vector3.ZERO
-var _last_bot_pos: Vector3 = Vector3.ZERO
 var _last_weapon_x: Vector3 = Vector3.ZERO
 var _last_weapon_z: Vector3 = Vector3.ZERO
 
@@ -268,11 +267,11 @@ func _on_body_entered(body):
 	if not monitoring: return
 	if body in hit_history: return
 	if body == attacker_node: return 
+	# Evitar fuego amigo entre enemigos (NPCs con grupo "Enemy")
+	if attacker_node and attacker_node.is_in_group("Enemy") and body.is_in_group("Enemy"): return
 	
-	# Evitar fuego amigo entre enemigos (opcional)
-	# if attacker_node and attacker_node.is_in_group("Enemy") and body.is_in_group("Enemy"): return
-
-	print("⚔️ HITBOX impactó a: ", body.name)
+	# Evitar fuego amigo extra (Jugador golpeándose a sí mismo o a aliados)
+	if attacker_node and attacker_node.is_in_group("Player") and body.is_in_group("Player"): return
 
 	var hit_connected = false
 
@@ -304,9 +303,23 @@ func _on_area_entered(area):
 	if area in hit_history: return
 	if area == attacker_node: return
 	
+	# Buscar recursivamente al dueño real (CharacterBody3D, Enemy, Player)
+	var entity = area
+	while entity != null and entity != get_tree().root:
+		if entity.is_in_group("Enemy") or entity.is_in_group("Player"):
+			break
+		entity = entity.get_parent()
+		
+	if entity == attacker_node: return # No golpearse a sí mismo
+	
+	# Evitar fuego amigo entre enemigos/jugadores usando la entidad real
+	if attacker_node and entity:
+		if attacker_node.is_in_group("Enemy") and entity.is_in_group("Enemy"): return
+		if attacker_node.is_in_group("Player") and entity.is_in_group("Player"): return
+
 	# Si es un Hurtbox, usar su método hit()
 	if area is Hurtbox or area.has_method("hit"):
-		print("⚔️ HITBOX impactó Hurtbox de: ", area.owner.name if area.owner else area.name)
+		print("⚔️ HITBOX impactó Hurtbox de: ", entity.name if entity else area.name)
 		
 		var origin = global_position
 		if attacker_node: origin = attacker_node.global_position

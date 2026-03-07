@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cn5kkl7yys5k1" path="res://src/actors/player/scripts/WeaponHitbox.gd" id="2_nmrsx"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nmrsx"]
-size = Vector3(1.8273315, 1.1315622, 1.1856464)
+size = Vector3(2.2341766, 1.8361742, 1.6000005)
 
 [node name="Node3D" type="Node3D"]
 
@@ -14,10 +14,9 @@ size = Vector3(1.8273315, 1.1315622, 1.1856464)
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("2_nmrsx")
-enable_trail = true
 trail_color = Color(3.5616756e-06, 0.5934619, 0.7610391, 1)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.41366577, 0.1404891, -0.013011292)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6170883, 0.4927951, -0.050413445)
 shape = SubResource("BoxShape3D_nmrsx")
 debug_color = Color(0.8627451, 0.30980393, 0.49019608, 1)

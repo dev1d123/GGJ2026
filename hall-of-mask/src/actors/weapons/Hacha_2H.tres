@@ -17,5 +17,6 @@ cooldown = 0.4
 stop_movement = true
 is_two_handed = true
 damage = 29.0
-knockback_force = 8.5
+knockback_force = 10.0
+jump_force = 4.0
 stamina_cost = 25.0

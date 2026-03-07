@@ -87,7 +87,7 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 ## Probabilidad por CABADA ATAQUE de realizar un salto-ataque sorpresivo (0.5 = 50% de saltar).
 @export var jump_attack_chance: float = 0.2
 ## Probabilidad por CADA ATAQUE de rodar ofensivamente hacia ti (0.5 = 50% de esquivar).
-@export var dodge_attack_chance: float = 0.99
+@export var dodge_attack_chance: float = 0.2
 
 @export_group("Puntería Inteligente (Ranged)")
 ## Segundos de retraso al apuntar (0 = Aimbot instantáneo).
@@ -155,6 +155,7 @@ var _dodge_timer: float = 0.0
 # INICIO
 # ------------------------------------------------------------------------------
 func _ready():
+	add_to_group("Enemy") # 🛡️ Garantizar que el fuego amigo aplique siempre
 	current_speed = base_speed
 	
 	if not anim_tree:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://cvogmipdh16f6"]
+[gd_scene load_steps=43 format=3 uid="uid://cvogmipdh16f6"]
 
 [ext_resource type="Script" uid="uid://fbt1pwffdsvr" path="res://src/levels/lobby/lobby.gd" id="1_h8r75"]
 [ext_resource type="PackedScene" uid="uid://oprw0dsewh7i" path="res://src/actors/player/Player.tscn" id="2_fgap4"]
@@ -23,9 +23,6 @@
 [ext_resource type="PackedScene" uid="uid://5y3h1r2k7nhq" path="res://src/actors/enemies/Skeleton_Warrior.tscn" id="21_xoriv"]
 [ext_resource type="PackedScene" uid="uid://550j3hb7qwen" path="res://src/actors/enemies/Skeleton_Rogue.tscn" id="22_4r8hd"]
 [ext_resource type="PackedScene" uid="uid://cdyglwgplotai" path="res://src/actors/enemies/bosses/orc_brute_blue.tscn" id="23_fgap4"]
-[ext_resource type="PackedScene" uid="uid://bqd2ekgnl5bvl" path="res://src/actors/enemies/bosses/monstrosity.tscn" id="24_embxt"]
-[ext_resource type="PackedScene" uid="uid://u6ejpuv2gfn0" path="res://src/actors/enemies/bosses/skull_knight.tscn" id="25_517sc"]
-[ext_resource type="PackedScene" uid="uid://p54djcq7e4qo" path="res://src/actors/enemies/bosses/frost_golem.tscn" id="26_5r7jn"]
 [ext_resource type="PackedScene" uid="uid://cyngv5u2uva1p" path="res://src/actors/enemies/Demon_Red.tscn" id="27_fi7gg"]
 [ext_resource type="PackedScene" uid="uid://eupffqfwx45" path="res://src/actors/enemies/Demon_Blue.tscn" id="28_180rk"]
 [ext_resource type="Resource" uid="uid://c8xdxdvj5sge3" path="res://src/actors/weapons/Espada_2H.tres" id="29_xn7sa"]
@@ -267,23 +264,12 @@ transform = Transform3D(-0.25881904, 0, -0.9659258, 0, 1, 0, 0.9659258, 0, -0.25
 loadout_mask = ExtResource("17_fi7gg")
 
 [node name="Orc_Brute_Green" parent="." instance=ExtResource("19_5gnw2")]
-transform = Transform3D(1.0000001, 0, 0, 0, 1, 0, 0, 0, 1.0000001, -81.386635, 0.8229659, 13.788742)
+transform = Transform3D(1.0000001, 0, 0, 0, 1, 0, 0, 0, 1.0000001, 39.171783, 0.8229659, -41.38937)
 loadout_weapon_r = null
 loadout_mask = null
-sprint_speed_mult = 1.5
 
 [node name="Orc_Brute_Blue" parent="." instance=ExtResource("23_fgap4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -84.88298, 0.004065764, 2.9465065)
-
-[node name="Monstrosity" parent="." instance=ExtResource("24_embxt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45.494137, 0.0120628, -94.659836)
-sprint_speed_mult = 1.5
-
-[node name="BlackKnight" parent="." instance=ExtResource("25_517sc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -51, 0, -71)
-
-[node name="FrostGolem" parent="." instance=ExtResource("26_5r7jn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.72867, 0.0039596558, -42.62384)
 
 [node name="Skeleton_Minion4" parent="." instance=ExtResource("27_fi7gg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.42265, 0.003961563, 3.271111)
