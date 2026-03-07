@@ -334,25 +334,31 @@ xfade_time = 0.4
 xfade_time = 0.05
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_emr0g"]
-xfade_time = 0.2
+xfade_time = 0.1
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_q3xa7"]
+xfade_time = 0.1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_8ycu5"]
+xfade_time = 0.1
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_31uth"]
+xfade_time = 0.1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0rbmx"]
+xfade_time = 0.1
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_4j0vm"]
+xfade_time = 0.1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bf1ay"]
+xfade_time = 0.1
 switch_mode = 2
 advance_mode = 2
 
@@ -378,7 +384,7 @@ states/Standing/node = SubResource("AnimationNodeBlendSpace2D_cupkb")
 states/Standing/position = Vector2(116.353516, 124.13376)
 states/Start/position = Vector2(-26.481384, 137.13376)
 transitions = ["Start", "Standing", SubResource("AnimationNodeStateMachineTransition_786ps"), "Jump_Idle", "Standing", SubResource("AnimationNodeStateMachineTransition_120y8"), "Standing", "Jump_Start", SubResource("AnimationNodeStateMachineTransition_2ph0s"), "Jump_Start", "Jump_Idle", SubResource("AnimationNodeStateMachineTransition_x7dbd"), "Standing", "Sneaking", SubResource("AnimationNodeStateMachineTransition_2dvjl"), "Sneaking", "Standing", SubResource("AnimationNodeStateMachineTransition_tkfvb"), "Sneaking", "Crawling", SubResource("AnimationNodeStateMachineTransition_230i4"), "Crawling", "Sneaking", SubResource("AnimationNodeStateMachineTransition_io12p"), "Jump_Start", "Crawling", SubResource("AnimationNodeStateMachineTransition_7cb6w"), "Standing", "Dodge", SubResource("AnimationNodeStateMachineTransition_spw8e"), "Dodge", "Standing", SubResource("AnimationNodeStateMachineTransition_emr0g"), "Standing", "Orc_Axe_2H_Attack_1", SubResource("AnimationNodeStateMachineTransition_q3xa7"), "Orc_Axe_2H_Attack_1", "Standing", SubResource("AnimationNodeStateMachineTransition_8ycu5"), "Standing", "Orc_Axe_2H_Attack_2", SubResource("AnimationNodeStateMachineTransition_31uth"), "Orc_Axe_2H_Attack_2", "Standing", SubResource("AnimationNodeStateMachineTransition_0rbmx"), "Standing", "Orc_Axe_2H_Attack_3", SubResource("AnimationNodeStateMachineTransition_4j0vm"), "Orc_Axe_2H_Attack_3", "Standing", SubResource("AnimationNodeStateMachineTransition_bf1ay")]
-graph_offset = Vector2(-256.0782, -47.866245)
+graph_offset = Vector2(-256.0782, 52.144367)
 
 [resource]
 resource_local_to_scene = true

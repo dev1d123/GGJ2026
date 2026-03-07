@@ -30,6 +30,10 @@ enum MaskEquipCondition {
 ## Condición bajo la cual el enemigo se equipará la máscara si la tiene en inventario.
 @export var mask_equip_condition: MaskEquipCondition = MaskEquipCondition.NONE
 
+@export_group("Ultimate IA (Enemigos)")
+## Probabilidad (%) de que ESTA instancia de enemigo pueda usar ultimate si tiene máscara equipada.
+@export_range(0.0, 100.0, 1.0) var ultimate_instance_chance_with_mask: float = 35.0
+
 # --- COMPONENTES ---
 @onready var combat_manager: CombatManager = $CombatManager
 @onready var health_component: HealthComponent = $HealthComponent
@@ -73,6 +77,16 @@ const P_MOVIMIENTO = "parameters/StateMachine/Standing/blend_position"
 ## Multiplicador artificial de la gravedad para hacer el salto menos "flotante" (Unificado con: player.gd)
 @export var gravity_multiplier: float = 3.0
 
+@export_group("Anti-Stuck sobre Player")
+## Evita que el enemigo/jefe se quede encima del jugador tras saltos ofensivos.
+@export var anti_stack_enabled: bool = true
+## Diferencia mínima en Y para considerar que está "encima" del jugador.
+@export var anti_stack_max_vertical_delta: float = 1.0
+## Distancia horizontal máxima para activar la separación.
+@export var anti_stack_horizontal_radius: float = 1.1
+## Velocidad extra al separarse del jugador.
+@export var anti_stack_escape_speed_mult: float = 1.15
+
 @export_group("Capacidades de Evasión")
 ## Si está activo, el enemigo puede esquivar ataques del jugador.
 @export var can_dodge: bool = false
@@ -108,7 +122,7 @@ var strafe_dir: int = 1
 # Variable para controlar la agresividad (1.0 normal, 2.0 frenético)
 var aggression: float = 1.2 
 
-enum State { IDLE, PATROL, CHASE, COMBAT_MANEUVER, ATTACKING, COOLDOWN, STUNNED, DODGING, PRE_DODGE }
+enum State { IDLE, PATROL, CHASE, COMBAT_MANEUVER, ATTACKING, COOLDOWN, STUNNED, DODGING, PRE_DODGE, DEAD }
 var current_state = State.PATROL
 var player_ref: Node3D = null
 
@@ -131,7 +145,7 @@ var _dodge_is_aggressive: bool = false
 
 var gravity = 9.8
 var knockback_velocity: Vector3 = Vector3.ZERO
-var unique_materials: Array[StandardMaterial3D] = []
+var unique_materials: Array[BaseMaterial3D] = []
 var flash_tween: Tween
 var original_colors: Dictionary = {}
 
@@ -145,6 +159,13 @@ var _bloom_change_timer: float = 0.0
 
 var _time_in_combat_timer: float = 0.0
 var _next_combat_maneuver: String = ""
+
+var _has_ultimate_roll: bool = false
+var _can_activate_ultimate: bool = false
+var _ultimate_proc_chance: float = 0.0
+var _ultimate_hits_dealt: int = 0
+var _ultimate_hits_received: int = 0
+var _forced_low_health_ultimate_used: bool = false
 
 # --- VARIABLES DE EVASIÓN ---
 var evade_cooldown: float = 0.0
@@ -184,13 +205,19 @@ func _ready():
 		_definir_arquetipo()
 		_decidir_proxima_maniobra()
 
-		mask_manager.on_mask_changed.connect(_on_mask_changed_event)
+		if mask_manager:
+			mask_manager.on_mask_changed.connect(_on_mask_changed_event)
+			mask_manager.on_ultimate_state.connect(_on_ultimate_visuals)
 		
-		if loadout_mask:
+		if loadout_mask and mask_manager:
 			if mask_handling == MaskHandling.EQUIP_ON_SPAWN:
 				mask_manager.equip_mask(loadout_mask, true) # true = instant spawn, no delay
 			elif mask_handling == MaskHandling.SIN_MASCARA:
 				loadout_mask = null # Ignorar la máscara asignada
+		elif mask_handling == MaskHandling.SIN_MASCARA:
+			loadout_mask = null
+
+	_initialize_enemy_ultimate_roll()
 
 	if health_component:
 		health_component.on_death.connect(_morir)
@@ -278,9 +305,46 @@ func _physics_process(delta: float):
 				_procesar_dodging(delta)
 			
 	if current_state != State.DODGING:
+		_resolver_superposicion_con_player()
 		move_and_slide()
 		
 	_animar_movimiento(delta)
+
+func _resolver_superposicion_con_player():
+	if not anti_stack_enabled:
+		return
+	if not is_instance_valid(player_ref):
+		return
+
+	var vertical_delta: float = global_position.y - player_ref.global_position.y
+	if vertical_delta <= anti_stack_max_vertical_delta:
+		return
+
+	var to_player: Vector3 = player_ref.global_position - global_position
+	var horizontal_delta: Vector2 = Vector2(to_player.x, to_player.z)
+	var horizontal_dist: float = horizontal_delta.length()
+	if horizontal_dist > anti_stack_horizontal_radius:
+		return
+
+	var escape_dir_2d: Vector2
+	if horizontal_dist > 0.05:
+		escape_dir_2d = (-horizontal_delta).normalized()
+	else:
+		var fallback_2d: Vector2 = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
+		if fallback_2d.length() < 0.01:
+			fallback_2d = Vector2(1, 0)
+		escape_dir_2d = fallback_2d.normalized() * (1.0 if strafe_dir >= 0 else -1.0)
+
+	var escape_speed: float = base_speed * maxf(anti_stack_escape_speed_mult, 0.1)
+	if can_sprint:
+		escape_speed *= 1.1
+
+	velocity.x = escape_dir_2d.x * escape_speed
+	velocity.z = escape_dir_2d.y * escape_speed
+
+	# Pequeño impulso para descolgarse del cuerpo del player sin romper ataques.
+	if is_on_floor() and current_state != State.DODGING and current_state != State.PRE_DODGE:
+		velocity.y = maxf(velocity.y, jump_force * 0.35)
 
 # ------------------------------------------------------------------------------
 # SUBSISTEMAS DE IA
@@ -315,6 +379,8 @@ func _process_mask_triggers(delta: float):
 		
 	if global_position.distance_to(player_ref.global_position) <= 6.5:
 		_check_mask_condition(MaskEquipCondition.ON_PROXIMITY)
+
+	_check_enemy_emergency_ultimate()
 
 func _process_evasion_logic(delta: float):
 	if evade_cooldown > 0.0: evade_cooldown -= delta
@@ -564,11 +630,17 @@ func _intentar_maniobra_ofensiva(dist: float, dir: Vector3, estado_origen: Strin
 		
 		var ataco = false
 		if combat_manager.weapon_r:
-			var delay_r = max(0.0, tiempo_vuelo - combat_manager.weapon_r.windup_time)
+			var effective_windup_r: float = combat_manager.weapon_r.windup_time
+			if combat_manager.has_method("get_effective_windup_time"):
+				effective_windup_r = combat_manager.get_effective_windup_time(combat_manager.weapon_r.windup_time, combat_manager.attack_speed_multiplier)
+			var delay_r = max(0.0, tiempo_vuelo - effective_windup_r)
 			_ataque_retrasado("right", delay_r)
 			ataco = true
 		if combat_manager.weapon_l:
-			var delay_l = max(0.0, tiempo_vuelo - combat_manager.weapon_l.windup_time)
+			var effective_windup_l: float = combat_manager.weapon_l.windup_time
+			if combat_manager.has_method("get_effective_windup_time"):
+				effective_windup_l = combat_manager.get_effective_windup_time(combat_manager.weapon_l.windup_time, combat_manager.attack_speed_multiplier)
+			var delay_l = max(0.0, tiempo_vuelo - effective_windup_l)
 			_ataque_retrasado("left", delay_l)
 			ataco = true
 			
@@ -793,6 +865,78 @@ func equipar_mascara_guardada():
 	if mask_manager and loadout_mask and mask_handling == MaskHandling.EN_INVENTARIO:
 		mask_manager.equip_mask(loadout_mask, false) # false = animate spawn
 
+func _uses_enemy_ultimate_roll_system() -> bool:
+	return true
+
+func _initialize_enemy_ultimate_roll():
+	_has_ultimate_roll = true
+	_can_activate_ultimate = false
+	_ultimate_proc_chance = 0.0
+	_ultimate_hits_dealt = 0
+	_ultimate_hits_received = 0
+	_forced_low_health_ultimate_used = false
+
+	if not _uses_enemy_ultimate_roll_system():
+		return
+
+	if mask_handling == MaskHandling.SIN_MASCARA:
+		return
+
+	if not loadout_mask:
+		return
+
+	_can_activate_ultimate = randf() <= (ultimate_instance_chance_with_mask / 100.0)
+
+func _can_try_enemy_ultimate() -> bool:
+	if not _uses_enemy_ultimate_roll_system():
+		return false
+	if not _has_ultimate_roll or not _can_activate_ultimate:
+		return false
+	if not mask_manager or not mask_manager.current_mask:
+		return false
+	if mask_manager.is_ultimate_active:
+		return false
+	return true
+
+func _activate_enemy_ultimate(reason: String):
+	if not _can_try_enemy_ultimate():
+		return
+
+	mask_manager.current_ult_charge = mask_manager.max_ult_charge
+	mask_manager.activate_ultimate()
+
+	if mask_manager.is_ultimate_active:
+		_ultimate_proc_chance = 0.0
+
+func _check_enemy_emergency_ultimate():
+	if _forced_low_health_ultimate_used:
+		return
+	if not _can_try_enemy_ultimate():
+		return
+	if not health_component or health_component.max_health <= 0:
+		return
+
+	var hp_ratio := health_component.current_health / health_component.max_health
+	if hp_ratio <= 0.33:
+		_forced_low_health_ultimate_used = true
+		_activate_enemy_ultimate("LOW_HEALTH_33")
+
+func _register_enemy_ultimate_event(event_name: String):
+	if not _can_try_enemy_ultimate():
+		return
+
+	_check_enemy_emergency_ultimate()
+	if mask_manager and mask_manager.is_ultimate_active:
+		return
+
+	_ultimate_proc_chance = clampf(_ultimate_proc_chance + 10.0, 0.0, 100.0)
+	if randf() * 100.0 <= _ultimate_proc_chance:
+		_activate_enemy_ultimate(event_name)
+
+func _on_attack_hit_landed(_target: Node = null):
+	_ultimate_hits_dealt += 1
+	_register_enemy_ultimate_event("HIT_DEALT")
+
 func _check_mask_condition(trigger: MaskEquipCondition):
 	if mask_handling != MaskHandling.EN_INVENTARIO: return
 	if mask_manager and mask_manager.current_mask: return # Ya equipada
@@ -819,11 +963,61 @@ func _on_damage_received(a, c):
 		if health_component.current_health <= health_component.max_health * 0.25:
 			_check_mask_condition(MaskEquipCondition.LOW_HEALTH_DESPERATION)
 
+	_ultimate_hits_received += 1
+	_register_enemy_ultimate_event("HIT_RECEIVED")
+	_check_enemy_emergency_ultimate()
+
 func _morir():
 	if is_instance_valid(player_ref) and player_ref.has_node("MaskManager"):
 		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
+	
+	current_state = State.DEAD
 	set_physics_process(false)
-	queue_free()
+	
+	# Desactivar colisiones para que no estorbe (la Capa 2 suele ser Enemy, 1 es World, etc)
+	collision_layer = 0
+	collision_mask = 0
+	
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false
+		combat_manager.is_movement_locked = true
+	
+	if anim_tree:
+		var playback = anim_tree["parameters/StateMachine/playback"]
+		if playback:
+			# Evitar que siga la animación de correr o atacar
+			playback.travel("Standing") 
+			
+	# Congelar la animación actual
+	if has_node("Visual/AnimationTree"): $Visual/AnimationTree.active = false
+	elif has_node("OrcBrute/AnimationTree"): $OrcBrute/AnimationTree.active = false
+	elif has_node("Rig/AnimationTree"): $Rig/AnimationTree.active = false
+	else: anim_tree.active = false
+
+	if not visual_mesh:
+		queue_free()
+		return
+		
+	# Efecto visual de muerte con Tween
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	# 1. Hacer que brille en rojo intenso
+	for m in unique_materials:
+		if m is StandardMaterial3D or m is ORMMaterial3D:
+			t.tween_property(m, "albedo_color", Color(4.0, 0.2, 0.2, 1.0), 0.3)
+			if "emission_enabled" in m:
+				m.emission_enabled = true
+				t.tween_property(m, "emission", Color(2.0, 0.0, 0.0), 0.3)
+	
+	# 2. Encoger hasta desaparecer dramáticamente
+	t.tween_property(visual_mesh, "scale", Vector3(0.01, 0.01, 0.01), 0.8).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	# 3. Flotar un poco hacia arriba mientras se encoge
+	t.tween_property(visual_mesh, "position:y", visual_mesh.position.y + 1.5, 0.8).set_ease(Tween.EASE_OUT)
+	
+	# Cuando el tween termina, se borra el nodo
+	t.chain().tween_callback(self.queue_free)
 
 # --- VISUALES ---
 func _setup_unique_materials():
@@ -848,19 +1042,60 @@ func flash_red():
 	for m in unique_materials:
 		if m in original_colors: flash_tween.parallel().tween_property(m, "albedo_color", original_colors[m], 0.2)
 
-func _activar_aura_mascara():
+func _get_effective_aura_color(mask_data: MaskData) -> Color:
+	var aura_c: Color = mask_data.aura_color
+	var looks_default_white: bool = (
+		is_equal_approx(aura_c.r, 1.0)
+		and is_equal_approx(aura_c.g, 1.0)
+		and is_equal_approx(aura_c.b, 1.0)
+	)
+
+	if looks_default_white:
+		aura_c = mask_data.screen_tint
+
+	aura_c.a = clampf(mask_data.aura_alpha, 0.0, 1.0)
+	return aura_c
+
+func _activar_aura_mascara(is_ult: bool = false):
 	if not mask_manager or not mask_manager.current_mask: return
 	if unique_materials.is_empty(): _setup_unique_materials()
-	var c = mask_manager.current_mask.screen_tint; c.a = 0.2
+	if unique_materials.is_empty(): return
+
+	var mask_data: MaskData = mask_manager.current_mask
+	if not mask_data.aura_enabled:
+		for m in unique_materials: m.next_pass = null
+		return
+
+	var aura_alpha_mult: float = mask_data.ult_aura_alpha_mult if is_ult else 1.0
+	var aura_emission_mult: float = mask_data.ult_aura_emission_mult if is_ult else 1.0
+	var aura_grow_mult: float = mask_data.ult_aura_grow_mult if is_ult else 1.0
+
+	var c: Color = _get_effective_aura_color(mask_data)
+	c.a = clampf(c.a * aura_alpha_mult, 0.0, 1.0)
+	var emission_c: Color = c
+	emission_c.a = 1.0
+
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = c; mat.emission = c; mat.emission_enabled = true; mat.emission_energy = 2.0
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; mat.cull_mode = BaseMaterial3D.CULL_FRONT; mat.grow = true; mat.grow_amount = 0.03
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	mat.albedo_color = c
+	mat.emission = emission_c
+	mat.emission_enabled = true
+	mat.emission_energy = maxf(0.0, mask_data.aura_emission_energy * aura_emission_mult)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.cull_mode = BaseMaterial3D.CULL_FRONT
+	mat.grow = true
+	mat.grow_amount = maxf(0.0, mask_data.aura_grow_amount * aura_grow_mult)
 	for m in unique_materials: m.next_pass = mat
 
 func _on_mask_changed_event(data: MaskData):
 	if data != null:
-		_activar_aura_mascara()
+		var is_ult_active := mask_manager != null and mask_manager.is_ultimate_active
+		_activar_aura_mascara(is_ult_active)
 	else:
 		for m in unique_materials: m.next_pass = null
 
-func _on_ultimate_visuals(a): pass
+func _on_ultimate_visuals(is_active: bool):
+	if not mask_manager or not mask_manager.current_mask:
+		return
+	_activar_aura_mascara(is_active)

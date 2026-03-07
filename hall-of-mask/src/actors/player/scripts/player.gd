@@ -46,6 +46,14 @@ var damage_vignette: ColorRect
 ## Fricción aplicada al finalizar el Dive (Lanzarse al piso).
 @export var dive_sprint_damp: float = 0.8
 
+@export_category("Cámara Estabilización")
+## Suaviza la posición del HeadMount para reducir jitter de animaciones bruscas.
+@export var camera_stabilization_enabled: bool = true
+## Velocidad de seguimiento horizontal (X/Z) del HeadMount hacia el objetivo animado.
+@export var camera_follow_speed: float = 14.0
+## Multiplicador de seguimiento vertical (Y). Menor valor = menos "rebote" al saltar/aterrizar.
+@export var camera_vertical_damping: float = 0.45
+
 # --- CONFIGURACIÓN DE MOMENTO ---
 const MAX_MOMENTUM_TIME: float = 0.9 
 const MIN_MOMENTUM_MULT: float = 0.1 
@@ -86,6 +94,10 @@ var _active_toasts: int = 0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 const MOUSE_SENSITIVITY: float = 0.003
 var _cam_pitch: float = 0.0 
+var _camera_smoothed_pos: Vector3 = Vector3.ZERO
+var _camera_stabilizer_ready: bool = false
+var _camera_stability_blend: float = 1.0
+var _camera_stability_tween: Tween = null
 var spine_bone_id: int = -1
 var knockback_velocity: Vector3 = Vector3.ZERO
 
@@ -180,6 +192,11 @@ func show_toast(message: String, color: Color = Color(1.0, 0.85, 0.1)) -> void:
 func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	anim_tree.active = true
+	if head_mount:
+		_camera_smoothed_pos = head_mount.global_position
+		_camera_stabilizer_ready = true
+	if combat_manager and not combat_manager.on_stop_movement_camera_mode.is_connected(_on_stop_movement_camera_mode):
+		combat_manager.on_stop_movement_camera_mode.connect(_on_stop_movement_camera_mode)
 	if skeleton_3d: spine_bone_id = skeleton_3d.find_bone("chest")
 	
 	if health_component:
@@ -265,6 +282,51 @@ void fragment() {
 	# ----------------------------------------
 			
 	emit_signal("on_state_changed", "NORMAL")
+
+func _process(delta: float) -> void:
+	_actualizar_estabilizador_camara(delta)
+
+func _actualizar_estabilizador_camara(delta: float) -> void:
+	if not camera_stabilization_enabled:
+		return
+	if not head_mount:
+		return
+	if not _camera_stabilizer_ready:
+		_camera_smoothed_pos = head_mount.global_position
+		_camera_stabilizer_ready = true
+		return
+
+	var target_pos: Vector3 = head_mount.global_position
+
+	# Si hubo un cambio grande (teleport/respawn), evitar arrastre visual.
+	if _camera_smoothed_pos.distance_to(target_pos) > 3.0:
+		_camera_smoothed_pos = target_pos
+		head_mount.global_position = _camera_smoothed_pos
+		return
+
+	var follow_speed: float = maxf(camera_follow_speed, 0.01)
+	var horizontal_alpha: float = clampf(follow_speed * delta, 0.0, 1.0)
+	var vertical_alpha: float = clampf(follow_speed * maxf(camera_vertical_damping, 0.01) * delta, 0.0, 1.0)
+
+	_camera_smoothed_pos.x = lerp(_camera_smoothed_pos.x, target_pos.x, horizontal_alpha)
+	_camera_smoothed_pos.z = lerp(_camera_smoothed_pos.z, target_pos.z, horizontal_alpha)
+	_camera_smoothed_pos.y = lerp(_camera_smoothed_pos.y, target_pos.y, vertical_alpha)
+
+	var stability_blend: float = clampf(_camera_stability_blend, 0.0, 1.0)
+	var final_pos: Vector3 = target_pos.lerp(_camera_smoothed_pos, stability_blend)
+	head_mount.global_position = final_pos
+
+func _on_stop_movement_camera_mode(active: bool, transition_time: float) -> void:
+	var target_blend: float = 1.0
+
+	if _camera_stability_tween:
+		_camera_stability_tween.kill()
+
+	var duration: float = maxf(transition_time, 0.01)
+	_camera_stability_tween = create_tween()
+	_camera_stability_tween.set_trans(Tween.TRANS_SINE)
+	_camera_stability_tween.set_ease(Tween.EASE_IN_OUT)
+	_camera_stability_tween.tween_property(self, "_camera_stability_blend", target_blend, duration)
 
 func _input(event: InputEvent) -> void:
 	if is_dead: return 

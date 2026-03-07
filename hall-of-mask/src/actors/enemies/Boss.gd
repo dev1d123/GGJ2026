@@ -33,11 +33,41 @@ signal boss_died
 ## Multiplicador de daño del Atk3.
 @export var atk3_mult_dmg: float = 1.5
 
+@export_group("Compensación de XFade")
+## Compensación local para sincronizar hit timing con xfade del AnimationTree del boss.
+@export var xfade_delay_compensation: float = 0.1
+
 # Estado interno
 var is_doing_boss_attack: bool = false
 var has_equipped_mask: bool = false
-var has_triggered_ult_30: bool = false
-var has_triggered_ult_10: bool = false
+var _phase2_initialized: bool = false
+
+var _boss_attack_count: int = 0
+var _boss_received_hit_count: int = 0
+var _boss_any_event_count: int = 0
+
+var _boss_half_health_thresholds: Array[float] = [40.0, 25.0, 10.0]
+var _boss_half_health_index: int = 0
+
+var _boss_desperation_thresholds: Array[float] = [25.0, 15.0, 10.0]
+var _boss_desperation_index: int = 0
+
+var _boss_first_attack_next: int = 3
+var _boss_first_attack_step: int = 6
+
+var _boss_first_hit_next: int = 3
+var _boss_first_hit_step: int = 3
+
+var _boss_any_next: int = 3
+var _boss_any_step: int = 4
+
+var _boss_proximity_time: float = 0.0
+var _boss_proximity_next: float = 4.0
+var _boss_proximity_step: float = 5.0
+
+var _boss_combat_time: float = 0.0
+var _boss_combat_next: float = 8.0
+var _boss_combat_step: float = 10.0
 
 # Variables de IA Avanzada
 var sprint_timer: float = 0.0
@@ -51,12 +81,9 @@ var internal_anim_player: AnimationPlayer = null
 # 1. INICIO
 # ----------------------------------------------------------------
 func _ready():
-	var mask_temp = loadout_mask
-	loadout_mask = null 
-	
 	super._ready() 
-	
-	loadout_mask = mask_temp
+	has_equipped_mask = mask_manager != null and mask_manager.current_mask != null
+	_phase2_initialized = has_equipped_mask
 	print("👹 JEFE ORCO TÁCTICO LISTO: ", name)
 	
 	if has_node("OrcBrute/AnimationPlayer"):
@@ -86,6 +113,9 @@ func _ready():
 		health_component.on_damage_received.connect(_check_fases_vida)
 		health_component.on_damage_received.connect(_on_boss_hit)
 
+func _uses_enemy_ultimate_roll_system() -> bool:
+	return false
+
 # ----------------------------------------------------------------
 # 2. PHYSICS PROCESS (MODIFICADO PARA SPRINT INFINITO)
 # ----------------------------------------------------------------
@@ -93,6 +123,7 @@ func _physics_process(delta):
 	zigzag_time += delta
 	
 	super._physics_process(delta)
+	_process_boss_conditioned_ultimate(delta)
 	
 	# Solo gestionamos sprint si está vivo y no está en otros estados críticos
 	var can_manage_sprint = current_state != State.ATTACKING and current_state != State.DODGING and current_state != State.PRE_DODGE
@@ -180,6 +211,7 @@ func _comportamiento_persecucion(delta: float):
 
 func _on_boss_hit(amount, current_hp):
 	if is_doing_boss_attack or current_hp <= 0: return
+	_register_boss_received_hit_for_ult()
 	
 	if current_state == State.PATROL or current_state == State.COOLDOWN:
 		current_state = State.CHASE
@@ -218,6 +250,8 @@ func _comportamiento_combate(delta: float):
 		velocity.z = dir.z * speed_to_use
 		return
 
+	# Respetar condición de máscara por primer ataque igual que Enemy.gd
+	_check_mask_condition(MaskEquipCondition.FIRST_ATTACK)
 	_iniciar_ataque_melee()
 
 # ----------------------------------------------------------------
@@ -280,6 +314,7 @@ func _realizar_ataque_3_spin():
 	_iniciar_secuencia("Orc_Axe_2H_Attack_3", atk3_windup, atk3_active, atk3_mult_dmg, 14.0)
 
 func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mult: float, knockback: float):
+	_register_boss_attack_for_ult()
 	is_doing_boss_attack = true
 	current_state = State.ATTACKING 
 	
@@ -301,13 +336,7 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	if combat_manager: combat_speed = combat_manager.attack_speed_multiplier
 	var total_speed_scale = max(0.1, current_anim_scale * combat_speed)
 	
-	# COMPENSACIÓN DE DESFASE (XFade Time)
-	# Los nodos AnimationTree suelen tener xfade_time de 0.2s o 0.3s. 
-	# Esto retrasa el "impacto visual" frente al código. 
-	# Forzamos que el timer compense este 'suavizado'
-	var xfade_delay_compensation = 0.2 
-	
-	var real_windup = max(0.01, (windup / total_speed_scale) - xfade_delay_compensation)
+	var real_windup = max(0.01, (windup / total_speed_scale) - maxf(xfade_delay_compensation, 0.0))
 	var real_active = active / total_speed_scale
 	
 	# Tracking inicial
@@ -340,14 +369,88 @@ func _check_fases_vida(amount, current_hp):
 	var max_hp = health_component.max_health
 	var percent = (current_hp / max_hp) * 100.0
 	_actualizar_velocidad_fases(percent)
-	
-	if percent <= 50.0 and not has_equipped_mask: _evento_equipar_mascara()
-	if percent <= 30.0 and not has_triggered_ult_30:
-		has_triggered_ult_30 = true
-		_evento_activar_ulti("Furia del 30%")
-	if percent <= 10.0 and not has_triggered_ult_10:
-		has_triggered_ult_10 = true
-		_evento_activar_ulti("Desesperación del 10%")
+	_check_boss_health_condition_for_ult(percent)
+
+func _can_try_boss_ultimate() -> bool:
+	if not mask_manager or not mask_manager.current_mask:
+		return false
+	if mask_manager.is_ultimate_active:
+		return false
+	return true
+
+func _trigger_boss_ultimate(reason: String) -> bool:
+	if not _can_try_boss_ultimate():
+		return false
+	_evento_activar_ulti(reason)
+	return mask_manager != null and mask_manager.is_ultimate_active
+
+func _register_boss_attack_for_ult():
+	_boss_attack_count += 1
+	_boss_any_event_count += 1
+
+	if mask_equip_condition == MaskEquipCondition.FIRST_ATTACK:
+		if _boss_attack_count >= _boss_first_attack_next:
+			if _trigger_boss_ultimate("FIRST_ATTACK_%d" % _boss_attack_count):
+				_boss_first_attack_next += _boss_first_attack_step
+				_boss_first_attack_step += 3
+
+	elif mask_equip_condition == MaskEquipCondition.ANY:
+		if _boss_any_event_count >= _boss_any_next:
+			if _trigger_boss_ultimate("ANY_EVENT_%d" % _boss_any_event_count):
+				_boss_any_next += _boss_any_step
+				_boss_any_step += 2
+
+func _register_boss_received_hit_for_ult():
+	_boss_received_hit_count += 1
+	_boss_any_event_count += 1
+
+	if mask_equip_condition == MaskEquipCondition.FIRST_HIT_RECEIVED:
+		if _boss_received_hit_count >= _boss_first_hit_next:
+			if _trigger_boss_ultimate("FIRST_HIT_%d" % _boss_received_hit_count):
+				_boss_first_hit_next += _boss_first_hit_step
+				_boss_first_hit_step += 2
+
+	elif mask_equip_condition == MaskEquipCondition.ANY:
+		if _boss_any_event_count >= _boss_any_next:
+			if _trigger_boss_ultimate("ANY_EVENT_%d" % _boss_any_event_count):
+				_boss_any_next += _boss_any_step
+				_boss_any_step += 2
+
+func _check_boss_health_condition_for_ult(percent: float):
+	if mask_equip_condition == MaskEquipCondition.HALF_HEALTH:
+		while _boss_half_health_index < _boss_half_health_thresholds.size() and percent <= _boss_half_health_thresholds[_boss_half_health_index]:
+			if _trigger_boss_ultimate("HALF_HEALTH_%d" % int(_boss_half_health_thresholds[_boss_half_health_index])):
+				_boss_half_health_index += 1
+			else:
+				break
+
+	elif mask_equip_condition == MaskEquipCondition.LOW_HEALTH_DESPERATION:
+		while _boss_desperation_index < _boss_desperation_thresholds.size() and percent <= _boss_desperation_thresholds[_boss_desperation_index]:
+			if _trigger_boss_ultimate("DESPERATION_%d" % int(_boss_desperation_thresholds[_boss_desperation_index])):
+				_boss_desperation_index += 1
+			else:
+				break
+
+func _process_boss_conditioned_ultimate(delta: float):
+	if not is_instance_valid(player_ref):
+		return
+	if current_state == State.PATROL:
+		return
+
+	if mask_equip_condition == MaskEquipCondition.ON_PROXIMITY:
+		if global_position.distance_to(player_ref.global_position) <= 6.5:
+			_boss_proximity_time += delta
+			if _boss_proximity_time >= _boss_proximity_next:
+				if _trigger_boss_ultimate("PROXIMITY_%.1fs" % _boss_proximity_time):
+					_boss_proximity_next += _boss_proximity_step
+					_boss_proximity_step += 2.0
+
+	elif mask_equip_condition == MaskEquipCondition.AFTER_TIME_IN_COMBAT:
+		_boss_combat_time += delta
+		if _boss_combat_time >= _boss_combat_next:
+			if _trigger_boss_ultimate("TIME_IN_COMBAT_%.1fs" % _boss_combat_time):
+				_boss_combat_next += _boss_combat_step
+				_boss_combat_step += 4.0
 
 func _actualizar_velocidad_fases(percent: float):
 	var anterior = current_anim_scale
@@ -359,16 +462,21 @@ func _actualizar_velocidad_fases(percent: float):
 	if internal_anim_player and anterior != current_anim_scale:
 		internal_anim_player.speed_scale = current_anim_scale
 
-func _evento_equipar_mascara():
-	if not mask_manager or not loadout_mask: return
+func _on_phase2_mask_equipped():
+	if not is_inside_tree() or not has_equipped_mask:
+		return
 	print("👺 JEFE: FASE 2 - ¡SPRINT INFINITO!")
-	has_equipped_mask = true
-	
-	current_state = State.COOLDOWN 
+	current_state = State.COOLDOWN
 	ai_cooldown_timer = 1.0
-	
-	mask_manager.equip_mask(loadout_mask, false) # false = usar animacion de spawn
-	mask_manager.current_ult_charge = mask_manager.max_ult_charge
+	if mask_manager:
+		mask_manager.current_ult_charge = mask_manager.max_ult_charge
+
+func _on_mask_changed_event(data: MaskData):
+	super._on_mask_changed_event(data)
+	has_equipped_mask = data != null
+	if has_equipped_mask and not _phase2_initialized:
+		_phase2_initialized = true
+		call_deferred("_on_phase2_mask_equipped")
 
 func _evento_activar_ulti(motivo):
 	if not mask_manager: return
@@ -383,9 +491,48 @@ func _morir():
 	print("💀 Boss Orc derrotado!")
 	boss_died.emit(self)
 	
+	current_state = State.DEAD
+	set_physics_process(false)
+	
+	# Desactivar colisiones
+	collision_layer = 0
+	collision_mask = 0
+	
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false
+		combat_manager.is_movement_locked = true
+		
+	# Detener animación agresiva
+	if anim_tree:
+		var playback = anim_tree["parameters/StateMachine/playback"]
+		if playback: playback.travel("Standing")
+		
+	if internal_anim_player: internal_anim_player.speed_scale = 0.5
+	
 	# Recompensa de carga
 	if player_ref and player_ref.has_node("MaskManager"):
-		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward)
+		player_ref.get_node("MaskManager").add_charge(combat_manager.ult_charge_reward * 2.5) # Recompensa extra de jefe
 	
-	set_physics_process(false)
-	queue_free()
+	if not visual_mesh:
+		queue_free()
+		return
+		
+	# EFECTO DE MUERTE DE JEFE (Más dramático)
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	# 1. Brillo morado/negro intenso
+	for m in unique_materials:
+		if m is StandardMaterial3D or m is ORMMaterial3D:
+			t.tween_property(m, "albedo_color", Color(2.0, 0.0, 3.0, 1.0), 1.5)
+			if "emission_enabled" in m:
+				m.emission_enabled = true
+				t.tween_property(m, "emission", Color(3.0, 0.0, 5.0), 1.5)
+				
+	# 2. Encoger lentamente y elevarse más
+	t.tween_property(visual_mesh, "scale", Vector3(0.01, 0.01, 0.01), 3.0).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(visual_mesh, "position:y", visual_mesh.position.y + 3.0, 3.0).set_ease(Tween.EASE_IN_OUT)
+	
+	# Al finalizar, eliminar al jefe
+	t.chain().tween_callback(self.queue_free)
