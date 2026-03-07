@@ -3,6 +3,7 @@ extends CharacterBody3D
 @export var footstep_sounds: Array[AudioStream] = []
 
 @onready var attack_audio: AudioStreamPlayer3D = $WeaponAudio
+## Array de sonidos para asignar a los ataques.
 @export var attack_sounds: Array[AudioStream] = []
 
 # ------------------------------------------------------------------------------
@@ -23,15 +24,26 @@ extends CharacterBody3D
 @onready var distortion_mat: ShaderMaterial = distortion.material
 var transitioning := false
 
+# --- SISTEMA DE VIÑETA Y DAÑO ---
+var damage_vignette: ColorRect
+
 # --- CONFIGURACIÓN FÍSICA ---
 @export_category("Movimiento Base")
-@export var speed_walk: float = 500.0
+## Velocidad base del jugador al caminar de frente.
+@export var speed_walk: float = 5.0
+## Multiplicador de velocidad al correr hacia adelante. (Correr hacia atrás usa la mitad).
+@export var speed_sprint_mult: float = 1.6
+## Fuerza vertical del salto.
 @export var jump_force: float = 15.0 
-@export var gravity_multiplier: float = 2.0 
+## Multiplicador artificial de la gravedad para hacer el salto menos "flotante".
+@export var gravity_multiplier: float = 3.0
 
 @export_category("Evasión (Dodge & Dive)")
+## Fuerza horizontal impulsada al hacer Dodge (Rodar).
 @export var dodge_power: float = 15.0 
+## Costo de Estamina para realizar un Dodge.
 @export var dodge_cost: float = 15.0
+## Fricción aplicada al finalizar el Dive (Lanzarse al piso).
 @export var dive_sprint_damp: float = 0.8
 
 # --- CONFIGURACIÓN DE MOMENTO ---
@@ -179,6 +191,79 @@ func _ready():
 	footstep_audio.volume_db = 6.0
 	attack_audio.volume_db = 8.0
 
+	
+	if attributes:
+		attributes.base_stats["move_speed"] = speed_walk
+		
+	# --- GENERACIÓN DE VIÑETA NEGRA (DAÑO) ---
+	var canvas_vignette = CanvasLayer.new()
+	canvas_vignette.layer = -1 
+	damage_vignette = ColorRect.new()
+	damage_vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	damage_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var shader = Shader.new()
+	shader.code = """
+shader_type canvas_item;
+uniform float vignette_intensity = 0.0; // Controlado por _update_damage_vignette (rango 0.0 a 1.0)
+uniform float vignette_opacity : hint_range(0.0, 1.0) = 1.0;
+uniform vec4 vignette_rgb : source_color = vec4(0.0, 0.0, 0.0, 1.0); 
+
+float create_vignette(vec2 uv, float time) {
+	vec2 center = uv - vec2(0.5);
+	// Relación de aspecto brutalmente ancha para liberar espacio arriba/abajo y limpiar el centro
+	center.x *= 1.777; 
+	float dist = length(center);
+	
+	// TIEMPOS MÁS LENTOS (Pulsos relajados hasta el borde de la muerte)
+	float cycle_duration = 2.0; // Por defecto a 50%
+	
+	// Intensidad mapea desde 0.0(50% vida) a 1.0(0% vida)
+	if (vignette_intensity > 0.8) {
+		cycle_duration = 0.6; // 10% Vida (Rápido pero no epiléptico)
+	} else if (vignette_intensity > 0.6) {
+		cycle_duration = 0.9; // 20% Vida
+	} else if (vignette_intensity > 0.4) {
+		cycle_duration = 1.3; // 30% Vida
+	} else if (vignette_intensity > 0.2) {
+		cycle_duration = 1.6; // 40% Vida
+	}
+	
+	// Generamos el pulso de 0.0 a 1.0 basado en el tiempo exacto solicitado
+	float time_factor = mod(time, cycle_duration) / cycle_duration;
+	
+	// Sinusoidal pura para latidos
+	float pulse = (sin(time_factor * 6.28318) + 1.0) * 0.5; // Va de 0.0 a 1.0
+	
+	float beat_effect = pulse * (0.1 + (vignette_intensity * 0.3)); 
+	
+	// 'inner_edge' se empuja un poco más lejos para dejar el centro más limpio
+	float inner_edge = clamp(0.7 - (vignette_intensity * 0.2) - beat_effect, 0.0, 0.9);
+	float outer_edge = 1.0; 
+	
+	// 'smoothstep' normal más un exponente (pow) hace que la esquina se llene de NEGRO PURO 
+	float v = smoothstep(inner_edge, outer_edge, dist);
+	v = pow(v, 1.5); // Acentúa el contraste de los bordes (menos gris en el medio, mucho negro a los lados)
+	
+	return v;
+}
+
+void fragment() {
+	float v = create_vignette(UV, TIME);
+	v = clamp(v, 0.0, 1.0); // Protección extra contra colores locos
+	// El rgb.rgb se mezcla al 100% de la fuerza 'v'
+	COLOR = vec4(vignette_rgb.rgb, v * vignette_opacity);
+}
+"""
+	var mat = ShaderMaterial.new()
+	mat.shader = shader
+	damage_vignette.material = mat
+	damage_vignette.visible = false
+	
+	canvas_vignette.add_child(damage_vignette)
+	add_child(canvas_vignette)
+	# ----------------------------------------
+			
 	emit_signal("on_state_changed", "NORMAL")
 
 func _input(event: InputEvent) -> void:
@@ -250,13 +335,23 @@ func _physics_process(delta: float) -> void:
 		was_in_air = false
 		refrescar_animacion_aterrizaje()
 
-	# Knockback
-	if knockback_velocity.length() > 0.5:
-		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, 10.0 * ed)
-		velocity.x = knockback_velocity.x
-		velocity.z = knockback_velocity.z
-		_cms()
+	# Knockback (Con control parcial del jugador)
+	if knockback_velocity.length() > 2.5: # ⚡ 2.5 y NO 0.5 para cortar en seco ese desliz baboso
+		var friction = 20.0 if is_on_floor() else 2.5 # Fricción brutal en el suelo para frenar el "patinaje"
+		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, friction * delta)
+		
+		# Leer el input del jugador para darle "Air Strafe" (Luchar contra el empuje)
+		var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+		var dir = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var player_resistance = dir * speed_walk # 100% de fuerza para contra-restar
+		
+		velocity.x = knockback_velocity.x + player_resistance.x
+		velocity.z = knockback_velocity.z + player_resistance.z
+		move_and_slide()
 		return
+	else:
+		# ¡Restaurar la velocidad total instantaneamente para liberar al jugador!
+		knockback_velocity = Vector3.ZERO
 
 	# Estados Bloqueantes
 	if current_state == State.DODGING: procesar_dodge(ed); return
@@ -306,7 +401,10 @@ func procesar_movimiento_normal(delta, input_dir):
 	
 	var final_speed = base_spd * mask_speed_mult * current_speed_mult
 	match current_state:
-		State.SPRINT: final_speed *= 1.6
+		State.SPRINT: 
+			final_speed *= speed_sprint_mult
+			if input_dir.y > 0: # Corriendo hacia atrás (+Y en Vector2 del joystick/teclado)
+				final_speed *= 0.5 
 		State.CROUCH: final_speed *= 0.5
 		State.PRONE: final_speed *= 0.3
 	
@@ -343,7 +441,7 @@ func controlar_inputs_postura(delta, moving_back):
 	var is_moving = velocity.x != 0 or velocity.z != 0
 	var aiming_block = combat_manager.is_aiming
 	
-	if Input.is_action_pressed("sprint") and is_on_floor() and not moving_back and current_state == State.NORMAL and is_moving and not aiming_block:
+	if Input.is_action_pressed("sprint") and is_on_floor() and current_state == State.NORMAL and is_moving and not aiming_block:
 		cambiar_estado(State.SPRINT)
 	
 	if current_state == State.SPRINT:
@@ -912,6 +1010,7 @@ func _shooter_disparar_laser(target: Node3D, damage: float) -> void:
 	t.tween_callback(_beam.queue_free)
 
 func take_damage(amount: float):
+	add_camera_trauma(0.6) # Tiembla la pantalla al recibir daño bruto
 	if health_component: health_component.take_damage(amount)
 	else: morir()
 
@@ -923,15 +1022,31 @@ func morir():
 	velocity = Vector3.ZERO
 	knockback_velocity = Vector3.ZERO
 	$CollisionShape3D.set_deferred("disabled", true)
+	
+	# Transición suave a negro
+	var death_canvas = CanvasLayer.new()
+	death_canvas.layer = 100 # Por encima de todos los HUDs y menús
+	var black_screen = ColorRect.new()
+	black_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	black_screen.color = Color(0, 0, 0, 0)
+	death_canvas.add_child(black_screen)
+	get_tree().current_scene.add_child(death_canvas)
+	
 	var death_cam = Camera3D.new()
 	get_tree().current_scene.add_child(death_cam)
 	death_cam.global_transform = camera.global_transform
 	death_cam.current = true; camera.visible = false 
+	
 	var t = create_tween()
 	t.tween_property(death_cam, "global_position:y", death_cam.global_position.y + 3.0, 3.0).set_trans(Tween.TRANS_SINE)
 	t.parallel().tween_property(death_cam, "rotation_degrees:x", -90.0, 2.5)
+	
+	# Oscurecer progresivamente toda la pantalla a negro absoluto en los 4 segundos
+	t.parallel().tween_property(black_screen, "color:a", 1.0, 3.8)
+	
 	await get_tree().create_timer(4.0).timeout
 	death_cam.queue_free()
+	death_canvas.queue_free()
 	get_tree().reload_current_scene()
 
 # --- UI CONNECTIONS ---
@@ -945,9 +1060,28 @@ signal mascara_cambiada(mask_data)
 var pociones_ui = [3, 1, 0] 
 
 func _ready_ui_connections():
+	vida_cambiada.connect(_update_damage_vignette)
+	
 	if health_component:
 		health_component.on_damage_received.connect(func(_amt, curr): emit_signal("vida_cambiada", curr))
 		emit_signal("vida_cambiada", health_component.current_health)
+
+func _update_damage_vignette(curr_hp: float):
+	if not damage_vignette or not damage_vignette.material: return
+	var max_hp = max_health if max_health > 0 else 100.0
+	var percent = curr_hp / max_hp
+	
+	if percent <= 0.5:
+		damage_vignette.visible = true
+		# Entre 0.5 y 0.0 de vida, la intensidad va de 0.0 a 1.0
+		var danger_level = (0.5 - percent) * 2.0 
+		
+		# Opacidad máxima es 1.0 (Bordes totalmente oscuros)
+		damage_vignette.material.set_shader_parameter("vignette_opacity", danger_level * 1.0)
+		# Acelera y expande el latido
+		damage_vignette.material.set_shader_parameter("vignette_intensity", danger_level * 1.0)
+	else:
+		damage_vignette.visible = false
 	if stamina:
 		stamina.on_value_changed.connect(func(curr, max_val): emit_signal("stamina_cambiada", curr, max_val))
 		if "current_value" in stamina: emit_signal("stamina_cambiada", stamina.current_value, stamina.max_value)

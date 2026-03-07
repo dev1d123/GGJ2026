@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://deiihjn2fcimd"]
+
+[ext_resource type="PackedScene" uid="uid://dop6mqo4fkkdj" path="res://assets/models/bosses/weapons/BlackKnight_Sword_Large.gltf" id="1_u7qg4"]
+[ext_resource type="Script" uid="uid://cn5kkl7yys5k1" path="res://src/actors/player/scripts/WeaponHitbox.gd" id="2_rjagr"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_u7qg4"]
+size = Vector3(1.1661625, 2.6109571, 0.70641464)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="BlackKnight_Sword_Large2" parent="." instance=ExtResource("1_u7qg4")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+
+[node name="Hitbox" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("2_rjagr")
+trail_color = Color(0.79640514, 0, 0.24121666, 0.98039216)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.009480476, 0.9151828, -0.010328323)
+shape = SubResource("BoxShape3D_u7qg4")
+debug_color = Color(0.88235295, 0.29411766, 0.44313726, 1)

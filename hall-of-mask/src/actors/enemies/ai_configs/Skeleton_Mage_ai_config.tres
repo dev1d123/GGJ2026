@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AIBehaviorConfig" load_steps=2 format=3 uid="uid://3ppxn3o7w38f"]
+
+[ext_resource type="Script" uid="uid://lgk5kify5c0c" path="res://src/actors/enemies/ai/AIBehaviorConfig.gd" id="1_b2btn"]
+
+[resource]
+script = ExtResource("1_b2btn")
+combat_style = 1
+aggression = 0.6
+courage = 0.3
+vision_range = 30.0
+lose_aggro_time = 10.0
+can_dodge = true
+can_sprint = false
+dodge_chance_vs_ranged = 0.8
+flee_health_percent = 0.5

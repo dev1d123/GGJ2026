@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="BossPhaseConfig" load_steps=2 format=3 uid="uid://bxml2r3cwlaq8"]
+
+[ext_resource type="Script" uid="uid://bo02yjxm4mgfn" path="res://src/actors/enemies/ai/BossPhaseConfig.gd" id="1_ndfxi"]
+
+[resource]
+script = ExtResource("1_ndfxi")
+phase_name = "Phase 1"

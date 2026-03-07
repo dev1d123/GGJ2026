@@ -6,22 +6,32 @@ signal boss_died
 # CONFIGURACIÓN DE COMBATE
 # ----------------------------------------------------------------
 @export_group("Mecánica de Carga (Sprint)")
+## Tiempo mínimo en segundos para volver a realizar un ataque de sprint/carga.
 @export var min_sprint_time: float = 5.0
+## Tiempo máximo en segundos para volver a realizar un ataque de sprint/carga.
 @export var max_sprint_time: float = 60.0
-@export var sprint_speed_mult: float = 2.2 
 
 @export_group("Tiempos de Ataque Base")
-@export var atk1_windup: float = 0.6
+## Segundos de preparación antes del golpe Atk1.
+@export var atk1_windup: float = 0.4
+## Segundos que dura el daño del golpe Atk1.
 @export var atk1_active: float = 0.2
-@export var atk1_dmg: float = 1.0      
+## Multiplicador de daño del Atk1.
+@export var atk1_mult_dmg: float = 1.0      
 
-@export var atk2_windup: float = 0.4
+## Segundos de preparación antes del golpe Atk2.
+@export var atk2_windup: float = 0.25
+## Segundos que dura el daño del golpe Atk2.
 @export var atk2_active: float = 0.3
-@export var atk2_dmg: float = 0.8
+## Multiplicador de daño del Atk2.
+@export var atk2_mult_dmg: float = 1.25
 
-@export var atk3_windup: float = 0.8
+## Segundos de preparación antes del golpe Atk3.
+@export var atk3_windup: float = 0.55
+## Segundos que dura el daño del golpe Atk3.
 @export var atk3_active: float = 0.4
-@export var atk3_dmg: float = 1.5
+## Multiplicador de daño del Atk3.
+@export var atk3_mult_dmg: float = 1.5
 
 # Estado interno
 var is_doing_boss_attack: bool = false
@@ -32,7 +42,6 @@ var has_triggered_ult_10: bool = false
 # Variables de IA Avanzada
 var sprint_timer: float = 0.0
 var is_sprinting: bool = false
-var zigzag_time: float = 0.0 
 
 # Variable de Velocidad de Animación
 var current_anim_scale: float = 0.6 
@@ -54,8 +63,17 @@ func _ready():
 		internal_anim_player = $OrcBrute/AnimationPlayer
 	
 	current_archetype = Archetype.MELEE_2H 
-	current_speed = base_speed * 0.9
-	preferred_range = 3
+	current_speed = base_speed
+	preferred_range = 3.5
+	
+	# ACTIVAR MECÁNICAS HEREDADAS DE ENEMY
+	can_sprint = true
+	can_jump = true
+	can_dodge = true
+	sprint_speed_mult = 2.0 # Garantizar que llega al BlendPosition 2 (Correr)
+	dodge_power = 15.0
+	jump_force = 12.0
+	gravity_multiplier = 3.0
 	
 	_reiniciar_timer_sprint()
 	_actualizar_velocidad_fases(100.0)
@@ -72,17 +90,15 @@ func _ready():
 # 2. PHYSICS PROCESS (MODIFICADO PARA SPRINT INFINITO)
 # ----------------------------------------------------------------
 func _physics_process(delta):
-	super._physics_process(delta)
-	
 	zigzag_time += delta
 	
-	if is_doing_boss_attack:
-		velocity.x = 0
-		velocity.z = 0
-		# Nota: No tocamos velocity.y para que la gravedad siga funcionando
+	super._physics_process(delta)
 	
-	# Solo gestionamos sprint si está vivo y no está atacando
-	if current_state != State.ATTACKING and health_component.current_health > 0:
+	# Solo gestionamos sprint si está vivo y no está en otros estados críticos
+	var can_manage_sprint = current_state != State.ATTACKING and current_state != State.DODGING and current_state != State.PRE_DODGE
+
+	
+	if can_manage_sprint and health_component.current_health > 0:
 		
 		# 🔴 LÓGICA DE SPRINT HÍBRIDA 🔴
 		if has_equipped_mask:
@@ -96,8 +112,6 @@ func _physics_process(delta):
 			if sprint_timer <= 0 and not is_sprinting:
 				_iniciar_carga()
 
-func _procesar_ataque_en_curso(delta):
-	pass 
 
 # ----------------------------------------------------------------
 # 3. LÓGICA DE MOVIMIENTO AVANZADO
@@ -113,30 +127,30 @@ func _iniciar_carga():
 	# Solo imprimimos y flasheamos si es un inicio de carga "real" (no spam de frame)
 	if not has_equipped_mask: 
 		print("😡 JEFE: ¡CARGA FURIOSA!")
-		flash_red() 
+		# Se quita el flash_red() aquí porque confundía al jugador, parecía que recibía daño.
 	
 	current_speed = base_speed * sprint_speed_mult
 	current_state = State.CHASE
 
-func _comportamiento_persecucion(delta):
-	if not player_ref: return
+func _comportamiento_persecucion(delta: float):
+	if not is_instance_valid(player_ref): return
 	
 	var dist = global_position.distance_to(player_ref.global_position)
 	var target_pos = player_ref.global_position
+	var dir_to_player = (player_ref.global_position - global_position).normalized()
+	
+	# INTENTAR MANIOBRAS OFENSIVAS (SALTO / DODGE-ATTACK)
+	if _intentar_maniobra_ofensiva(dist, dir_to_player, "Persecución (Jefe)"):
+		return
 	
 	# 🔴 MEJORA: ZIG-ZAG COMPATIBLE CON SPRINT (FASE 2)
-	# - Fase 1: ZigZag solo si camina.
-	# - Fase 2 (Máscara): ZigZag INCLUSO si corre (esprinta en serpiente).
 	var aplicar_zigzag = false
-	
 	if dist > 5.0:
 		if has_equipped_mask: aplicar_zigzag = true # Fase 2: Siempre esquiva
 		elif not is_sprinting: aplicar_zigzag = true # Fase 1: Solo si camina
 	
 	if aplicar_zigzag:
-		var dir_to_player = (player_ref.global_position - global_position).normalized()
 		var right_vec = dir_to_player.cross(Vector3.UP)
-		# ZigZag más rápido en fase 2
 		var speed_zigzag = 8.0 if has_equipped_mask else 5.0
 		var offset = right_vec * sin(zigzag_time * speed_zigzag) * 2.0
 		target_pos += offset
@@ -144,7 +158,7 @@ func _comportamiento_persecucion(delta):
 	nav_agent.target_position = target_pos
 	
 	# Velocidad dinámica
-	var final_speed = current_speed
+	var final_speed = base_speed
 	if is_sprinting: final_speed = base_speed * sprint_speed_mult
 	
 	_mover_hacia(nav_agent.get_next_path_position(), delta, final_speed)
@@ -155,12 +169,11 @@ func _comportamiento_persecucion(delta):
 	if dist <= preferred_range:
 		# Si llega corriendo, golpe inmediato
 		if is_sprinting:
-			# En fase máscara no imprimimos texto para no saturar consola
 			if not has_equipped_mask: print("😡 JEFE: ¡TE ALCANCÉ!")
 			
 			is_sprinting = false
 			_reiniciar_timer_sprint()
-			current_speed = base_speed * 0.9 
+			current_speed = base_speed 
 			_realizar_ataque_3_spin()
 		else:
 			current_state = State.COMBAT_MANEUVER
@@ -170,7 +183,7 @@ func _on_boss_hit(amount, current_hp):
 	
 	if current_state == State.PATROL or current_state == State.COOLDOWN:
 		current_state = State.CHASE
-		if player_ref:
+		if is_instance_valid(player_ref):
 			var dist = global_position.distance_to(player_ref.global_position)
 			if dist > 10.0 and not is_sprinting:
 				_iniciar_carga()
@@ -178,8 +191,8 @@ func _on_boss_hit(amount, current_hp):
 # ----------------------------------------------------------------
 # 5. ESTRATEGIA DE COMBATE
 # ----------------------------------------------------------------
-func _comportamiento_combate(delta):
-	if not player_ref: 
+func _comportamiento_combate(delta: float):
+	if not is_instance_valid(player_ref): 
 		current_state = State.PATROL
 		return
 
@@ -190,34 +203,93 @@ func _comportamiento_combate(delta):
 
 	if is_doing_boss_attack: return
 
-	# Acercarse si el jugador huye un poco
 	var dist = global_position.distance_to(player_ref.global_position)
-	if dist > preferred_range + 0.5:
-		var dir = (player_ref.global_position - global_position).normalized()
-		velocity.x = dir.x * current_speed
-		velocity.z = dir.z * current_speed
-		return 
+	var dir = (player_ref.global_position - global_position).normalized()
+	
+	if _intentar_maniobra_ofensiva(dist, dir, "Combate (Jefe)"):
+		return
 
+	# Acercarse si el jugador huye un poco
+	if dist > preferred_range + 0.5:
+		var speed_to_use = base_speed
+		if is_sprinting: speed_to_use = base_speed * sprint_speed_mult
+		
+		velocity.x = dir.x * speed_to_use
+		velocity.z = dir.z * speed_to_use
+		return
+
+	_iniciar_ataque_melee()
+
+# ----------------------------------------------------------------
+# OVERRIDES DE ESTADOS PADRE Y ENEMIGO PARA JEFES
+# ----------------------------------------------------------------
+func _procesar_ataque_en_curso(delta: float):
+	# Los Jefes usan corutinas (await) para los ataques con is_doing_boss_attack.
+	# Nos movemos lentamente hacia el jugador, pero NO llamamos a super para evitar 
+	# que la lógica del enemigo corte el ataque prematuramente al pasar a COOLDOWN.
+	if is_on_floor():
+		if is_instance_valid(player_ref):
+			var dir = (player_ref.global_position - global_position).normalized()
+			var speed_to_use = base_speed * attack_movement_mult
+			velocity.x = dir.x * speed_to_use
+			velocity.z = dir.z * speed_to_use
+		else:
+			velocity.x = move_toward(velocity.x, 0, base_speed * delta)
+			velocity.z = move_toward(velocity.z, 0, base_speed * delta)
+
+func _comportamiento_cooldown(delta: float):
+	# Jefes no tienen cooldown de strafe. Si caen aquí, regresan directo a combatir
+	current_state = State.CHASE
+
+func _iniciar_ataque_melee():
 	var roll = randf()
 	if roll < 0.4: _realizar_ataque_1_chop()
 	elif roll < 0.7: _realizar_ataque_2_thrust()
 	else: _realizar_ataque_3_spin()
 
+func _intentar_maniobra_ofensiva(dist: float, dir: Vector3, estado_origen: String) -> bool:
+	if can_jump and is_on_floor() and dist <= 6.5 and dist >= 3.5 and _next_combat_maneuver == "JUMP_ATTACK":
+		print("👹 BOSS OFFENSIVE-JUMP en ", estado_origen)
+		velocity.y = jump_force
+		velocity.x = dir.x * base_speed * sprint_speed_mult
+		velocity.z = dir.z * base_speed * sprint_speed_mult
+		_next_combat_maneuver = ""
+		
+		# Disparamos ataque pesado inmediatamente y dejamos que la gravedad lo aterrice
+		_realizar_ataque_1_chop()
+		return true
+
+	if can_dodge and dist <= 3.75 and dist >= 2.0 and _next_combat_maneuver == "DODGE_ATTACK":
+		print("👹 BOSS DODGE-ATTACK en ", estado_origen)
+		_next_combat_maneuver = ""
+		_iniciar_esquive_ofensivo()
+		return true
+
+	return false
+
 # ----------------------------------------------------------------
 # 6. ATAQUES
 # ----------------------------------------------------------------
 func _realizar_ataque_1_chop():
-	_iniciar_secuencia("Orc_Axe_2H_Attack_1", atk1_windup, atk1_active, atk1_dmg, 6.0)
+	_iniciar_secuencia("Orc_Axe_2H_Attack_1", atk1_windup, atk1_active, atk1_mult_dmg, 6.0)
 
 func _realizar_ataque_2_thrust():
-	_iniciar_secuencia("Orc_Axe_2H_Attack_2", atk2_windup, atk2_active, atk2_dmg, 9.0)
+	_iniciar_secuencia("Orc_Axe_2H_Attack_2", atk2_windup, atk2_active, atk2_mult_dmg, 9.0)
 
 func _realizar_ataque_3_spin():
-	_iniciar_secuencia("Orc_Axe_2H_Attack_3", atk3_windup, atk3_active, atk3_dmg, 14.0)
+	_iniciar_secuencia("Orc_Axe_2H_Attack_3", atk3_windup, atk3_active, atk3_mult_dmg, 14.0)
 
 func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mult: float, knockback: float):
 	is_doing_boss_attack = true
 	current_state = State.ATTACKING 
+	
+	# Sobreescribir el temporizador padre para no entrar en conflicto con la lógica manual del Boss
+	safety_attack_timer = 0.0
+	
+	# Reiniciar cualquier ataque erróneo atrapado en el CombatManager proveniente del Enemy.gd
+	if combat_manager:
+		combat_manager.is_attacking_r = false
+		combat_manager.is_attacking_l = false 
 	
 	var vel_original = current_speed
 	current_speed = 0.0 
@@ -229,7 +301,13 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	if combat_manager: combat_speed = combat_manager.attack_speed_multiplier
 	var total_speed_scale = max(0.1, current_anim_scale * combat_speed)
 	
-	var real_windup = windup / total_speed_scale
+	# COMPENSACIÓN DE DESFASE (XFade Time)
+	# Los nodos AnimationTree suelen tener xfade_time de 0.2s o 0.3s. 
+	# Esto retrasa el "impacto visual" frente al código. 
+	# Forzamos que el timer compense este 'suavizado'
+	var xfade_delay_compensation = 0.2 
+	
+	var real_windup = max(0.01, (windup / total_speed_scale) - xfade_delay_compensation)
 	var real_active = active / total_speed_scale
 	
 	# Tracking inicial
@@ -237,12 +315,11 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	var track_time = real_windup * 0.5 
 	
 	while timer < track_time:
-		var dt = get_physics_process_delta_time()
-		if player_ref: _mirar_hacia(player_ref.global_position, dt * 5.0)
-		velocity.x = 0
-		velocity.z = 0
-		timer += dt
+		if not is_inside_tree(): return
 		await get_tree().process_frame 
+		var dt = get_process_delta_time()
+		if is_instance_valid(player_ref): _mirar_hacia(player_ref.global_position, dt * 5.0)
+		timer += dt
 	
 	if real_windup > track_time:
 		await get_tree().create_timer(real_windup - track_time).timeout
@@ -250,15 +327,11 @@ func _iniciar_secuencia(anim_name: String, windup: float, active: float, dmg_mul
 	if combat_manager:
 		combat_manager.manual_hitbox_activation(dmg_mult, real_active, knockback, combat_manager.right_hand_bone)
 	
-	await get_tree().create_timer(real_active + 0.2).timeout
+	await get_tree().create_timer(real_active).timeout
 	
 	current_speed = vel_original
 	is_doing_boss_attack = false
-	
-	# Cooldown reducido en Fase 2
-	var cooldown_time = 1.2 / current_anim_scale 
-	if mask_manager and mask_manager.is_ultimate_active: cooldown_time = 0.3 # ¡Casi sin pausa!
-	_entrar_cooldown(cooldown_time)
+	current_state = State.CHASE
 
 # ----------------------------------------------------------------
 # 7. FASES
@@ -294,8 +367,7 @@ func _evento_equipar_mascara():
 	current_state = State.COOLDOWN 
 	ai_cooldown_timer = 1.0
 	
-	mask_manager.equip_mask(loadout_mask)
-	_activar_aura_mascara()
+	mask_manager.equip_mask(loadout_mask, false) # false = usar animacion de spawn
 	mask_manager.current_ult_charge = mask_manager.max_ult_charge
 
 func _evento_activar_ulti(motivo):

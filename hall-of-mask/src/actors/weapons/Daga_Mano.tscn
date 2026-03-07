@@ -16,6 +16,7 @@ collision_mask = 4
 monitoring = false
 monitorable = false
 script = ExtResource("2_4i077")
+enable_trail = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.035017014, 0.4086647, -0.005279541)

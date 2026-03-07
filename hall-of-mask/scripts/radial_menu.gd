@@ -14,20 +14,21 @@ var ruta_armas_melee = "res://src/actors/weapons/"
 var ruta_armas_rango = "res://src/actors/weapons/Ranged_Weapons/" # <--- TU CARPETA
 var ruta_mascaras = "res://src/actors/masks/"
 
-var num_sectors = 6
+var num_sectors = 4
 var current_sector_index = -1
 
 var current_equipped_mask: MaskData = null
 
 # --- REFERENCIAS VISUALES ---
 @onready var wheel_origin = $WheelOrigin
+@onready var stats_panel_node = $"../GameUI/StatsPanel"
 @onready var sectores_visuales = [
 	$WheelOrigin/Sector0, # Máscaras
 	$WheelOrigin/Sector1, # Armas Ligeras
 	$WheelOrigin/Sector2, # Armas Pesadas
-	$WheelOrigin/Sector3,
-	$WheelOrigin/Sector4,
-	$WheelOrigin/Sector5
+	$WheelOrigin/Sector3, # Armas mana
+	#$WheelOrigin/Sector4,
+	#$WheelOrigin/Sector5
 ]
 @onready var rombo_centro = $WheelOrigin/RomboCentro
 @onready var icon_mask_preview = $WheelOrigin/RomboCentro/Icon_Mask
@@ -47,12 +48,14 @@ func _ready():
 
 	# Buscar player y crear panel de stats
 	_player_ref = get_tree().root.find_child("Player", true, false)
-	_build_stats_panel()
+	#_build_stats_panel()
 
 	# --- CARGA AUTOMÁTICA DE DATOS ---
 	_escanear_carpeta(ruta_armas_melee)
 	_escanear_carpeta(ruta_armas_rango)
 	_escanear_carpeta(ruta_mascaras)
+	
+	_agregar_opcion_sin_mascara()
 	
 	# Conectar con GameManager para actualizar máscaras desbloqueadas
 	if GameManager:
@@ -126,17 +129,31 @@ func _input(event):
 		visible = true
 		wheel_origin.position = get_viewport_rect().size / 2
 		_actualizar_resaltado()
-		_refresh_stats()
+		
+		#_refresh_starts()
+		
+		# --- MOSTRAR STATS PANEL ---
+		var player = get_tree().root.find_child("Player", true, false)
+		
+		if stats_panel_node and stats_panel_node.has_method("toggle_attributes_panel"):
+			stats_panel_node.toggle_attributes_panel(true, player)
+		# ---------------------------
+		
 		get_tree().paused = true
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		
 	elif event.is_action_released("abrir_menu_radial"):
 		visible = false
 		current_sector_index = -1
-		if _stats_panel: _stats_panel.visible = false
+		
+		# --- OCULTAR STATS PANEL ---
+		if stats_panel_node and stats_panel_node.has_method("toggle_attributes_panel"):
+			stats_panel_node.toggle_attributes_panel(false)
+		# ---------------------------
+		
 		get_tree().paused = false
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		return 
+		return
 
 	if not visible: return
 	
@@ -145,18 +162,37 @@ func _input(event):
 	var mouse_pos = get_global_mouse_position()
 	var direction = mouse_pos - center
 	
-	if direction.length() < 60.0: # Zona muerta
+	if direction.length() < 60.0: # Zona muerta central
 		if current_sector_index != -1:
 			current_sector_index = -1
 			_actualizar_resaltado()
 		return
 
+	# --- MATEMÁTICAS ESTRICTAS EN CRUZ (CON ZONAS MUERTAS) ---
 	var deg = rad_to_deg(direction.angle())
-	if deg < 0: deg += 360
-	deg = fmod(deg + 90, 360.0) # Rotar 90deg para que 0 esté arriba
+	if deg < 0: deg += 360 # Convertimos el ángulo a un formato de 0 a 360 grados
 	
-	var sector_size = 360.0 / num_sectors
-	var new_index = int(deg / sector_size)
+	var new_index = -1
+	
+	# 'tolerancia' es qué tan "ancho" es el rayo de detección para cada arma.
+	# 35 grados significa que tienes que apuntar bastante directo al arma.
+	# (Si lo bajas a 20, tendrás que apuntar de forma MUY precisa).
+	var tolerancia = 35.0 
+	
+	# Derecha (Sector 1) -> Alrededor de 0° (y 360°)
+	if deg <= tolerancia or deg >= (360 - tolerancia):
+		new_index = 1
+	# Abajo (Sector 2) -> Alrededor de 90°
+	elif deg >= (90 - tolerancia) and deg <= (90 + tolerancia):
+		new_index = 2
+	# Izquierda (Sector 3) -> Alrededor de 180°
+	elif deg >= (180 - tolerancia) and deg <= (180 + tolerancia):
+		new_index = 3
+	# Arriba (Sector 0) -> Alrededor de 270°
+	elif deg >= (270 - tolerancia) and deg <= (270 + tolerancia):
+		new_index = 0
+	# Si el ángulo no cae en ninguno de estos rangos (ej. está en una esquina), new_index se queda en -1
+	# ---------------------------------------------------------
 	
 	if new_index != current_sector_index:
 		current_sector_index = new_index
@@ -224,10 +260,10 @@ func _actualizar_iconos_sectores(sector_especifico: int = -1):
 			else:
 				sector_visual.texture = null # O un icono default
 				
-			sector_visual.modulate = Color(1, 1, 1, 0.6) # Dimmed
+			sector_visual.self_modulate = Color(1, 1, 1, 0.6) # Dimmed
 		else:
 			sector_visual.texture = null
-			sector_visual.modulate = Color(0.2, 0.2, 0.2, 0.5) # Apagado
+			sector_visual.self_modulate = Color(0.2, 0.2, 0.2, 0.5) # Apagado
 
 func _actualizar_resaltado():
 	# 1. Resetear sectores
@@ -249,7 +285,7 @@ func _actualizar_resaltado():
 		var sector_activo = sectores_visuales[current_sector_index]
 		var lista = inventory_data[current_sector_index]
 		
-		sector_activo.modulate = Color(1.5, 1.5, 1.5, 1) 
+		sector_activo.self_modulate = Color(1.5, 1.5, 1.5, 1) 
 		sector_activo.scale = Vector2(1.15, 1.15)
 		
 		# Si estamos sobre el sector de máscaras (0), mostramos la PREVIEW
@@ -260,7 +296,7 @@ func _actualizar_resaltado():
 			
 			if icon_mask_preview:
 				icon_mask_preview.texture = item_preview.icon
-				icon_mask_preview.modulate = Color(1, 1, 1, 0.7) # Un poco transparente para indicar "preview"
+				icon_mask_preview.modulate = Color(1, 1, 1, 1) # Un poco transparente para indicar "preview"
 
 # -----------------------------------------------------------
 # 🎭 SISTEMA DE MÁSCARAS DESBLOQUEABLES
@@ -294,11 +330,26 @@ func _on_mask_unlocked(mask_name: String):
 	print("🎭 RadialMenu: Máscara desbloqueada, actualizando inventario...")
 	inventory_data[0].clear()
 	_escanear_carpeta(ruta_mascaras)
+	
+	_agregar_opcion_sin_mascara()
+	
 	_actualizar_iconos_sectores(0)
 	sector_scroll_indices[0] = 0 # Reset scroll
 
 # -----------------------------------------------------------
-# 📊 STATS PANEL
+# 👤 OPCIÓN POR DEFECTO: SIN MÁSCARA
+# -----------------------------------------------------------
+func _agregar_opcion_sin_mascara():
+	var no_mask = MaskData.new()
+	no_mask.mask_name = "None"
+	# Usa LA MISMA RUTA en StatsPanel para la cara del personaje
+	no_mask.icon = preload("res://UI_assets/Face.png") 
+	
+	# Usamos push_front para meterlo al PRINCIPIO de la lista del Sector 0
+	inventory_data[0].push_front(no_mask)
+
+# -----------------------------------------------------------
+# 📊 PANEL DE ESTADÍSTICAS (desde feature/ulti)
 # -----------------------------------------------------------
 func _build_stats_panel():
 	# PanelContainer raíz
@@ -388,7 +439,7 @@ func _refresh_stats():
 	if hc:
 		_stat_labels["hp"].text = "%d / %d" % [int(hc.current_health), int(hc.max_health)]
 	else:
-		_stat_labels["hp"].text = "—"
+		_stat_labels["hp"].text = "��"
 
 	# Speed (respeta el multiplicador de máscara si existe)
 	var spd = _player_ref.speed_walk if "speed_walk" in _player_ref else 0.0

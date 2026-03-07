@@ -5,36 +5,53 @@ class_name CombatManager
 # 1. DEPENDENCIAS
 # ------------------------------------------------------------------------------
 @export_category("Referencias Obligatorias")
+## Nodo de AnimationTree para controlar las transiciones de ataque.
 @export var animation_tree: AnimationTree
+## Nodo posicional donde se adjuntarán las armas de la mano derecha.
 @export var right_hand_bone: Node3D 
+## Nodo posicional donde se adjuntarán las armas de la mano izquierda.
 @export var left_hand_bone: Node3D  
 
 @export_category("Control de Input")
+## Si es verdadero, escucha clics de ratón. Si es falso, es controlado por IA.
 @export var is_player_controlled: bool = false 
 
 @export_category("Componentes Opcionales")
+## Referencia al nodo de Estamina para consumir energía al atacar.
 @export var stamina_component: Node 
+## Referencia al nodo de Maná para consumir magia al castear hechizos.
 @export var mana_component: Node 
+## Gestor de Atributos para escalar el daño con las estadísticas base.
 @export var attribute_manager: Node 
+## Gestor de Máscaras para aplicar los efectos de las pasivas.
 @export var mask_manager: MaskManager 
 
 # ------------------------------------------------------------------------------
 # 2. CONFIGURACIÓN
 # ------------------------------------------------------------------------------
 @export_category("Reglas de Combate")
+## Las capas de físicas (Physics Layers) a las que las armas pueden hacer daño (Generalmente: Enemies o Player).
 @export_flags_3d_physics var attack_layer_mask: int = 1 
+## Multiplicador global de todo el daño infligido.
 @export var damage_multiplier: float = 1.0 
+## Cantidad base de carga de Ultimate que ganas por cada impacto exitoso.
 @export var ult_charge_reward: float = 10.0
 
 # ------------------------------------------------------------------------------
 # 3. INVENTARIO
 # ------------------------------------------------------------------------------
 @export_category("Inventario Armas")
+## Arma secundaria equipada actualmente (Escudo, espada corta, pistola).
 @export var slot_1_left: WeaponData
+## Arma primaria equipada actualmente (Espada principal, hacha, rifle).
 @export var slot_1_right: WeaponData
+## (Opcional) Guardado rápido de arma 2.
 @export var slot_2: WeaponData 
+## (Opcional) Guardado rápido de arma 3.
 @export var slot_3: WeaponData 
+## (Opcional) Guardado rápido de arma 4.
 @export var slot_4: WeaponData 
+## Máscara actualmente llevada en el inventario.
 @export var mask_slot_1: MaskData
 
 signal on_weapon_changed(hand, weapon_data)
@@ -464,7 +481,6 @@ func _ejecutar_secuencia_ataque(w: WeaponData, mano: String):
 	var tiempo_gastado = real_windup + real_active
 	var tiempo_restante_anim = real_total - tiempo_gastado
 	var duracion_fade = max(0.15, tiempo_restante_anim)
-	
 	_safe_set_tween(blend_path, 0.0, duracion_fade)
 	
 	if duracion_fade > 0:
@@ -505,16 +521,16 @@ func _get_aim_target() -> Vector3:
 		return to 
 
 	# 2. LÓGICA PARA LA IA (ENEMIGOS) 🤖
-	elif ai_target:
-		# Apuntamos al pecho/cabeza del objetivo (offset vertical)
-		# Si no ponemos el Vector3(0, 1.2, 0), le dispararán a tus pies y fallarán mucho.
-		return ai_target.global_position + Vector3(0, 1.2, 0)
+	elif not is_player_controlled:
+		if is_instance_valid(owner_node) and owner_node.has_method("get_aim_position"):
+			return owner_node.get_aim_position()
+		elif is_instance_valid(ai_target):
+			return ai_target.global_position + Vector3(0, 1.2, 0)
 	
 	# 3. FALLBACK (Si no hay target, disparan hacia adelante)
-	else:
-		# Dispara hacia donde está mirando el modelo (Forward vector)
-		# Nota: En Godot -Z suele ser "Adelante"
-		return owner_node.global_position - (owner_node.global_transform.basis.z * 10.0)
+	# Dispara hacia donde está mirando el modelo (Forward vector)
+	# Nota: En Godot -Z suele ser "Adelante"
+	return owner_node.global_position - (owner_node.global_transform.basis.z * 10.0)
 
 func _apply_spread(target: Vector3, spread_deg: float, origin: Vector3) -> Vector3:
 	if spread_deg <= 0.01: return target
@@ -602,9 +618,16 @@ func manual_hitbox_activation(damage_mult_override: float, duration: float, knoc
 		hitbox.collision_mask = attack_layer_mask
 		var base_dmg = 10.0
 		if weapon_r: base_dmg = weapon_r.damage 
+		
+		# --- RESPETANDO EL DAÑO ORIGINAL DEL ARMA ---
+		# Permite que el '.tres' y los atributos definan la letalidad.
+		# Jefes usan el "override" como un multiplicador final de esta base (ahora llamado atk_mult_dmg).
+		var dmg_from_attributes = 0.0
 		if attribute_manager and attribute_manager.has_method("get_stat"):
-			base_dmg += attribute_manager.get_stat("melee_damage")
-		var final_damage = base_dmg * damage_multiplier * damage_mult_override
+			dmg_from_attributes = attribute_manager.get_stat("melee_damage")
+		
+		var final_damage = (base_dmg + dmg_from_attributes) * damage_multiplier * damage_mult_override
+		
 		hitbox.activate(final_damage, knockback_force, 5.0, owner_node)
 		await get_tree().create_timer(duration).timeout
 		if hitbox: hitbox.deactivate()
