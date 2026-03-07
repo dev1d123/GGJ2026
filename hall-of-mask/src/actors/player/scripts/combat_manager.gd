@@ -258,12 +258,16 @@ func handle_left_click(pressed: bool):
 			if is_attacking_r or cd_timer_r > 0: return 
 			if w.mana_cost > 0:
 				if mana_component and mana_component.has_method("try_consume"):
-					if not mana_component.try_consume(w.mana_cost): return
-			_ejecutar_disparo_rango(w, "right")
-	
+					if not mana_component.try_consume(w.mana_cost):
+						_notify_toast("Insufficient mana!", Color(0.2, 0.5, 1.0))
+						return
 	# CASO 2: MELEE
 	else:
 		if pressed: _try_melee_attack("left")
+
+func _notify_toast(message: String, color: Color) -> void:
+	if owner_node and owner_node.has_method("show_toast"):
+		owner_node.show_toast(message, color)
 
 # Wrapper Interno Melee
 func _try_melee_attack(mano: String):
@@ -286,7 +290,9 @@ func _try_melee_attack(mano: String):
 	
 	# Stamina
 	if stamina_component and stamina_component.has_method("try_consume"):
-		if not stamina_component.try_consume(w.stamina_cost): return
+		if not stamina_component.try_consume(w.stamina_cost):
+			_notify_toast("Not enough stamina!", Color(1.0, 0.55, 0.1))
+			return
 		
 	_ejecutar_secuencia_ataque(w, mano)
 
