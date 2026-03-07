@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://j05p63ktadh7"]
+
+[ext_resource type="Script" uid="uid://r2rvquosrqcd" path="res://src/actors/player/scripts/WeaponData.gd" id="1_e4sym"]
+[ext_resource type="PackedScene" uid="uid://c4fbqrpccncfg" path="res://src/actors/enemies/bosses/weapons/Pitchfork.tscn" id="2_e4sym"]
+
+[resource]
+script = ExtResource("1_e4sym")
+weapon_scene = ExtResource("2_e4sym")
+windup_time = 0.4
+cooldown = 0.5
+stop_movement = true
+damage = 20.0
+jump_force = 8.0
